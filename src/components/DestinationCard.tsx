@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { TripEstimate } from "@/lib/ranking";
@@ -18,18 +19,18 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
   "athens":              "1555993539-1732b0258235",
   "istanbul":            "1524231757912-21f4fe3a7200",
   "reykjavik":           "1531168087216-80de62b8b4e7",
-  "porto":               "1555881400-74d7acaacd47",
+  "porto":               "Jc4LH4jZsjM",
   "seville":             "1558618666-fcd25c85cd64",
   "valencia":            "1583153380367-75e285a06f06",
   "krakow":              "1577791658220-55f0c898ab86",
   "warsaw":              "1573455494060-c55b22587bcc",
-  "florence":            "1534259163a5a32d16dd",
+  "florence":            "NN_vPCzkU3M",
   "naples":              "1516747773462-e1f7b1f14e8c",
   "dubrovnik":           "1508739773434-c26b3d09e071",
   "split":               "1533587851976-a8f14ccc7c16",
   "kotor":               "1555400150-01b5e01e3b70",
   "belgrade":            "1566481209441-bf1cedf35ab5",
-  "bucharest":           "1558618666-fcd25c85cd64",
+  "bucharest":           "ogXPqfXoFD4",
   "sofia":               "1601134467661-3d775b999c8b",
   "vilnius":             "1554056648-d74af0a20e20",
   "tallinn":             "1587893904075-0e1a2b6cdf03",
@@ -40,17 +41,17 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
   "mexico-city":         "1518638150340-f706e86654de",
   "cancun":              "1510097467424-192d713fd8b2",
   "tulum":               "1518500335-7e822c9b4f3b",
-  "oaxaca":              "1572116469950-b1b9e7c63462",
+  "oaxaca":              "rzdQcSNTCyU",
   "puerto-vallarta":     "1551004579-9a72f7cd9e0f",
   "san-juan":            "1559494007-dc9e50dcf7f5",
   "punta-cana":          "1584551246679-0daf3d275d0f",
-  "havana":              "1551009175-8a68da93d5f9",
+  "havana":              "rSqq_JQOU4k",
   "antigua-guatemala":   "1555400038-63f5ba517a47",
   "san-jose-costa-rica": "1543702895-ac3e79bda095",
   "panama-city":         "1529073036-36f8c6aeaf11",
-  "colombia-medellin":   "1599390263-a62f83e45700",
-  "cartagena":           "1570735678527-6943a5d3a3c9",
-  "bogota":              "1589909077-ab06ade97dbf",
+  "colombia-medellin":   "2RZJIMTfJkU",
+  "cartagena":           "L6T_6Rp2iEk",
+  "bogota":              "469Rvb5h0fk",
   "lima":                "1531769701891-9f8af54f8b8a",
   "cusco":               "1526392060635-9d6019884377",
   "buenos-aires":        "1612294105787-3c9d86b88b4f",
@@ -61,7 +62,7 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
   "nassau":              "1548504769-b93f8db14534",
   "marrakech":           "1597212720753-4d00e55eab4d",
   "cape-town":           "1580060839134-75a5edca2e99",
-  "nairobi":             "1547471080-7cc2caa01bdb",
+  "nairobi":             "IaJm3mq0F5o",
   "bangkok":             "1508009603885-50cf7c579365",
   "bali":                "1537996194471-e657df975ab4",
   "tokyo":               "1540959733332-eab4deabeeaf",
@@ -88,10 +89,11 @@ type Props = {
 };
 
 export default function DestinationCard({ trip, budget, isLivePrice, departDate, returnDate }: Props) {
+  const [imgError, setImgError] = useState(false);
   const match = BUDGET_MATCH_STYLES[trip.budgetMatch];
   const savings = budget - trip.totalCost;
   const photoId = UNSPLASH_PHOTOS[trip.id];
-  const photoUrl = photoId
+  const photoUrl = photoId && !imgError
     ? `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=600&q=75`
     : null;
 
@@ -109,6 +111,7 @@ export default function DestinationCard({ trip, budget, isLivePrice, departDate,
             fill
             className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
             unoptimized
+            onError={() => setImgError(true)}
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-[#2A2A2A] to-[#1A1A1A]" />
