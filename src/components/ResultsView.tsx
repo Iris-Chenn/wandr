@@ -130,7 +130,7 @@ export default function ResultsView({
 
       {/* Header */}
       <div className="py-8">
-        <h1 className="font-serif text-2xl sm:text-3xl font-bold text-[#1A1A1A] mb-1">
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#0A0A0A] mb-1">
           {filteredTrips.length} trips for{" "}
           <span className="text-[#D4612A]">${budget.toLocaleString()}</span>
         </h1>

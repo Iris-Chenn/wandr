@@ -93,7 +93,7 @@ export default function Home() {
       </section>
 
       {/* 3 — Stats strip */}
-      <section className="py-10 px-4 sm:px-6 bg-[#F9FAFB] border-b border-[#E5E7EB]">
+      <section className="py-10 px-4 sm:px-6 bg-[#F5F0E8] border-b border-[#E0D8C8]">
         <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
           {STATS.map((s) => (
             <div key={s.label}>
@@ -124,15 +124,15 @@ export default function Home() {
       </section>
 
       {/* 5 — Features */}
-      <section className="py-24 px-4 sm:px-6 bg-[#F9FAFB] border-b border-[#E5E7EB]">
+      <section className="py-24 px-4 sm:px-6 bg-[#F5F0E8] border-b border-[#E0D8C8]">
         <div className="max-w-4xl mx-auto">
           <div className="mb-16">
-            <div className="font-mono text-xs text-[#9CA3AF] uppercase tracking-widest mb-3">Why Wandr</div>
+            <div className="font-mono text-xs text-[#8A8A8A] uppercase tracking-widest mb-3">Why Wandr</div>
             <h2 className="text-3xl font-bold text-[#0A0A0A]">Nobody owns the full budget.<br />Until now.</h2>
           </div>
           <div className="grid sm:grid-cols-3 gap-6">
             {FEATURES.map((f) => (
-              <div key={f.title} className="bg-white border border-[#E5E7EB] rounded-xl p-6 hover:border-[#D4612A]/40 transition-colors">
+              <div key={f.title} className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6 hover:border-[#D4612A]/40 transition-colors">
                 <div className="flex items-center justify-between mb-4">
                   <span
                     className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full"
@@ -150,9 +150,9 @@ export default function Home() {
       </section>
 
       {/* 6 — The gap */}
-      <section className="py-24 px-4 sm:px-6 bg-white border-b border-[#E5E7EB]">
+      <section className="py-24 px-4 sm:px-6 bg-[#F5F0E8] border-b border-[#E0D8C8]">
         <div className="max-w-3xl mx-auto">
-          <div className="font-mono text-xs text-[#9CA3AF] uppercase tracking-widest mb-6">The gap</div>
+          <div className="font-mono text-xs text-[#8A8A8A] uppercase tracking-widest mb-6">The gap</div>
           <h2 className="text-4xl sm:text-5xl font-bold text-[#0A0A0A] leading-tight mb-6">
             Google Flights asks<br />&quot;Where to?&quot;
           </h2>

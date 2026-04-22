@@ -182,7 +182,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
           <div className="flex items-center gap-3 mb-1">
             <span className="text-4xl">{destination.flag}</span>
             <div>
-              <h1 className="font-serif text-3xl sm:text-4xl font-bold">{destination.city}</h1>
+              <h1 className="text-3xl sm:text-4xl font-bold">{destination.city}</h1>
               <div className="text-white/70 text-sm">{destination.country} · {destination.region}</div>
             </div>
           </div>
@@ -206,7 +206,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
             <div className="lg:col-span-2 space-y-5">
 
               {/* Cost breakdown */}
-              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-6">
+              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
                 <div className="flex items-baseline justify-between mb-5">
                   <h2 className="font-semibold text-[#1A1A1A] text-lg">Your {nights}-night budget</h2>
                   <div className="font-mono font-bold text-2xl text-[#D4612A]">${totalCost.toLocaleString()}</div>
@@ -272,14 +272,14 @@ export default async function DestinationPage({ params, searchParams }: Props) {
 
               {/* Stretch / Save */}
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-5">
+                <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-5">
                   <div className="font-mono text-xs text-[#6B4FA0] uppercase tracking-widest mb-2">Stretch option</div>
                   <div className="font-mono font-bold text-xl text-[#1A1A1A] mb-1">${stretchTotal.toLocaleString()}</div>
                   <p className="text-xs text-[#5A5A5A] leading-relaxed">
                     4-star hotel + guided excursion.{stretchTotal > budget ? ` $${stretchTotal - budget} over budget — reachable with a short savings plan.` : " Still within budget!"}
                   </p>
                 </div>
-                <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-5">
+                <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-5">
                   <div className="font-mono text-xs text-[#1A7A6D] uppercase tracking-widest mb-2">Save option</div>
                   <div className="font-mono font-bold text-xl text-[#1A1A1A] mb-1">${saveTotal.toLocaleString()}</div>
                   <p className="text-xs text-[#5A5A5A] leading-relaxed">
@@ -289,7 +289,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
               </div>
 
               {/* Trip details */}
-              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-6">
+              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
                 <h3 className="font-semibold text-[#1A1A1A] mb-4">Trip details</h3>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
@@ -320,7 +320,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
 
             {/* Sidebar */}
             <div className="space-y-4">
-              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-5 sticky top-20">
+              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-5 sticky top-20">
                 <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-3">Ready to book?</div>
                 <div className="font-mono font-bold text-2xl text-[#D4612A] mb-0.5">${totalCost.toLocaleString()}</div>
                 <div className="text-xs text-[#8A8A8A] mb-4">{nights} nights all-in</div>
