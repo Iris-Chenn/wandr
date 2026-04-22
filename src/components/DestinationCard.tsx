@@ -6,6 +6,9 @@ import type { TripEstimate } from "@/lib/ranking";
 type Props = {
   trip: TripEstimate;
   budget: number;
+  isLivePrice?: boolean;
+  departDate?: string;
+  returnDate?: string;
 };
 
 const BUDGET_MATCH_STYLES = {
@@ -14,7 +17,7 @@ const BUDGET_MATCH_STYLES = {
   stretch: { label: "Slight stretch", color: "#6B4FA0", bg: "#E8DFF5" },
 };
 
-export default function DestinationCard({ trip, budget }: Props) {
+export default function DestinationCard({ trip, budget, isLivePrice, departDate, returnDate }: Props) {
   const match = BUDGET_MATCH_STYLES[trip.budgetMatch];
   const flightPct = Math.round((trip.flightCost / trip.totalCost) * 100);
   const hotelPct = Math.round((trip.hotelCost / trip.totalCost) * 100);
@@ -24,7 +27,7 @@ export default function DestinationCard({ trip, budget }: Props) {
 
   return (
     <Link
-      href={`/destination/${trip.id}?budget=${budget}&origin=JFK&nights=${trip.nights}`}
+      href={`/destination/${trip.id}?budget=${budget}&origin=JFK&nights=${trip.nights}${departDate ? `&depart=${departDate}&return=${returnDate}` : ""}`}
       className="block bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#D4612A]/40 transition-all group"
     >
       {/* Header */}
@@ -79,13 +82,16 @@ export default function DestinationCard({ trip, budget }: Props) {
       {/* Footer */}
       <div className="px-5 py-3 bg-[#F5F0E8] border-t border-[#E0D8C8] flex items-center justify-between">
         <div>
-          <div className="font-mono font-bold text-[#D4612A] text-lg">${trip.totalCost.toLocaleString()}</div>
+          <div className="flex items-center gap-1.5">
+            <div className="font-mono font-bold text-[#D4612A] text-lg">${trip.totalCost.toLocaleString()}</div>
+            {isLivePrice && (
+              <span className="text-[10px] bg-[#D0ECE7] text-[#1A7A6D] font-mono font-semibold px-1.5 py-0.5 rounded">LIVE</span>
+            )}
+          </div>
           <div className="text-xs text-[#8A8A8A]">{trip.nights} nights all-in</div>
         </div>
         {savings > 0 && (
-          <div className="text-right">
-            <div className="text-xs text-[#1A7A6D] font-semibold">${savings} under budget</div>
-          </div>
+          <div className="text-xs text-[#1A7A6D] font-semibold">${savings} under</div>
         )}
         <span className="text-[#D4612A] text-sm font-medium group-hover:translate-x-0.5 transition-transform">
           View details →

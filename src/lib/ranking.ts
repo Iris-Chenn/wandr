@@ -56,11 +56,13 @@ export type UserPreferences = {
   tripType?: string;
 };
 
+// realPrices: map of destination id → actual flight cost from Duffel
 export function rankDestinations(
   budget: number,
   origin: string,
   tripLength: string,
-  preferences?: UserPreferences
+  preferences?: UserPreferences,
+  realPrices?: Record<string, number>
 ): TripEstimate[] {
   const nights = TRIP_LENGTH_NIGHTS[tripLength] ?? 5;
   const flightMultiplier = ORIGIN_FLIGHT_MULTIPLIERS[origin] ?? 1.0;
@@ -68,7 +70,8 @@ export function rankDestinations(
   const destinations = destinationsRaw as Destination[];
 
   const estimates: TripEstimate[] = destinations.map((dest) => {
-    const flightCost = Math.round(dest.avgFlightCostFromJFK * flightMultiplier);
+    const flightCost = realPrices?.[dest.id]
+      ?? Math.round(dest.avgFlightCostFromJFK * flightMultiplier);
     const hotelCost = dest.avgHotelNightly * nights;
     const foodCost = Math.round(dest.avgDailyCost * 0.45 * nights);
     const activitiesCost = Math.round(dest.avgDailyCost * 0.35 * nights);
