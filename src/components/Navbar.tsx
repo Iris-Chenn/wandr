@@ -21,7 +21,7 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#0D0D0D]/95 backdrop-blur-sm border-b border-white/10">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#050A18]/95 backdrop-blur-md border-b border-cyan-500/15 shadow-[0_1px_24px_rgba(6,182,212,0.06)]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
           <Link href="/" className="font-bold text-xl text-white tracking-tight">
             wandr
@@ -58,17 +58,17 @@ export default function Navbar() {
           onClick={() => setShowModal(false)}
         >
           <div
-            className="bg-white rounded-xl p-7 w-full max-w-sm shadow-2xl border border-[#E5E7EB]"
+            className="bg-[#080F25] border border-white/10 rounded-xl p-7 w-full max-w-sm shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <h2 className="text-xl font-bold text-[#0A0A0A] mb-1">Sign in to Wandr</h2>
-            <p className="text-sm text-[#6B7280] mb-5">We&apos;ll email you a magic link — no password needed.</p>
+            <h2 className="text-xl font-bold text-white mb-1">Sign in to Wandr</h2>
+            <p className="text-sm text-white/40 mb-5">We&apos;ll email you a magic link — no password needed.</p>
 
             {sent ? (
               <div className="text-center py-4">
-                <div className="text-3xl mb-3">✉️</div>
-                <div className="font-semibold text-[#0A0A0A] mb-1">Check your inbox</div>
-                <p className="text-sm text-[#6B7280]">We sent a link to <strong>{email}</strong>. Click it to sign in.</p>
+                <div className="font-mono text-cyan-400 text-2xl mb-3">✓</div>
+                <div className="font-semibold text-white mb-1">Check your inbox</div>
+                <p className="text-sm text-white/40">We sent a link to <strong className="text-white">{email}</strong>. Click it to sign in.</p>
               </div>
             ) : (
               <form onSubmit={handleSignIn} className="space-y-3">
@@ -79,7 +79,7 @@ export default function Navbar() {
                   placeholder="your@email.com"
                   required
                   autoFocus
-                  className="w-full border border-[#E5E7EB] rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#D4612A]/30"
+                  className="w-full bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500/40 font-mono"
                 />
                 <button
                   type="submit"
@@ -93,7 +93,7 @@ export default function Navbar() {
 
             <button
               onClick={() => setShowModal(false)}
-              className="mt-4 w-full text-center text-xs text-[#9CA3AF] hover:text-[#6B7280]"
+              className="mt-4 w-full text-center text-xs text-white/30 hover:text-white/60 transition-colors font-mono"
             >
               Cancel
             </button>

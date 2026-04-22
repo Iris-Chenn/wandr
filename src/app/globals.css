@@ -22,7 +22,78 @@
 }
 
 body {
-  background-color: #FFFFFF;
+  background-color: #050A18;
   color: #0A0A0A;
   -webkit-font-smoothing: antialiased;
+}
+
+/* ── Dot-matrix grid ── */
+.dot-grid {
+  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+}
+
+/* ── Aurora keyframes ── */
+@keyframes aurora-move {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(4%, -6%) scale(1.08); }
+  66%       { transform: translate(-3%, 4%) scale(0.95); }
+}
+
+@keyframes aurora-move-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(-5%, 3%) scale(1.05); }
+  66%       { transform: translate(6%, -4%) scale(1.1); }
+}
+
+@keyframes aurora-move-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50%       { transform: translate(3%, 5%) scale(1.08); }
+}
+
+/* ── Aurora blobs ── */
+.aurora-1 {
+  position: absolute;
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.13) 0%, transparent 70%);
+  top: -15%;
+  left: -10%;
+  animation: aurora-move 14s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.aurora-2 {
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(ellipse, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
+  top: 10%;
+  right: -15%;
+  animation: aurora-move-2 18s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.aurora-3 {
+  position: absolute;
+  width: 500px;
+  height: 350px;
+  background: radial-gradient(ellipse, rgba(212, 97, 42, 0.09) 0%, transparent 70%);
+  bottom: 0;
+  left: 25%;
+  animation: aurora-move-3 11s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.aurora-waitlist {
+  position: absolute;
+  width: 700px;
+  height: 500px;
+  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.08) 0%, transparent 65%);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  animation: aurora-move 16s ease-in-out infinite;
+  pointer-events: none;
 }
