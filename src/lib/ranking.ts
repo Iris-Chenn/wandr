@@ -17,6 +17,8 @@ export type Destination = {
   bestMonths: string[];
   visaRequired: boolean;
   unsplashId: string;
+  lat: number;
+  lng: number;
 };
 
 export type TripEstimate = Destination & {

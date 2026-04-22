@@ -15,7 +15,9 @@
     "description": "Coastal European gem with world-class food, wine, and history at budget-friendly prices.",
     "bestMonths": ["March", "April", "May", "September", "October"],
     "visaRequired": false,
-    "unsplashId": "lisbon-portugal"
+    "unsplashId": "lisbon-portugal",
+    "lat": 38.7223,
+    "lng": -9.1393
   },
   {
     "id": "bangkok",
@@ -33,7 +35,9 @@
     "description": "Vibrant street food paradise with stunning temples and world-class nightlife.",
     "bestMonths": ["November", "December", "January", "February"],
     "visaRequired": false,
-    "unsplashId": "bangkok-thailand"
+    "unsplashId": "bangkok-thailand",
+    "lat": 13.7563,
+    "lng": 100.5018
   },
   {
     "id": "mexico-city",
@@ -51,7 +55,9 @@
     "description": "Megacity of museums, street tacos, lucha libre, and colonial architecture.",
     "bestMonths": ["February", "March", "April", "May", "October", "November"],
     "visaRequired": false,
-    "unsplashId": "mexico-city"
+    "unsplashId": "mexico-city",
+    "lat": 19.4326,
+    "lng": -99.1332
   },
   {
     "id": "bali",
@@ -69,7 +75,9 @@
     "description": "Tropical paradise with rice terraces, volcanic peaks, spiritual temples, and surf.",
     "bestMonths": ["April", "May", "June", "July", "August", "September"],
     "visaRequired": false,
-    "unsplashId": "bali-indonesia"
+    "unsplashId": "bali-indonesia",
+    "lat": -8.3405,
+    "lng": 115.0920
   },
   {
     "id": "prague",
@@ -87,7 +95,9 @@
     "description": "Medieval fairy-tale city with Gothic architecture, craft beer, and incredible value.",
     "bestMonths": ["March", "April", "May", "September", "October"],
     "visaRequired": false,
-    "unsplashId": "prague-czech-republic"
+    "unsplashId": "prague-czech-republic",
+    "lat": 50.0755,
+    "lng": 14.4378
   },
   {
     "id": "buenos-aires",
@@ -105,7 +115,9 @@
     "description": "The Paris of South America: tango, steak, Malbec wine, and vibrant nightlife.",
     "bestMonths": ["March", "April", "October", "November"],
     "visaRequired": false,
-    "unsplashId": "buenos-aires-argentina"
+    "unsplashId": "buenos-aires-argentina",
+    "lat": -34.6037,
+    "lng": -58.3816
   },
   {
     "id": "marrakech",
@@ -123,7 +135,9 @@
     "description": "Labyrinthine medinas, hammams, rooftop riads, and the Sahara at your doorstep.",
     "bestMonths": ["March", "April", "May", "October", "November"],
     "visaRequired": false,
-    "unsplashId": "marrakech-morocco"
+    "unsplashId": "marrakech-morocco",
+    "lat": 31.6295,
+    "lng": -7.9811
   },
   {
     "id": "tokyo",
@@ -141,7 +155,9 @@
     "description": "Ultra-modern metropolis blending ancient temples with neon-lit pop culture.",
     "bestMonths": ["March", "April", "May", "October", "November"],
     "visaRequired": false,
-    "unsplashId": "tokyo-japan"
+    "unsplashId": "tokyo-japan",
+    "lat": 35.6762,
+    "lng": 139.6503
   },
   {
     "id": "havana",
@@ -159,7 +175,9 @@
     "description": "Frozen in time: classic cars, salsa, mojitos, and faded colonial grandeur.",
     "bestMonths": ["December", "January", "February", "March", "April"],
     "visaRequired": true,
-    "unsplashId": "havana-cuba"
+    "unsplashId": "havana-cuba",
+    "lat": 23.1136,
+    "lng": -82.3666
   },
   {
     "id": "chiang-mai",
@@ -177,7 +195,9 @@
     "description": "Northern Thailand's cultural capital: temples, elephant sanctuaries, and $3 Thai massages.",
     "bestMonths": ["November", "December", "January", "February", "March"],
     "visaRequired": false,
-    "unsplashId": "chiang-mai-thailand"
+    "unsplashId": "chiang-mai-thailand",
+    "lat": 18.7883,
+    "lng": 98.9853
   },
   {
     "id": "budapest",
@@ -195,7 +215,9 @@
     "description": "Thermal spas, ruin bars, Hungarian goulash, and the Danube skyline — all at Eastern European prices.",
     "bestMonths": ["April", "May", "June", "September", "October"],
     "visaRequired": false,
-    "unsplashId": "budapest-hungary"
+    "unsplashId": "budapest-hungary",
+    "lat": 47.4979,
+    "lng": 19.0402
   },
   {
     "id": "colombia-medellin",
@@ -213,7 +235,9 @@
     "description": "City of eternal spring: year-round warmth, cable cars over hillside barrios, and incredible coffee.",
     "bestMonths": ["January", "February", "March", "July", "August"],
     "visaRequired": false,
-    "unsplashId": "medellin-colombia"
+    "unsplashId": "medellin-colombia",
+    "lat": 6.2442,
+    "lng": -75.5812
   },
   {
     "id": "athens",
@@ -231,7 +255,9 @@
     "description": "Cradle of Western civilization: the Acropolis, souvlaki, and Aegean sunsets.",
     "bestMonths": ["April", "May", "September", "October"],
     "visaRequired": false,
-    "unsplashId": "athens-greece"
+    "unsplashId": "athens-greece",
+    "lat": 37.9838,
+    "lng": 23.7275
   },
   {
     "id": "ho-chi-minh",
@@ -249,7 +275,9 @@
     "description": "Electric megacity with some of the world's best street food and a complex, fascinating history.",
     "bestMonths": ["December", "January", "February", "March"],
     "visaRequired": true,
-    "unsplashId": "ho-chi-minh-vietnam"
+    "unsplashId": "ho-chi-minh-vietnam",
+    "lat": 10.8231,
+    "lng": 106.6297
   },
   {
     "id": "barcelona",
@@ -267,7 +295,9 @@
     "description": "Gaudí's surreal architecture, beaches, tapas, and Catalonian culture collide.",
     "bestMonths": ["May", "June", "September", "October"],
     "visaRequired": false,
-    "unsplashId": "barcelona-spain"
+    "unsplashId": "barcelona-spain",
+    "lat": 41.3851,
+    "lng": 2.1734
   },
   {
     "id": "cape-town",
@@ -285,7 +315,9 @@
     "description": "Table Mountain, penguin colonies, wine country, and world-class beaches in one city.",
     "bestMonths": ["November", "December", "January", "February", "March"],
     "visaRequired": false,
-    "unsplashId": "cape-town-south-africa"
+    "unsplashId": "cape-town-south-africa",
+    "lat": -33.9249,
+    "lng": 18.4241
   },
   {
     "id": "istanbul",
@@ -303,7 +335,9 @@
     "description": "Where East meets West: Byzantine domes, bazaars, Bosphorus views, and incredible Turkish food.",
     "bestMonths": ["April", "May", "September", "October"],
     "visaRequired": true,
-    "unsplashId": "istanbul-turkey"
+    "unsplashId": "istanbul-turkey",
+    "lat": 41.0082,
+    "lng": 28.9784
   },
   {
     "id": "hanoi",
@@ -321,7 +355,9 @@
     "description": "Ancient Old Quarter, egg coffee, pho for $2, and a gateway to Ha Long Bay.",
     "bestMonths": ["October", "November", "December", "March", "April"],
     "visaRequired": true,
-    "unsplashId": "hanoi-vietnam"
+    "unsplashId": "hanoi-vietnam",
+    "lat": 21.0285,
+    "lng": 105.8542
   },
   {
     "id": "oaxaca",
@@ -339,7 +375,9 @@
     "description": "Mexico's culinary capital: mole, mezcal, Day of the Dead celebrations, and Zapotec ruins.",
     "bestMonths": ["October", "November", "December", "January", "February", "March"],
     "visaRequired": false,
-    "unsplashId": "oaxaca-mexico"
+    "unsplashId": "oaxaca-mexico",
+    "lat": 17.0732,
+    "lng": -96.7266
   },
   {
     "id": "amsterdam",
@@ -357,7 +395,9 @@
     "description": "Canal houses, world-class museums, cycling culture, and progressive spirit.",
     "bestMonths": ["April", "May", "June", "September"],
     "visaRequired": false,
-    "unsplashId": "amsterdam-netherlands"
+    "unsplashId": "amsterdam-netherlands",
+    "lat": 52.3676,
+    "lng": 4.9041
   },
   {
     "id": "cartagena",
@@ -375,7 +415,9 @@
     "description": "Caribbean walled city with rainbow colonial buildings and white sand beaches.",
     "bestMonths": ["December", "January", "February", "March", "April"],
     "visaRequired": false,
-    "unsplashId": "cartagena-colombia"
+    "unsplashId": "cartagena-colombia",
+    "lat": 10.3910,
+    "lng": -75.4794
   },
   {
     "id": "reykjavik",
@@ -393,7 +435,9 @@
     "description": "Northern Lights, geysers, hot springs, and dramatic volcanic landscapes.",
     "bestMonths": ["June", "July", "August", "September", "October", "November"],
     "visaRequired": false,
-    "unsplashId": "reykjavik-iceland"
+    "unsplashId": "reykjavik-iceland",
+    "lat": 64.1466,
+    "lng": -21.9426
   },
   {
     "id": "taipei",
@@ -411,7 +455,9 @@
     "description": "Night markets, bubble tea origin story, Taipei 101, and mountains 30 minutes away.",
     "bestMonths": ["October", "November", "December", "March", "April"],
     "visaRequired": false,
-    "unsplashId": "taipei-taiwan"
+    "unsplashId": "taipei-taiwan",
+    "lat": 25.0330,
+    "lng": 121.5654
   },
   {
     "id": "nairobi",
@@ -429,7 +475,9 @@
     "description": "Gateway to East African safaris: game parks within city limits and Maasai Mara nearby.",
     "bestMonths": ["January", "February", "July", "August", "September", "October"],
     "visaRequired": true,
-    "unsplashId": "nairobi-kenya"
+    "unsplashId": "nairobi-kenya",
+    "lat": -1.2921,
+    "lng": 36.8219
   },
   {
     "id": "porto",
@@ -447,7 +495,9 @@
     "description": "Port wine caves, azulejo-tiled facades, and grilled sardines on a clifftop terrace.",
     "bestMonths": ["April", "May", "June", "September", "October"],
     "visaRequired": false,
-    "unsplashId": "porto-portugal"
+    "unsplashId": "porto-portugal",
+    "lat": 41.1579,
+    "lng": -8.6291
   },
   {
     "id": "seville",
@@ -465,7 +515,9 @@
     "description": "Flamenco, tapas culture, orange trees, and Moorish architecture baked in Andalusian sun.",
     "bestMonths": ["March", "April", "October", "November"],
     "visaRequired": false,
-    "unsplashId": "seville-spain"
+    "unsplashId": "seville-spain",
+    "lat": 37.3891,
+    "lng": -5.9845
   },
   {
     "id": "krakow",
@@ -483,7 +535,9 @@
     "description": "Medieval old town, Jewish Quarter, pierogis, and one of Europe's best nightlife scenes.",
     "bestMonths": ["May", "June", "September", "October"],
     "visaRequired": false,
-    "unsplashId": "krakow-poland"
+    "unsplashId": "krakow-poland",
+    "lat": 50.0647,
+    "lng": 19.9450
   },
   {
     "id": "singapore",
@@ -501,7 +555,9 @@
     "description": "Garden city where hawker centers serve Michelin-starred food for $5 and skyscrapers touch the clouds.",
     "bestMonths": ["February", "March", "April", "July", "August"],
     "visaRequired": false,
-    "unsplashId": "singapore"
+    "unsplashId": "singapore",
+    "lat": 1.3521,
+    "lng": 103.8198
   },
   {
     "id": "kathmandu",
@@ -519,7 +575,9 @@
     "description": "Gateway to the Himalayas: Everest base camp treks, ancient stupas, and $2 dahl bhat.",
     "bestMonths": ["March", "April", "May", "October", "November"],
     "visaRequired": true,
-    "unsplashId": "kathmandu-nepal"
+    "unsplashId": "kathmandu-nepal",
+    "lat": 27.7172,
+    "lng": 85.3240
   },
   {
     "id": "rio-de-janeiro",
@@ -537,7 +595,9 @@
     "description": "Copacabana, Christ the Redeemer, samba, and some of the world's most dramatic urban scenery.",
     "bestMonths": ["March", "April", "May", "September", "October", "November"],
     "visaRequired": false,
-    "unsplashId": "rio-de-janeiro-brazil"
+    "unsplashId": "rio-de-janeiro-brazil",
+    "lat": -22.9068,
+    "lng": -43.1729
   },
   {
     "id": "tbilisi",
@@ -555,7 +615,9 @@
     "description": "Emerging gem: Soviet architecture, natural wine, sulfur baths, and the Caucasus mountains.",
     "bestMonths": ["May", "June", "September", "October"],
     "visaRequired": false,
-    "unsplashId": "tbilisi-georgia"
+    "unsplashId": "tbilisi-georgia",
+    "lat": 41.6938,
+    "lng": 44.8015
   },
   {
     "id": "bogota",
@@ -573,6 +635,8 @@
     "description": "High-altitude capital with world-class street art, coffee culture, and a buzzing food scene.",
     "bestMonths": ["December", "January", "February", "June", "July"],
     "visaRequired": false,
-    "unsplashId": "bogota-colombia"
+    "unsplashId": "bogota-colombia",
+    "lat": 4.7110,
+    "lng": -74.0721
   }
 ]
