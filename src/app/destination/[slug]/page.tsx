@@ -10,7 +10,7 @@ import type { Destination } from "@/lib/ranking";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ budget?: string; origin?: string; nights?: string; depart?: string; return?: string }>;
+  searchParams: Promise<{ budget?: string; origin?: string; nights?: string; depart?: string; return?: string; flight?: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -115,8 +115,9 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   const depart = sp.depart || "";
   const ret = sp.return || "";
 
-  // Cost breakdown
-  const flightCost = Math.round(destination.avgFlightCostFromJFK * 1.0);
+  // Use live Duffel price if passed from results page, else fall back to static estimate
+  const isLiveFlight = !!sp.flight;
+  const flightCost = sp.flight ? Number(sp.flight) : Math.round(destination.avgFlightCostFromJFK);
   const hotelCost = destination.avgHotelNightly * nights;
   const foodCost = Math.round(destination.avgDailyCost * 0.45 * nights);
   const activitiesCost = Math.round(destination.avgDailyCost * 0.35 * nights);
@@ -220,7 +221,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
 
                 <div className="space-y-3">
                   {[
-                    { icon: "✈️", label: "Flights (round trip)", cost: flightCost, pct: flightPct, color: "#D4612A", bg: "#F0D4C0" },
+                    { icon: "✈️", label: `Flights (round trip)${isLiveFlight ? " · live" : " · est."}`, cost: flightCost, pct: flightPct, color: "#D4612A", bg: "#F0D4C0" },
                     { icon: "🏨", label: `Hotel (${nights} nights)`, cost: hotelCost, pct: hotelPct, color: "#1A7A6D", bg: "#D0ECE7" },
                     { icon: "🍽️", label: `Food & drinks`, cost: foodCost, pct: foodPct, color: "#6B4FA0", bg: "#E8DFF5" },
                     { icon: "🎯", label: `Activities & transport`, cost: activitiesCost, pct: activitiesPct, color: "#8A8A8A", bg: "#F5F0E8" },
@@ -254,6 +255,9 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                       : "Try flexible dates or a slightly longer savings plan to make this work."}
                   </div>
                 </div>
+                <p className="text-[10px] text-[#8A8A8A] mt-3 leading-relaxed">
+                  {isLiveFlight ? "✈ Flight price is live from Duffel." : "✈ Flight price is an estimate."} Hotel, food & activity costs are averages — actual prices may vary.
+                </p>
               </div>
 
               {/* Budget sliders */}

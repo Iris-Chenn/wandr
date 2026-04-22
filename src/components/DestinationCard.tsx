@@ -27,7 +27,7 @@ export default function DestinationCard({ trip, budget, isLivePrice, departDate,
 
   return (
     <Link
-      href={`/destination/${trip.id}?budget=${budget}&origin=JFK&nights=${trip.nights}${departDate ? `&depart=${departDate}&return=${returnDate}` : ""}`}
+      href={`/destination/${trip.id}?budget=${budget}&origin=JFK&nights=${trip.nights}&flight=${trip.flightCost}${departDate ? `&depart=${departDate}&return=${returnDate}` : ""}`}
       className="block bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl overflow-hidden hover:shadow-md hover:border-[#D4612A]/40 transition-all group"
     >
       {/* Header */}
