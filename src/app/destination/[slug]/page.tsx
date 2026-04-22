@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
@@ -11,40 +12,93 @@ type Props = {
   searchParams: Promise<{ budget?: string; origin?: string; nights?: string; depart?: string; return?: string }>;
 };
 
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const destination = (destinationsRaw as Destination[]).find((d) => d.id === slug);
+  if (!destination) return {};
+  return {
+    title: `${destination.city}, ${destination.country} — Wandr`,
+    description: `Plan a trip to ${destination.city} on a budget. See flight + hotel + food costs, best months to visit, and book with one click.`,
+    openGraph: {
+      title: `${destination.flag} ${destination.city} for less than you think`,
+      description: destination.description,
+      siteName: "Wandr",
+    },
+  };
+}
+
 // Curated Unsplash photo IDs per destination
 const UNSPLASH_PHOTOS: Record<string, string> = {
-  "lisbon":           "1555881400-74d7acaacd47",
-  "bangkok":          "1508009603885-50cf7c579365",
-  "mexico-city":      "1518638150340-f706e86654de",
-  "bali":             "1537996194471-e657df975ab4",
-  "prague":           "1541849546-216549ae216d",
-  "buenos-aires":     "1612294105787-3c9d86b88b4f",
-  "marrakech":        "1597212720753-4d00e55eab4d",
-  "tokyo":            "1540959733332-eab4deabeeaf",
-  "havana":           "1551009175-8a68da93d5f9",
-  "chiang-mai":       "1528360983277-13d401cdc186",
-  "budapest":         "1541849546-216549ae216d",
-  "colombia-medellin":"1599390263-a62f83e45700",
-  "athens":           "1555993539-1732b0258235",
-  "ho-chi-minh":      "1583417319070-4a69db38a482",
-  "barcelona":        "1539037116277-4db20889f2d4",
-  "cape-town":        "1580060839134-75a5edca2e99",
-  "istanbul":         "1524231757912-21f4fe3a7200",
-  "hanoi":            "1583417319070-4a69db38a482",
-  "oaxaca":           "1518638150340-f706e86654de",
-  "amsterdam":        "1534351590666-13e3e96b5017",
-  "cartagena":        "1570735678527-6943a5d3a3c9",
-  "reykjavik":        "1531168087216-80de62b8b4e7",
-  "taipei":           "1570077788046-2a8e7b2f69c5",
-  "nairobi":          "1547471080-7cc2caa01bdb",
-  "porto":            "1555881400-74d7acaacd47",
-  "seville":          "1558618666-fcd25c85cd64",
-  "krakow":           "1577791658220-55f0c898ab86",
-  "singapore":        "1525625293386-2d66c8bc27b4",
-  "kathmandu":        "1571085406820-b3c24f8c7a8a",
-  "rio-de-janeiro":   "1483729558449-99ef09a8c36d",
-  "tbilisi":          "1565008576344-b6a91cd7c4d1",
-  "bogota":           "1589909077-ab06ade97dbf",
+  // Europe
+  "lisbon":              "1555881400-74d7acaacd47",
+  "paris":               "1499856845952-5870d4ab4cf7",
+  "rome":                "1552832230-c0197dd311b5",
+  "madrid":              "1543783207-ec64e4d95325",
+  "barcelona":           "1539037116277-4db20889f2d4",
+  "vienna":              "1516550893923-42d28e5677af",
+  "berlin":              "1560969184-10fe8719e047",
+  "amsterdam":           "1534351590666-13e3e96b5017",
+  "prague":              "1541849546-216549ae216d",
+  "budapest":            "1549144511-f099e773c147",
+  "athens":              "1555993539-1732b0258235",
+  "istanbul":            "1524231757912-21f4fe3a7200",
+  "reykjavik":           "1531168087216-80de62b8b4e7",
+  "porto":               "1555881400-74d7acaacd47",
+  "seville":             "1558618666-fcd25c85cd64",
+  "valencia":            "1583153380367-75e285a06f06",
+  "krakow":              "1577791658220-55f0c898ab86",
+  "warsaw":              "1573455494060-c55b22587bcc",
+  "florence":            "1534259163a5a32d16dd",
+  "naples":              "1516747773462-e1f7b1f14e8c",
+  "dubrovnik":           "1508739773434-c26b3d09e071",
+  "split":               "1533587851976-a8f14ccc7c16",
+  "kotor":               "1555400150-01b5e01e3b70",
+  "belgrade":            "1566481209441-bf1cedf35ab5",
+  "bucharest":           "1558618666-fcd25c85cd64",
+  "sofia":               "1601134467661-3d775b999c8b",
+  "vilnius":             "1554056648-d74af0a20e20",
+  "tallinn":             "1587893904075-0e1a2b6cdf03",
+  "dublin":              "1520698555132-e3b890d75f3b",
+  "edinburgh":           "1558618047-2df7e76e2697",
+  "valletta":            "1535040534350-4f68dc3aea3e",
+  "tbilisi":             "1565008576344-b6a91cd7c4d1",
+  // Americas
+  "mexico-city":         "1518638150340-f706e86654de",
+  "cancun":              "1510097467424-192d713fd8b2",
+  "tulum":               "1518500335-7e822c9b4f3b",
+  "oaxaca":              "1572116469950-b1b9e7c63462",
+  "puerto-vallarta":     "1551004579-9a72f7cd9e0f",
+  "san-juan":            "1559494007-dc9e50dcf7f5",
+  "punta-cana":          "1584551246679-0daf3d275d0f",
+  "havana":              "1551009175-8a68da93d5f9",
+  "antigua-guatemala":   "1555400038-63f5ba517a47",
+  "san-jose-costa-rica": "1543702895-ac3e79bda095",
+  "panama-city":         "1529073036-36f8c6aeaf11",
+  "colombia-medellin":   "1599390263-a62f83e45700",
+  "cartagena":           "1570735678527-6943a5d3a3c9",
+  "bogota":              "1589909077-ab06ade97dbf",
+  "lima":                "1531769701891-9f8af54f8b8a",
+  "cusco":               "1526392060635-9d6019884377",
+  "buenos-aires":        "1612294105787-3c9d86b88b4f",
+  "santiago":            "1554481923-a6918bd997bc",
+  "rio-de-janeiro":      "1483729558449-99ef09a8c36d",
+  "montevideo":          "1592861777091-f9d2dd0e6ff6",
+  "quito":               "1531572753322-ad063cecc140",
+  "nassau":              "1548504769-b93f8db14534",
+  // Africa
+  "marrakech":           "1597212720753-4d00e55eab4d",
+  "cape-town":           "1580060839134-75a5edca2e99",
+  "nairobi":             "1547471080-7cc2caa01bdb",
+  // Asia
+  "bangkok":             "1508009603885-50cf7c579365",
+  "bali":                "1537996194471-e657df975ab4",
+  "tokyo":               "1540959733332-eab4deabeeaf",
+  "chiang-mai":          "1528360983277-13d401cdc186",
+  "ho-chi-minh":         "1583417319070-4a69db38a482",
+  "hanoi":               "1583417319070-4a69db38a482",
+  "taipei":              "1570077788046-2a8e7b2f69c5",
+  "singapore":           "1525625293386-2d66c8bc27b4",
+  "kathmandu":           "1571085406820-b3c24f8c7a8a",
 };
 
 export default async function DestinationPage({ params, searchParams }: Props) {
