@@ -48,14 +48,14 @@ export default function BudgetInput() {
   };
 
   return (
-    <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-6 sm:p-8 shadow-sm w-full max-w-xl">
+    <div className="bg-white border border-[#E5E7EB] rounded-xl p-6 sm:p-8 shadow-xl w-full max-w-xl">
       {/* Budget slider */}
       <div className="mb-6">
         <div className="flex items-baseline justify-between mb-3">
-          <label className="text-sm font-semibold text-[#1A1A1A] uppercase tracking-widest font-mono">
+          <label className="text-xs font-semibold text-[#6B7280] uppercase tracking-widest font-mono">
             My budget
           </label>
-          <span className="font-serif text-3xl font-bold text-[#D4612A]">
+          <span className="font-mono text-3xl font-bold text-[#D4612A]">
             ${budget.toLocaleString()}
           </span>
         </div>
@@ -68,7 +68,7 @@ export default function BudgetInput() {
           onChange={(e) => setBudget(Number(e.target.value))}
           className="w-full accent-[#D4612A] cursor-pointer"
         />
-        <div className="flex justify-between text-xs text-[#8A8A8A] font-mono mt-1">
+        <div className="flex justify-between text-xs text-[#9CA3AF] font-mono mt-1">
           <span>$200</span>
           <span>$5,000</span>
         </div>
@@ -76,13 +76,13 @@ export default function BudgetInput() {
 
       {/* Origin */}
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-[#1A1A1A] uppercase tracking-widest font-mono mb-2">
+        <label className="block text-xs font-semibold text-[#6B7280] uppercase tracking-widest font-mono mb-2">
           Flying from
         </label>
         <select
           value={origin}
           onChange={(e) => setOrigin(e.target.value)}
-          className="w-full bg-[#F5F0E8] border border-[#E0D8C8] rounded-xl px-4 py-3 text-[#1A1A1A] text-sm focus:outline-none focus:ring-2 focus:ring-[#D4612A]/30"
+          className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-3 text-[#0A0A0A] text-sm focus:outline-none focus:ring-2 focus:ring-[#D4612A]/30"
         >
           {POPULAR_ORIGINS.map((o) => (
             <option key={o.code} value={o.code}>{o.label}</option>
@@ -92,7 +92,7 @@ export default function BudgetInput() {
 
       {/* Trip length */}
       <div className="mb-4">
-        <label className="block text-sm font-semibold text-[#1A1A1A] uppercase tracking-widest font-mono mb-2">
+        <label className="block text-xs font-semibold text-[#6B7280] uppercase tracking-widest font-mono mb-2">
           Trip length
         </label>
         <div className="grid grid-cols-4 gap-2">
@@ -100,10 +100,10 @@ export default function BudgetInput() {
             <button
               key={t.value}
               onClick={() => setTripLength(t.value)}
-              className={`py-2 px-2 rounded-xl text-xs font-medium border transition-all ${
+              className={`py-2 px-2 rounded-lg text-xs font-medium border transition-all ${
                 tripLength === t.value
                   ? "bg-[#D4612A] text-white border-[#D4612A]"
-                  : "bg-[#F5F0E8] text-[#5A5A5A] border-[#E0D8C8] hover:border-[#D4612A]"
+                  : "bg-[#F9FAFB] text-[#6B7280] border-[#E5E7EB] hover:border-[#D4612A]/50"
               }`}
             >
               {t.label}
@@ -114,15 +114,15 @@ export default function BudgetInput() {
 
       {/* Month (optional) */}
       <div className="mb-6">
-        <label className="block text-sm font-semibold text-[#1A1A1A] uppercase tracking-widest font-mono mb-2">
-          When <span className="text-[#8A8A8A] normal-case font-normal tracking-normal">(optional)</span>
+        <label className="block text-xs font-semibold text-[#6B7280] uppercase tracking-widest font-mono mb-2">
+          When <span className="text-[#9CA3AF] normal-case font-normal tracking-normal">(optional)</span>
         </label>
         <select
           value={month}
           onChange={(e) => setMonth(e.target.value)}
-          className="w-full bg-[#F5F0E8] border border-[#E0D8C8] rounded-xl px-4 py-3 text-[#1A1A1A] text-sm focus:outline-none focus:ring-2 focus:ring-[#D4612A]/30"
+          className="w-full bg-[#F9FAFB] border border-[#E5E7EB] rounded-lg px-4 py-3 text-[#0A0A0A] text-sm focus:outline-none focus:ring-2 focus:ring-[#D4612A]/30"
         >
-          <option value="">I'm flexible</option>
+          <option value="">I&apos;m flexible</option>
           {months.map((m) => (
             <option key={m} value={m}>{m}</option>
           ))}
@@ -133,12 +133,12 @@ export default function BudgetInput() {
       <button
         onClick={handleSearch}
         disabled={loading}
-        className="w-full bg-[#D4612A] hover:bg-[#A84A1E] text-white font-semibold py-4 rounded-xl transition-colors disabled:opacity-60 text-base"
+        className="w-full bg-[#D4612A] hover:bg-[#A84A1E] text-white font-semibold py-4 rounded-lg transition-colors disabled:opacity-60 text-sm"
       >
         {loading ? "Finding your trips..." : "Show me where I can go →"}
       </button>
 
-      <p className="text-center text-xs text-[#8A8A8A] mt-3">
+      <p className="text-center text-xs text-[#9CA3AF] mt-3">
         No credit card needed · Free to use
       </p>
     </div>
