@@ -132,6 +132,41 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   const stretchTotal = Math.round(totalCost * 1.15);
   const saveTotal = Math.round(totalCost * 0.82);
 
+  // Hotel tiers based on avg nightly rate
+  const hotelNightly = destination.avgHotelNightly;
+  const hotelTiers = [
+    {
+      label: "Budget",
+      type: "Hostel / guesthouse",
+      nightly: Math.round(hotelNightly * 0.55),
+      total: Math.round(hotelNightly * 0.55 * nights),
+      stars: "★★",
+    },
+    {
+      label: "Mid-range",
+      type: "3-star hotel",
+      nightly: hotelNightly,
+      total: hotelNightly * nights,
+      stars: "★★★",
+    },
+    {
+      label: "Boutique",
+      type: "4-star / boutique",
+      nightly: Math.round(hotelNightly * 1.7),
+      total: Math.round(hotelNightly * 1.7 * nights),
+      stars: "★★★★",
+    },
+  ];
+
+  // Common carriers by region
+  const carriers: Record<string, string> = {
+    Americas: "Delta, American, United",
+    Europe: "Delta, American, TAP, Iberia",
+    Asia: "United, Cathay Pacific, JAL",
+    Africa: "Delta, Air France, Ethiopian",
+  };
+  const carrierHint = carriers[destination.region] || "Major carriers";
+
   const photoId = UNSPLASH_PHOTOS[slug];
   const unsplashUrl = photoId
     ? `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=1200&q=80`
@@ -269,6 +304,108 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                 budget={budget}
                 nights={nights}
               />
+
+              {/* Flights */}
+              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-[#0A0A0A]">✈ Flights</h3>
+                  {isLiveFlight
+                    ? <span className="text-[10px] bg-[#D0ECE7] text-[#1A7A6D] font-mono font-semibold px-2 py-0.5 rounded">LIVE PRICE</span>
+                    : <span className="text-[10px] bg-[#F5F0E8] text-[#8A8A8A] font-mono px-2 py-0.5 rounded">ESTIMATE</span>}
+                </div>
+
+                {/* Route */}
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="text-center">
+                    <div className="font-mono font-bold text-lg text-[#0A0A0A]">{origin}</div>
+                    <div className="text-xs text-[#8A8A8A]">Origin</div>
+                  </div>
+                  <div className="flex-1 flex items-center gap-1">
+                    <div className="flex-1 border-t border-dashed border-[#E0D8C8]" />
+                    <span className="text-xs text-[#D4612A]">✈</span>
+                    <div className="flex-1 border-t border-dashed border-[#E0D8C8]" />
+                  </div>
+                  <div className="text-center">
+                    <div className="font-mono font-bold text-lg text-[#0A0A0A]">{destination.iataCode}</div>
+                    <div className="text-xs text-[#8A8A8A]">{destination.city}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
+                  {depart && (
+                    <div>
+                      <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-0.5">Depart</div>
+                      <div className="font-medium text-[#0A0A0A]">{new Date(depart + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
+                    </div>
+                  )}
+                  {ret && (
+                    <div>
+                      <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-0.5">Return</div>
+                      <div className="font-medium text-[#0A0A0A]">{new Date(ret + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
+                    </div>
+                  )}
+                  <div>
+                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-0.5">Round trip</div>
+                    <div className="font-mono font-bold text-[#D4612A] text-lg">${flightCost.toLocaleString()}</div>
+                  </div>
+                  <div>
+                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-0.5">Common carriers</div>
+                    <div className="text-xs text-[#5A5A5A]">{carrierHint}</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={`https://www.kiwi.com/en/search/results/${origin}/${destination.iataCode}/${depart || "anytime"}/${ret || "anytime"}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="block bg-[#D4612A] hover:bg-[#A84A1E] text-white font-semibold py-2.5 rounded-lg transition-colors text-center text-xs"
+                  >
+                    Search Kiwi.com ↗
+                  </a>
+                  <a
+                    href={`https://www.google.com/travel/flights/search?q=flights+from+${origin}+to+${destination.iataCode}${depart ? `+${depart}` : ""}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="block bg-[#F5F0E8] hover:bg-[#E8E0D0] text-[#0A0A0A] font-semibold py-2.5 rounded-lg transition-colors text-center text-xs border border-[#E0D8C8]"
+                  >
+                    Search Google Flights ↗
+                  </a>
+                </div>
+              </div>
+
+              {/* Hotels */}
+              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-[#0A0A0A]">🏨 Hotel options</h3>
+                  <span className="text-xs text-[#8A8A8A]">{nights} nights</span>
+                </div>
+
+                <div className="space-y-3 mb-4">
+                  {hotelTiers.map((tier) => (
+                    <a
+                      key={tier.label}
+                      href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination.city)}&checkin=${depart}&checkout=${ret}&price=1-${tier.nightly * 1.2}`}
+                      target="_blank" rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3 border border-[#E0D8C8] rounded-lg hover:border-[#D4612A]/40 hover:bg-[#F5F0E8] transition-all group"
+                    >
+                      <div>
+                        <div className="flex items-center gap-2 mb-0.5">
+                          <span className="text-xs font-semibold text-[#0A0A0A]">{tier.label}</span>
+                          <span className="text-[10px] text-[#D4612A]">{tier.stars}</span>
+                        </div>
+                        <div className="text-xs text-[#8A8A8A]">{tier.type}</div>
+                      </div>
+                      <div className="text-right">
+                        <div className="font-mono font-bold text-[#0A0A0A] text-sm">${tier.total.toLocaleString()}</div>
+                        <div className="text-[10px] text-[#8A8A8A]">${tier.nightly}/night · Browse ↗</div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+
+                <p className="text-[10px] text-[#8A8A8A]">
+                  Prices are estimates. Click any tier to search live availability on Booking.com.
+                </p>
+              </div>
 
               {/* Stretch / Save */}
               <div className="grid sm:grid-cols-2 gap-4">
