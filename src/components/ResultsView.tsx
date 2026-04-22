@@ -129,37 +129,37 @@ export default function ResultsView({
       )}
 
       {/* Header */}
-      <div className="py-8">
-        <h1 className="text-2xl sm:text-3xl font-bold text-[#0A0A0A] mb-1">
-          {filteredTrips.length} trips for{" "}
-          <span className="text-[#D4612A]">${budget.toLocaleString()}</span>
-        </h1>
-        <p className="text-[#5A5A5A] text-sm">
-          Flying from {origin} · {tripLengthLabel}
-          {month !== "flexible" && ` · ${month}`}
-          {" · "}
-          <span className="text-[#8A8A8A]">Departing {departDisplay}</span>
-        </p>
-        <div className="flex flex-wrap gap-2 mt-2">
-          {hasDuffelPrices && (
-            <div className="inline-flex items-center gap-1.5 bg-[#D0ECE7] text-[#1A7A6D] text-xs font-medium px-3 py-1 rounded-full">
-              ✓ Live prices via Duffel
+      <div className="py-8 border-b border-[#E0D8C8] mb-6">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="font-mono text-xs text-[#8A8A8A] uppercase tracking-widest mb-1">
+              {origin} · {tripLengthLabel}{month !== "flexible" && ` · ${month}`} · Departing {departDisplay}
             </div>
-          )}
-          {personalized && preferences && (
-            <div className="inline-flex items-center gap-1.5 bg-[#F0D4C0] text-[#A84A1E] text-xs font-medium px-3 py-1 rounded-full">
-              ✨ Personalized for you ·{" "}
-              <button onClick={() => setShowQuiz(true)} className="underline">edit</button>
-            </div>
-          )}
-          {!personalized && !showQuiz && (
-            <button
-              onClick={() => setShowQuiz(true)}
-              className="inline-flex items-center gap-1.5 bg-[#E8DFF5] text-[#6B4FA0] text-xs font-medium px-3 py-1 rounded-full hover:bg-[#D8CFF0] transition-colors"
-            >
-              ✦ Personalize results
-            </button>
-          )}
+            <h1 className="text-3xl sm:text-4xl font-bold text-[#0A0A0A]">
+              {filteredTrips.length} trips for{" "}
+              <span className="text-[#D4612A]">${budget.toLocaleString()}</span>
+            </h1>
+          </div>
+          <div className="flex flex-wrap gap-2 pt-1">
+            {hasDuffelPrices && (
+              <div className="inline-flex items-center gap-1.5 bg-[#D0ECE7] text-[#1A7A6D] text-xs font-medium px-3 py-1.5 rounded-full">
+                ✓ Live prices via Duffel
+              </div>
+            )}
+            {personalized && preferences ? (
+              <div className="inline-flex items-center gap-1.5 bg-[#FEE9DC] text-[#A84A1E] text-xs font-medium px-3 py-1.5 rounded-full">
+                Personalized ·{" "}
+                <button onClick={() => setShowQuiz(true)} className="underline">edit</button>
+              </div>
+            ) : !showQuiz && (
+              <button
+                onClick={() => setShowQuiz(true)}
+                className="inline-flex items-center gap-1.5 bg-[#EDE9F8] text-[#6B4FA0] text-xs font-medium px-3 py-1.5 rounded-full hover:bg-[#D8CFF0] transition-colors"
+              >
+                ✦ Personalize
+              </button>
+            )}
+          </div>
         </div>
       </div>
 
@@ -278,20 +278,6 @@ export default function ResultsView({
       {/* List view */}
       {view === "list" && (
         <>
-          <div className="flex flex-wrap gap-4 mb-5 text-xs text-[#8A8A8A]">
-            {[
-              { color: "#D4612A", label: "Flight" },
-              { color: "#1A7A6D", label: "Hotel" },
-              { color: "#6B4FA0", label: "Food" },
-              { color: "#E0D8C8", label: "Activities" },
-            ].map(({ color, label }) => (
-              <div key={label} className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-sm" style={{ backgroundColor: color }} />
-                {label}
-              </div>
-            ))}
-          </div>
-
           {filteredTrips.length === 0 ? (
             <div className="text-center py-16 bg-[#FFFCF7] rounded-2xl border border-[#E0D8C8]">
               <div className="text-4xl mb-3">🔍</div>
