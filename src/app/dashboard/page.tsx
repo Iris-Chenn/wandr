@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
+import { useAuth } from "@/components/AuthProvider";
+import { supabase } from "@/lib/supabase";
 
 type SavedTrip = {
   id: string;
@@ -15,17 +17,51 @@ type SavedTrip = {
 };
 
 export default function DashboardPage() {
+  const { user, loading: authLoading } = useAuth();
   const [saved, setSaved] = useState<SavedTrip[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const trips = JSON.parse(localStorage.getItem("wandr_saved") || "[]");
-    setSaved(trips);
-  }, []);
+    if (authLoading) return;
 
-  const removeTrip = (id: string) => {
+    if (user && supabase) {
+      // Pull from Supabase
+      supabase
+        .from("saved_trips")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("saved_at", { ascending: false })
+        .then(({ data }) => {
+          if (data) {
+            setSaved(
+              data.map((row) => ({
+                id: row.destination_id,
+                city: row.city,
+                country: row.country,
+                flag: row.flag,
+                totalCost: row.total_cost,
+                nights: row.nights,
+                budget: row.budget,
+              }))
+            );
+          }
+          setLoading(false);
+        });
+    } else {
+      // Fall back to localStorage (no Supabase keys, or not signed in)
+      const trips = JSON.parse(localStorage.getItem("wandr_saved") || "[]");
+      setSaved(trips);
+      setLoading(false);
+    }
+  }, [user, authLoading]);
+
+  const removeTrip = async (id: string) => {
     const updated = saved.filter((t) => t.id !== id);
-    localStorage.setItem("wandr_saved", JSON.stringify(updated));
     setSaved(updated);
+    localStorage.setItem("wandr_saved", JSON.stringify(updated));
+    if (user && supabase) {
+      await supabase.from("saved_trips").delete().eq("user_id", user.id).eq("destination_id", id);
+    }
   };
 
   return (
@@ -35,18 +71,30 @@ export default function DashboardPage() {
         <div className="mb-8">
           <h1 className="font-serif text-3xl font-bold text-[#1A1A1A] mb-1">Saved trips</h1>
           <p className="text-[#5A5A5A] text-sm">
-            {saved.length === 0
+            {loading
+              ? "Loading…"
+              : saved.length === 0
               ? "No trips saved yet."
               : `${saved.length} trip${saved.length !== 1 ? "s" : ""} saved`}
           </p>
         </div>
 
-        {saved.length === 0 ? (
+        {!user && !authLoading && (
+          <div className="bg-[#E8DFF5] border border-[#6B4FA0]/20 rounded-xl p-4 mb-6 text-sm text-[#1A1A1A]">
+            <strong className="text-[#6B4FA0]">Sign in</strong> to sync your saved trips across devices and never lose them.
+          </div>
+        )}
+
+        {loading ? (
+          <div className="space-y-4">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-5 animate-pulse h-20" />
+            ))}
+          </div>
+        ) : saved.length === 0 ? (
           <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-12 text-center">
             <div className="text-5xl mb-4">🗺️</div>
-            <h2 className="font-serif text-xl font-bold text-[#1A1A1A] mb-2">
-              Start exploring
-            </h2>
+            <h2 className="font-serif text-xl font-bold text-[#1A1A1A] mb-2">Start exploring</h2>
             <p className="text-[#5A5A5A] text-sm mb-6">
               Save trips from the results page and they&apos;ll appear here.
             </p>
@@ -78,13 +126,9 @@ export default function DashboardPage() {
                           ${trip.totalCost.toLocaleString()}
                         </span>
                         {savings >= 0 ? (
-                          <span className="text-xs text-[#1A7A6D]">
-                            ${savings.toLocaleString()} under budget
-                          </span>
+                          <span className="text-xs text-[#1A7A6D]">${savings.toLocaleString()} under budget</span>
                         ) : (
-                          <span className="text-xs text-[#A84A1E]">
-                            ${Math.abs(savings).toLocaleString()} over budget
-                          </span>
+                          <span className="text-xs text-[#A84A1E]">${Math.abs(savings).toLocaleString()} over budget</span>
                         )}
                       </div>
                     </div>
@@ -109,10 +153,7 @@ export default function DashboardPage() {
             })}
 
             <div className="pt-4 text-center">
-              <Link
-                href="/"
-                className="text-sm text-[#D4612A] hover:underline"
-              >
+              <Link href="/" className="text-sm text-[#D4612A] hover:underline">
                 + Search more trips
               </Link>
             </div>

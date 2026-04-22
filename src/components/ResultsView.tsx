@@ -95,10 +95,16 @@ export default function ResultsView({
     setShowQuiz(false);
   };
 
-  const handleAlertSubmit = (e: React.FormEvent) => {
+  const handleAlertSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!alertEmail) return;
-    // Store locally + show confirmation (Formspree wired via action attr)
+    // Send to Formspree via waitlist endpoint
+    await fetch("/api/waitlist", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: alertEmail, note: `Price alert — budget $${budget}` }),
+    });
+    // localStorage backup
     const alerts = JSON.parse(localStorage.getItem("wandr_alerts") || "[]");
     alerts.push({ email: alertEmail, budget, savedAt: new Date().toISOString() });
     localStorage.setItem("wandr_alerts", JSON.stringify(alerts));
