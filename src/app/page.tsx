@@ -4,16 +4,41 @@ import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import BudgetInput from "@/components/BudgetInput";
 
-const SOCIAL_PROOF = [
-  { emoji: "🇵🇹", text: "Lisbon for 5 nights · $612 total" },
-  { emoji: "🇲🇽", text: "Mexico City for 7 nights · $490 total" },
-  { emoji: "🇹🇭", text: "Bangkok for 10 nights · $680 total" },
+const STATS = [
+  { value: "60+", label: "Destinations" },
+  { value: "Live", label: "Flight prices" },
+  { value: "$200–$5K", label: "Budget range" },
+  { value: "Free", label: "To use" },
 ];
 
 const HOW_IT_WORKS = [
-  { n: "01", title: "Enter your budget", desc: "One number. Flights + hotel + food all included." },
-  { n: "02", title: "See your world", desc: "A map lights up with every trip you can afford." },
-  { n: "03", title: "Book in one click", desc: "Flight and hotel combined. No tab-switching." },
+  { n: "01", title: "Enter your budget", desc: "One number covers everything — flights, hotel, food, and activities." },
+  { n: "02", title: "See your world", desc: "A live map shows every destination you can actually afford right now." },
+  { n: "03", title: "Book in one click", desc: "Flight and hotel in one flow. No 12 open tabs." },
+];
+
+const FEATURES = [
+  {
+    title: "Total trip cost",
+    desc: "We break down every dollar — flights, hotel, food, activities. No hidden surprises when you land.",
+    tag: "Unique",
+    tagColor: "#D4612A",
+    tagBg: "#FEE9DC",
+  },
+  {
+    title: "AI personalization",
+    desc: "Two people with the same $800 budget get different trips. We match destinations to how you travel.",
+    tag: "AI-powered",
+    tagColor: "#1A7A6D",
+    tagBg: "#D0ECE7",
+  },
+  {
+    title: "Stretch & save",
+    desc: "Every result shows a base trip, a +10% upgrade, and a budget-cut version. You decide how to spend.",
+    tag: "Fintech",
+    tagColor: "#6B4FA0",
+    tagBg: "#EDE9F8",
+  },
 ];
 
 export default function Home() {
@@ -21,142 +46,102 @@ export default function Home() {
     <div className="min-h-screen bg-white">
       <Navbar />
 
-      {/* Dark hero */}
-      <section className="bg-[#0D0D0D] pt-28 pb-20 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+      {/* 1 — Hero */}
+      <section className="bg-[#0D0D0D] min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-6 text-center pt-14">
+        <div className="max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 bg-white/8 border border-white/10 rounded-full px-4 py-1.5 mb-8">
+            <span className="w-1.5 h-1.5 rounded-full bg-[#D4612A] animate-pulse" />
+            <span className="font-mono text-xs text-white/50 uppercase tracking-widest">Budget-first travel search</span>
+          </div>
 
-            {/* Left: copy */}
-            <div className="pt-4">
-              <div className="inline-flex items-center gap-2 bg-white/10 border border-white/10 rounded-full px-3 py-1 mb-6">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#D4612A] animate-pulse" />
-                <span className="font-mono text-xs text-white/60 uppercase tracking-widest">Budget-first travel search</span>
-              </div>
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.08] text-white mb-6 tracking-tight">
+            Tell us your budget.<br />
+            <span className="text-[#D4612A]">We&apos;ll find your</span><br />
+            next adventure.
+          </h1>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight text-white mb-6">
-                Tell us your budget.
-                <br />
-                <span className="text-[#D4612A]">We&apos;ll find your</span>
-                <br />
-                next adventure.
-              </h1>
+          <p className="text-lg sm:text-xl text-white/40 leading-relaxed mb-10 max-w-xl mx-auto">
+            Stop searching destinations you can&apos;t afford. One number — your total budget — unlocks every trip you can actually take.
+          </p>
 
-              <p className="text-lg text-white/50 leading-relaxed mb-8 max-w-md">
-                Stop searching destinations you can&apos;t afford. Enter one number — your total budget — and see every trip you can actually take.
-              </p>
+          <a
+            href="#search"
+            className="inline-flex items-center gap-2 bg-[#D4612A] hover:bg-[#A84A1E] text-white font-semibold px-8 py-4 rounded-lg transition-colors text-base"
+          >
+            Find my trip →
+          </a>
 
-              {/* Social proof chips */}
-              <div className="flex flex-wrap gap-2 mb-12">
-                {SOCIAL_PROOF.map((item, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1.5 text-sm text-white/50"
-                  >
-                    <span>{item.emoji}</span>
-                    <span>{item.text}</span>
-                  </div>
-                ))}
-              </div>
-
-              {/* How it works */}
-              <div className="hidden lg:block border-t border-white/10 pt-8">
-                <div className="text-xs font-mono text-white/30 uppercase tracking-widest mb-5">How it works</div>
-                <div className="space-y-5">
-                  {HOW_IT_WORKS.map((step) => (
-                    <div key={step.n} className="flex items-start gap-4">
-                      <div className="font-mono text-xs text-[#D4612A] font-bold w-6 flex-shrink-0 mt-0.5">{step.n}</div>
-                      <div>
-                        <div className="font-semibold text-white text-sm">{step.title}</div>
-                        <div className="text-sm text-white/40">{step.desc}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* Right: search widget */}
-            <div>
-              <BudgetInput />
-
-              <div className="mt-4 bg-white/5 border border-white/10 rounded-xl p-4">
-                <div className="text-xs font-mono text-[#D4612A] uppercase tracking-widest mb-1">Early access</div>
-                <p className="text-sm text-white/70 font-medium mb-3">
-                  Get notified when price alerts and savings goals launch
-                </p>
-                <WaitlistForm />
-              </div>
-            </div>
+          <div className="mt-12 flex flex-wrap justify-center gap-3">
+            {["🇵🇹 Lisbon · $612", "🇲🇽 Mexico City · $490", "🇹🇭 Bangkok · $680"].map((item) => (
+              <span key={item} className="text-sm text-white/30 bg-white/5 border border-white/8 rounded-full px-4 py-1.5">
+                {item}
+              </span>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* How it works — mobile only */}
-      <section className="lg:hidden border-b border-[#E5E7EB] bg-[#F9FAFB] py-12 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-xs font-mono text-[#9CA3AF] uppercase tracking-widest mb-6">How it works</div>
-          <div className="space-y-5">
+      {/* 2 — Search */}
+      <section id="search" className="py-20 px-4 sm:px-6 bg-white border-b border-[#E5E7EB]">
+        <div className="max-w-xl mx-auto">
+          <div className="text-center mb-8">
+            <div className="font-mono text-xs text-[#9CA3AF] uppercase tracking-widest mb-2">Start here</div>
+            <h2 className="text-2xl font-bold text-[#0A0A0A]">How much do you have to spend?</h2>
+          </div>
+          <BudgetInput />
+        </div>
+      </section>
+
+      {/* 3 — Stats strip */}
+      <section className="py-10 px-4 sm:px-6 bg-[#F9FAFB] border-b border-[#E5E7EB]">
+        <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-8 text-center">
+          {STATS.map((s) => (
+            <div key={s.label}>
+              <div className="font-mono text-2xl font-bold text-[#0A0A0A]">{s.value}</div>
+              <div className="text-xs text-[#9CA3AF] mt-1">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* 4 — How it works */}
+      <section className="py-24 px-4 sm:px-6 bg-white border-b border-[#E5E7EB]">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-16">
+            <div className="font-mono text-xs text-[#9CA3AF] uppercase tracking-widest mb-3">How it works</div>
+            <h2 className="text-3xl font-bold text-[#0A0A0A]">Three steps to your next trip.</h2>
+          </div>
+          <div className="grid sm:grid-cols-3 gap-12">
             {HOW_IT_WORKS.map((step) => (
-              <div key={step.n} className="flex items-start gap-4">
-                <div className="font-mono text-xs text-[#D4612A] font-bold w-6 flex-shrink-0 mt-0.5">{step.n}</div>
-                <div>
-                  <div className="font-semibold text-[#0A0A0A] text-sm">{step.title}</div>
-                  <div className="text-sm text-[#6B7280]">{step.desc}</div>
-                </div>
+              <div key={step.n}>
+                <div className="font-mono text-xs text-[#D4612A] font-bold mb-4">{step.n}</div>
+                <h3 className="font-bold text-[#0A0A0A] text-lg mb-2">{step.title}</h3>
+                <p className="text-sm text-[#6B7280] leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Features strip */}
-      <section className="border-b border-[#E5E7EB] py-16 px-4 sm:px-6 bg-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-10">
+      {/* 5 — Features */}
+      <section className="py-24 px-4 sm:px-6 bg-[#F9FAFB] border-b border-[#E5E7EB]">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-16">
             <div className="font-mono text-xs text-[#9CA3AF] uppercase tracking-widest mb-3">Why Wandr</div>
-            <h2 className="text-3xl font-bold text-[#0A0A0A]">Nobody owns the full budget. Until now.</h2>
+            <h2 className="text-3xl font-bold text-[#0A0A0A]">Nobody owns the full budget.<br />Until now.</h2>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {[
-              {
-                icon: "✈️",
-                title: "Total trip cost, not just flights",
-                desc: "We break down your budget across flights, hotel, food, and activities — so there are no surprises on the ground.",
-                tag: "Unique",
-                tagColor: "#D4612A",
-                tagBg: "#FEE9DC",
-              },
-              {
-                icon: "🧠",
-                title: "AI personalization",
-                desc: "Tell us you're a foodie or an adventurer. Two people with the same $800 get very different, perfectly-matched trips.",
-                tag: "AI-powered",
-                tagColor: "#1A7A6D",
-                tagBg: "#D0ECE7",
-              },
-              {
-                icon: "💰",
-                title: "Stretch & save options",
-                desc: "Every destination shows a base option, a 10% stretch with a savings plan, and a deep-save budget version.",
-                tag: "Fintech",
-                tagColor: "#6B4FA0",
-                tagBg: "#EDE9F8",
-              },
-            ].map((f) => (
-              <div
-                key={f.title}
-                className="bg-white border border-[#E5E7EB] rounded-xl p-6 hover:border-[#D4612A]/30 transition-colors"
-              >
-                <div className="text-2xl mb-4">{f.icon}</div>
-                <div className="flex items-start justify-between gap-2 mb-2">
-                  <h3 className="font-semibold text-[#0A0A0A] text-sm leading-snug">{f.title}</h3>
+          <div className="grid sm:grid-cols-3 gap-6">
+            {FEATURES.map((f) => (
+              <div key={f.title} className="bg-white border border-[#E5E7EB] rounded-xl p-6 hover:border-[#D4612A]/40 transition-colors">
+                <div className="flex items-center justify-between mb-4">
                   <span
-                    className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full flex-shrink-0"
+                    className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full"
                     style={{ color: f.tagColor, backgroundColor: f.tagBg }}
                   >
                     {f.tag}
                   </span>
                 </div>
+                <h3 className="font-bold text-[#0A0A0A] mb-2">{f.title}</h3>
                 <p className="text-sm text-[#6B7280] leading-relaxed">{f.desc}</p>
               </div>
             ))}
@@ -164,26 +149,38 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Competitor callout */}
-      <section className="py-16 px-4 sm:px-6 bg-[#F9FAFB] border-b border-[#E5E7EB]">
-        <div className="max-w-3xl mx-auto text-center">
-          <div className="font-mono text-xs text-[#9CA3AF] uppercase tracking-widest mb-3">The gap</div>
-          <h2 className="text-3xl font-bold text-[#0A0A0A] mb-4">
-            Google Flights asks &quot;Where to?&quot;<br />
-            <span className="text-[#D4612A]">We ask &quot;How much?&quot;</span>
+      {/* 6 — The gap */}
+      <section className="py-24 px-4 sm:px-6 bg-white border-b border-[#E5E7EB]">
+        <div className="max-w-3xl mx-auto">
+          <div className="font-mono text-xs text-[#9CA3AF] uppercase tracking-widest mb-6">The gap</div>
+          <h2 className="text-4xl sm:text-5xl font-bold text-[#0A0A0A] leading-tight mb-6">
+            Google Flights asks<br />&quot;Where to?&quot;
           </h2>
-          <p className="text-[#6B7280] leading-relaxed">
-            Skyscanner, Expedia, and Google Flights all assume you know where you&apos;re going.
+          <p className="text-2xl font-bold text-[#D4612A] mb-6">We ask &quot;How much?&quot;</p>
+          <p className="text-[#6B7280] leading-relaxed max-w-xl">
+            Skyscanner, Expedia, and Google Flights assume you know where you&apos;re going.
             Wandr flips the model — your budget is the starting point, not an afterthought.
           </p>
         </div>
       </section>
 
+      {/* 7 — Waitlist CTA */}
+      <section className="bg-[#0D0D0D] py-24 px-4 sm:px-6">
+        <div className="max-w-xl mx-auto text-center">
+          <div className="font-mono text-xs text-[#D4612A] uppercase tracking-widest mb-4">Early access</div>
+          <h2 className="text-3xl font-bold text-white mb-3">Be first to know.</h2>
+          <p className="text-white/40 mb-8">
+            Get notified when price alerts and savings goals launch.
+          </p>
+          <WaitlistForm />
+        </div>
+      </section>
+
       {/* Footer */}
-      <footer className="border-t border-[#E5E7EB] bg-[#0D0D0D] py-8 px-4 sm:px-6">
+      <footer className="bg-[#0D0D0D] border-t border-white/10 py-8 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="font-bold text-lg text-white">wandr</span>
-          <span className="text-sm text-white/30">© 2026 Wandr · Travel made accessible</span>
+          <span className="font-bold text-white">wandr</span>
+          <span className="text-sm text-white/20">© 2026 Wandr · Travel made accessible</span>
         </div>
       </footer>
     </div>
@@ -214,27 +211,23 @@ function WaitlistForm() {
   };
 
   if (submitted) {
-    return (
-      <div className="text-sm font-semibold text-[#D4612A]">
-        ✓ You&apos;re on the list! We&apos;ll notify you when it&apos;s ready.
-      </div>
-    );
+    return <p className="text-[#D4612A] font-semibold">✓ You&apos;re on the list.</p>;
   }
 
   return (
-    <form onSubmit={handleSubmit} className="flex gap-2">
+    <form onSubmit={handleSubmit} className="flex gap-2 max-w-sm mx-auto">
       <input
         type="email"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         placeholder="your@email.com"
         required
-        className="flex-1 bg-white/10 border border-white/20 rounded-lg px-3 py-2 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#D4612A]/40"
+        className="flex-1 bg-white/8 border border-white/15 rounded-lg px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-2 focus:ring-[#D4612A]/40"
       />
       <button
         type="submit"
         disabled={loading}
-        className="bg-[#D4612A] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#A84A1E] transition-colors disabled:opacity-60"
+        className="bg-[#D4612A] hover:bg-[#A84A1E] text-white text-sm font-semibold px-5 py-3 rounded-lg transition-colors disabled:opacity-60 whitespace-nowrap"
       >
         {loading ? "…" : "Notify me"}
       </button>
