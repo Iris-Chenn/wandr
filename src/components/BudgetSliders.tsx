@@ -78,7 +78,7 @@ export default function BudgetSliders({
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#D4612A]" />
-            <span className="text-sm text-[#5A5A5A]">✈️ Flights (fixed)</span>
+            <span className="text-sm text-[#5A5A5A]">Flights (fixed)</span>
           </div>
           <span className="font-mono font-semibold text-[#1A1A1A]">${flightCost.toLocaleString()}</span>
         </div>
@@ -92,7 +92,7 @@ export default function BudgetSliders({
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#1A7A6D]" />
-            <span className="text-sm text-[#5A5A5A]">🏨 Hotel</span>
+            <span className="text-sm text-[#5A5A5A]">Hotel</span>
           </div>
           <div className="text-right">
             <span className="font-mono font-semibold text-[#1A1A1A]">${hotel.toLocaleString()}</span>
@@ -121,7 +121,7 @@ export default function BudgetSliders({
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#6B4FA0]" />
-            <span className="text-sm text-[#5A5A5A]">🍽️ Food & drinks</span>
+            <span className="text-sm text-[#5A5A5A]">Food & drinks</span>
           </div>
           <div className="text-right">
             <span className="font-mono font-semibold text-[#1A1A1A]">${food.toLocaleString()}</span>
@@ -150,7 +150,7 @@ export default function BudgetSliders({
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-[#8A8A8A]" />
-            <span className="text-sm text-[#5A5A5A]">🎯 Activities & transport</span>
+            <span className="text-sm text-[#5A5A5A]">Activities & transport</span>
           </div>
           <div className="text-right">
             <span className="font-mono font-semibold text-[#1A1A1A]">${activities.toLocaleString()}</span>

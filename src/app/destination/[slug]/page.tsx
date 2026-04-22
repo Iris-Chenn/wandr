@@ -256,15 +256,15 @@ export default async function DestinationPage({ params, searchParams }: Props) {
 
                 <div className="space-y-3">
                   {[
-                    { icon: "✈️", label: `Flights (round trip)${isLiveFlight ? " · live" : " · est."}`, cost: flightCost, pct: flightPct, color: "#D4612A", bg: "#F0D4C0" },
-                    { icon: "🏨", label: `Hotel (${nights} nights)`, cost: hotelCost, pct: hotelPct, color: "#1A7A6D", bg: "#D0ECE7" },
-                    { icon: "🍽️", label: `Food & drinks`, cost: foodCost, pct: foodPct, color: "#6B4FA0", bg: "#E8DFF5" },
-                    { icon: "🎯", label: `Activities & transport`, cost: activitiesCost, pct: activitiesPct, color: "#8A8A8A", bg: "#F5F0E8" },
+                    { label: `Flights (round trip)${isLiveFlight ? " · live" : " · est."}`, cost: flightCost, pct: flightPct, color: "#D4612A", bg: "#F0D4C0" },
+                    { label: `Hotel (${nights} nights)`, cost: hotelCost, pct: hotelPct, color: "#1A7A6D", bg: "#D0ECE7" },
+                    { label: `Food & drinks`, cost: foodCost, pct: foodPct, color: "#6B4FA0", bg: "#E8DFF5" },
+                    { label: `Activities & transport`, cost: activitiesCost, pct: activitiesPct, color: "#8A8A8A", bg: "#F5F0E8" },
                   ].map((item) => (
                     <div key={item.label} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-                        <span className="text-sm text-[#5A5A5A]">{item.icon} {item.label}</span>
+                        <span className="text-sm text-[#5A5A5A]">{item.label}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: item.color, backgroundColor: item.bg }}>
@@ -308,7 +308,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
               {/* Flights */}
               <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-[#0A0A0A]">✈ Flights</h3>
+                  <h3 className="font-semibold text-[#0A0A0A]">Flights</h3>
                   {isLiveFlight
                     ? <span className="text-[10px] bg-[#D0ECE7] text-[#1A7A6D] font-mono font-semibold px-2 py-0.5 rounded">LIVE PRICE</span>
                     : <span className="text-[10px] bg-[#F5F0E8] text-[#8A8A8A] font-mono px-2 py-0.5 rounded">ESTIMATE</span>}
@@ -375,7 +375,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
               {/* Hotels */}
               <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-[#0A0A0A]">🏨 Hotel options</h3>
+                  <h3 className="font-semibold text-[#0A0A0A]">Hotel options</h3>
                   <span className="text-xs text-[#8A8A8A]">{nights} nights</span>
                 </div>
 
@@ -436,7 +436,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                   <div>
                     <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">Visa (US citizens)</div>
                     <div className="text-sm">
-                      {destination.visaRequired ? "⚠️ Check requirements" : "✓ No visa needed"}
+                      {destination.visaRequired ? "Check requirements" : "No visa needed"}
                     </div>
                   </div>
                   <div>
