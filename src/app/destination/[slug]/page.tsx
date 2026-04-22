@@ -1,15 +1,51 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import Navbar from "@/components/Navbar";
+import SaveShareButtons from "@/components/SaveShareButtons";
 import destinationsRaw from "@/data/destinations.json";
 import type { Destination } from "@/lib/ranking";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ budget?: string; origin?: string; nights?: string }>;
+  searchParams: Promise<{ budget?: string; origin?: string; nights?: string; depart?: string; return?: string }>;
 };
 
-const TRIP_LENGTH_MAP: Record<string, number> = { "3-4": 3, "5-7": 5, "8-10": 8, "11-14": 11 };
+// Curated Unsplash photo IDs per destination
+const UNSPLASH_PHOTOS: Record<string, string> = {
+  "lisbon":           "1555881400-74d7acaacd47",
+  "bangkok":          "1508009603885-50cf7c579365",
+  "mexico-city":      "1518638150340-f706e86654de",
+  "bali":             "1537996194471-e657df975ab4",
+  "prague":           "1541849546-216549ae216d",
+  "buenos-aires":     "1612294105787-3c9d86b88b4f",
+  "marrakech":        "1597212720753-4d00e55eab4d",
+  "tokyo":            "1540959733332-eab4deabeeaf",
+  "havana":           "1551009175-8a68da93d5f9",
+  "chiang-mai":       "1528360983277-13d401cdc186",
+  "budapest":         "1541849546-216549ae216d",
+  "colombia-medellin":"1599390263-a62f83e45700",
+  "athens":           "1555993539-1732b0258235",
+  "ho-chi-minh":      "1583417319070-4a69db38a482",
+  "barcelona":        "1539037116277-4db20889f2d4",
+  "cape-town":        "1580060839134-75a5edca2e99",
+  "istanbul":         "1524231757912-21f4fe3a7200",
+  "hanoi":            "1583417319070-4a69db38a482",
+  "oaxaca":           "1518638150340-f706e86654de",
+  "amsterdam":        "1534351590666-13e3e96b5017",
+  "cartagena":        "1570735678527-6943a5d3a3c9",
+  "reykjavik":        "1531168087216-80de62b8b4e7",
+  "taipei":           "1570077788046-2a8e7b2f69c5",
+  "nairobi":          "1547471080-7cc2caa01bdb",
+  "porto":            "1555881400-74d7acaacd47",
+  "seville":          "1558618666-fcd25c85cd64",
+  "krakow":           "1577791658220-55f0c898ab86",
+  "singapore":        "1525625293386-2d66c8bc27b4",
+  "kathmandu":        "1571085406820-b3c24f8c7a8a",
+  "rio-de-janeiro":   "1483729558449-99ef09a8c36d",
+  "tbilisi":          "1565008576344-b6a91cd7c4d1",
+  "bogota":           "1589909077-ab06ade97dbf",
+};
 
 export default async function DestinationPage({ params, searchParams }: Props) {
   const { slug } = await params;
@@ -21,6 +57,8 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   const budget = Number(sp.budget) || 700;
   const nights = Number(sp.nights) || 5;
   const origin = sp.origin || "JFK";
+  const depart = sp.depart || "";
+  const ret = sp.return || "";
 
   // Cost breakdown
   const flightCost = Math.round(destination.avgFlightCostFromJFK * 1.0);
@@ -35,121 +73,148 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   const foodPct = Math.round((foodCost / totalCost) * 100);
   const activitiesPct = 100 - flightPct - hotelPct - foodPct;
 
-  // Stretch / save
   const stretchTotal = Math.round(totalCost * 1.15);
   const saveTotal = Math.round(totalCost * 0.82);
+
+  const photoId = UNSPLASH_PHOTOS[slug];
+  const unsplashUrl = photoId
+    ? `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=1200&q=80`
+    : null;
+
+  const tripData = {
+    id: destination.id,
+    city: destination.city,
+    country: destination.country,
+    flag: destination.flag,
+    totalCost,
+    nights,
+    budget,
+  };
 
   return (
     <div className="min-h-screen bg-[#F5F0E8]">
       <Navbar />
 
-      <main className="pt-20 pb-16">
-        {/* Hero banner */}
-        <div className="bg-[#1A1A1A] text-white py-12 px-4 sm:px-6 mb-8">
-          <div className="max-w-4xl mx-auto">
-            <Link href={`/results?budget=${budget}&origin=${origin}&nights=${nights}`} className="text-sm text-[#8A8A8A] hover:text-white mb-4 inline-block">
-              ← Back to results
-            </Link>
-            <div className="flex items-center gap-4 mb-3">
-              <span className="text-5xl">{destination.flag}</span>
-              <div>
-                <h1 className="font-serif text-4xl sm:text-5xl font-bold">{destination.city}</h1>
-                <div className="text-[#8A8A8A] mt-1">{destination.country} · {destination.region}</div>
-              </div>
+      {/* Hero photo */}
+      <div className="relative h-64 sm:h-80 bg-[#1A1A1A] mt-14">
+        {unsplashUrl ? (
+          <Image
+            src={unsplashUrl}
+            alt={destination.city}
+            fill
+            className="object-cover opacity-80"
+            priority
+            unoptimized
+          />
+        ) : (
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] to-[#3A3A3A]" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent" />
+
+        {/* Back link */}
+        <div className="absolute top-4 left-4">
+          <Link
+            href={`/results?budget=${budget}&origin=${origin}&nights=${nights}`}
+            className="text-white/80 hover:text-white text-sm bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full transition-colors"
+          >
+            ← Back to results
+          </Link>
+        </div>
+
+        {/* Title overlay */}
+        <div className="absolute bottom-6 left-4 sm:left-6 text-white">
+          <div className="flex items-center gap-3 mb-1">
+            <span className="text-4xl">{destination.flag}</span>
+            <div>
+              <h1 className="font-serif text-3xl sm:text-4xl font-bold">{destination.city}</h1>
+              <div className="text-white/70 text-sm">{destination.country} · {destination.region}</div>
             </div>
-            <p className="text-[#E0D8C8] text-base leading-relaxed max-w-xl mt-3">{destination.description}</p>
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
-          <div className="grid lg:grid-cols-3 gap-6">
+        {unsplashUrl && (
+          <div className="absolute bottom-2 right-3 text-[10px] text-white/40">
+            Photo: Unsplash
+          </div>
+        )}
+      </div>
 
-            {/* Main: Budget breakdown */}
+      <main className="pb-16 px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto">
+          <p className="text-[#5A5A5A] text-sm leading-relaxed py-5 max-w-xl">
+            {destination.description}
+          </p>
+
+          <div className="grid lg:grid-cols-3 gap-6">
+            {/* Main content */}
             <div className="lg:col-span-2 space-y-5">
 
-              {/* Cost breakdown card */}
+              {/* Cost breakdown */}
               <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-6">
                 <div className="flex items-baseline justify-between mb-5">
                   <h2 className="font-semibold text-[#1A1A1A] text-lg">Your {nights}-night budget</h2>
                   <div className="font-mono font-bold text-2xl text-[#D4612A]">${totalCost.toLocaleString()}</div>
                 </div>
 
-                {/* Breakdown bar */}
-                <div className="mb-5">
-                  <div className="flex h-3 rounded-full overflow-hidden gap-0.5 mb-3">
-                    <div className="bg-[#D4612A]" style={{ width: `${flightPct}%` }} />
-                    <div className="bg-[#1A7A6D]" style={{ width: `${hotelPct}%` }} />
-                    <div className="bg-[#6B4FA0]" style={{ width: `${foodPct}%` }} />
-                    <div className="bg-[#E0D8C8]" style={{ width: `${activitiesPct}%` }} />
-                  </div>
-
-                  <div className="space-y-3">
-                    {[
-                      { icon: "✈️", label: "Flights (round trip)", cost: flightCost, pct: flightPct, color: "#D4612A", bg: "#F0D4C0" },
-                      { icon: "🏨", label: `Hotel (${nights} nights)`, cost: hotelCost, pct: hotelPct, color: "#1A7A6D", bg: "#D0ECE7" },
-                      { icon: "🍽️", label: `Food & drinks (${nights} days)`, cost: foodCost, pct: foodPct, color: "#6B4FA0", bg: "#E8DFF5" },
-                      { icon: "🎯", label: `Activities & transport (${nights} days)`, cost: activitiesCost, pct: activitiesPct, color: "#8A8A8A", bg: "#F5F0E8" },
-                    ].map((item) => (
-                      <div key={item.label} className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div
-                            className="w-2 h-2 rounded-full"
-                            style={{ backgroundColor: item.color }}
-                          />
-                          <span className="text-sm text-[#5A5A5A]">{item.icon} {item.label}</span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <span
-                            className="text-xs font-mono px-2 py-0.5 rounded-full"
-                            style={{ color: item.color, backgroundColor: item.bg }}
-                          >
-                            {item.pct}%
-                          </span>
-                          <span className="font-mono font-semibold text-[#1A1A1A] w-16 text-right">
-                            ${item.cost.toLocaleString()}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+                <div className="flex h-3 rounded-full overflow-hidden gap-0.5 mb-4">
+                  <div className="bg-[#D4612A]" style={{ width: `${flightPct}%` }} />
+                  <div className="bg-[#1A7A6D]" style={{ width: `${hotelPct}%` }} />
+                  <div className="bg-[#6B4FA0]" style={{ width: `${foodPct}%` }} />
+                  <div className="bg-[#E0D8C8]" style={{ width: `${activitiesPct}%` }} />
                 </div>
 
-                {/* Budget status */}
-                {savings >= 0 ? (
-                  <div className="bg-[#D0ECE7] border border-[#1A7A6D]/20 rounded-xl p-4">
-                    <div className="text-sm font-semibold text-[#1A7A6D]">
-                      ✓ ${savings.toLocaleString()} under your ${budget.toLocaleString()} budget
+                <div className="space-y-3">
+                  {[
+                    { icon: "✈️", label: "Flights (round trip)", cost: flightCost, pct: flightPct, color: "#D4612A", bg: "#F0D4C0" },
+                    { icon: "🏨", label: `Hotel (${nights} nights)`, cost: hotelCost, pct: hotelPct, color: "#1A7A6D", bg: "#D0ECE7" },
+                    { icon: "🍽️", label: `Food & drinks`, cost: foodCost, pct: foodPct, color: "#6B4FA0", bg: "#E8DFF5" },
+                    { icon: "🎯", label: `Activities & transport`, cost: activitiesCost, pct: activitiesPct, color: "#8A8A8A", bg: "#F5F0E8" },
+                  ].map((item) => (
+                    <div key={item.label} className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
+                        <span className="text-sm text-[#5A5A5A]">{item.icon} {item.label}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: item.color, backgroundColor: item.bg }}>
+                          {item.pct}%
+                        </span>
+                        <span className="font-mono font-semibold text-[#1A1A1A] w-16 text-right">
+                          ${item.cost.toLocaleString()}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-xs text-[#5A5A5A] mt-1">
-                      You could upgrade your hotel or add another activity with what's left.
-                    </div>
+                  ))}
+                </div>
+
+                <div className={`mt-4 rounded-xl p-4 ${savings >= 0 ? "bg-[#D0ECE7] border border-[#1A7A6D]/20" : "bg-[#F0D4C0] border border-[#D4612A]/20"}`}>
+                  <div className={`text-sm font-semibold ${savings >= 0 ? "text-[#1A7A6D]" : "text-[#A84A1E]"}`}>
+                    {savings >= 0
+                      ? `✓ $${savings.toLocaleString()} under your $${budget.toLocaleString()} budget`
+                      : `$${Math.abs(savings).toLocaleString()} over your $${budget.toLocaleString()} budget`}
                   </div>
-                ) : (
-                  <div className="bg-[#F0D4C0] border border-[#D4612A]/20 rounded-xl p-4">
-                    <div className="text-sm font-semibold text-[#A84A1E]">
-                      ${Math.abs(savings).toLocaleString()} over your ${budget.toLocaleString()} budget
-                    </div>
-                    <div className="text-xs text-[#5A5A5A] mt-1">
-                      Try flexible dates or a slightly longer savings plan to make this work.
-                    </div>
+                  <div className="text-xs text-[#5A5A5A] mt-1">
+                    {savings >= 0
+                      ? "You could upgrade your hotel or add another activity with what's left."
+                      : "Try flexible dates or a slightly longer savings plan to make this work."}
                   </div>
-                )}
+                </div>
               </div>
 
-              {/* Options: Stretch / Save */}
+              {/* Stretch / Save */}
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-5">
                   <div className="font-mono text-xs text-[#6B4FA0] uppercase tracking-widest mb-2">Stretch option</div>
                   <div className="font-mono font-bold text-xl text-[#1A1A1A] mb-1">${stretchTotal.toLocaleString()}</div>
                   <p className="text-xs text-[#5A5A5A] leading-relaxed">
-                    Upgrade to a 4-star hotel and add a guided excursion. ~${stretchTotal - budget > 0 ? stretchTotal - budget : 0} over budget — achievable with 4 weeks of saving.
+                    4-star hotel + guided excursion.{stretchTotal > budget ? ` $${stretchTotal - budget} over budget — reachable with a short savings plan.` : " Still within budget!"}
                   </p>
                 </div>
                 <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-5">
                   <div className="font-mono text-xs text-[#1A7A6D] uppercase tracking-widest mb-2">Save option</div>
                   <div className="font-mono font-bold text-xl text-[#1A1A1A] mb-1">${saveTotal.toLocaleString()}</div>
                   <p className="text-xs text-[#5A5A5A] leading-relaxed">
-                    Stay in a hostel private room and eat local street food. Same experience, lower cost.
+                    Hostel private room + street food. Same experience, lower cost.
                   </p>
                 </div>
               </div>
@@ -163,9 +228,9 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                     <div className="text-sm text-[#1A1A1A]">{destination.bestMonths.join(", ")}</div>
                   </div>
                   <div>
-                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">Visa required</div>
-                    <div className="text-sm text-[#1A1A1A]">
-                      {destination.visaRequired ? "⚠️ Check requirements" : "✓ No visa needed for US citizens"}
+                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">Visa (US citizens)</div>
+                    <div className="text-sm">
+                      {destination.visaRequired ? "⚠️ Check requirements" : "✓ No visa needed"}
                     </div>
                   </div>
                   <div>
@@ -184,15 +249,15 @@ export default async function DestinationPage({ params, searchParams }: Props) {
               </div>
             </div>
 
-            {/* Sidebar: CTA */}
+            {/* Sidebar */}
             <div className="space-y-4">
               <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-5 sticky top-20">
                 <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-3">Ready to book?</div>
-                <div className="font-mono font-bold text-2xl text-[#D4612A] mb-1">${totalCost.toLocaleString()}</div>
-                <div className="text-xs text-[#8A8A8A] mb-4">All-in for {nights} nights</div>
+                <div className="font-mono font-bold text-2xl text-[#D4612A] mb-0.5">${totalCost.toLocaleString()}</div>
+                <div className="text-xs text-[#8A8A8A] mb-4">{nights} nights all-in</div>
 
                 <a
-                  href={`https://www.kiwi.com/en/search/results/${origin}/${destination.iataCode}`}
+                  href={`https://www.kiwi.com/en/search/results/${origin}/${destination.iataCode}/${depart || "anytime"}/${ret || "anytime"}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full bg-[#D4612A] hover:bg-[#A84A1E] text-white font-semibold py-3 rounded-xl transition-colors text-center text-sm mb-3"
@@ -200,7 +265,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                   Search flights ↗
                 </a>
                 <a
-                  href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination.city)}`}
+                  href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination.city)}&checkin=${depart}&checkout=${ret}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="block w-full bg-[#F5F0E8] hover:bg-[#E8E0D0] text-[#1A1A1A] font-semibold py-3 rounded-xl transition-colors text-center text-sm mb-4 border border-[#E0D8C8]"
@@ -208,20 +273,9 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                   Search hotels ↗
                 </a>
 
-                <div className="border-t border-[#E0D8C8] pt-4 space-y-2">
-                  <button className="w-full text-left text-sm text-[#5A5A5A] hover:text-[#D4612A] transition-colors py-1 flex items-center gap-2">
-                    <span>🔔</span> Set price alert
-                  </button>
-                  <button className="w-full text-left text-sm text-[#5A5A5A] hover:text-[#1A7A6D] transition-colors py-1 flex items-center gap-2">
-                    <span>💾</span> Save this trip
-                  </button>
-                  <button className="w-full text-left text-sm text-[#5A5A5A] hover:text-[#6B4FA0] transition-colors py-1 flex items-center gap-2">
-                    <span>🔗</span> Share with friends
-                  </button>
-                </div>
+                <SaveShareButtons trip={tripData} />
               </div>
             </div>
-
           </div>
         </div>
       </main>
