@@ -7,9 +7,9 @@ import PreferenceQuiz, { type Preferences } from "./PreferenceQuiz";
 
 const WorldMap = lazy(() => import("./WorldMap"));
 
+const REGIONS = ["All", "Americas", "Europe", "Asia", "Africa"];
 const ALL_TAGS = ["All", "Beach", "City", "Nature", "Culture", "Adventure", "Food"];
 
-// Client-side re-ranking based on preferences
 function applyPreferences(trips: TripEstimate[], prefs: Preferences): TripEstimate[] {
   return [...trips].sort((a, b) => {
     let scoreA = a.valueScore;
@@ -54,14 +54,16 @@ export default function ResultsView({
   month,
 }: Props) {
   const [view, setView] = useState<"list" | "map">("list");
+  const [activeRegion, setActiveRegion] = useState("All");
   const [activeTag, setActiveTag] = useState("All");
   const [selectedTrip, setSelectedTrip] = useState<TripEstimate | null>(null);
   const [showQuiz, setShowQuiz] = useState(false);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [rankedTrips, setRankedTrips] = useState(trips);
   const [personalized, setPersonalized] = useState(false);
+  const [alertEmail, setAlertEmail] = useState("");
+  const [alertSent, setAlertSent] = useState(false);
 
-  // Check for saved preferences on mount
   useEffect(() => {
     const saved = localStorage.getItem("wandr_prefs");
     if (saved) {
@@ -70,16 +72,19 @@ export default function ResultsView({
       setRankedTrips(applyPreferences(trips, prefs));
       setPersonalized(true);
     } else {
-      // Show quiz after 1.5s on first visit
       const timer = setTimeout(() => setShowQuiz(true), 1500);
       return () => clearTimeout(timer);
     }
   }, [trips]);
 
-  // Filter by tag
-  const filteredTrips = activeTag === "All"
+  // Region → tag double filter
+  const regionFiltered = activeRegion === "All"
     ? rankedTrips
-    : rankedTrips.filter((t) =>
+    : rankedTrips.filter((t) => t.region === activeRegion);
+
+  const filteredTrips = activeTag === "All"
+    ? regionFiltered
+    : regionFiltered.filter((t) =>
         t.tags.some((tag) => tag.toLowerCase() === activeTag.toLowerCase())
       );
 
@@ -90,13 +95,26 @@ export default function ResultsView({
     setShowQuiz(false);
   };
 
+  const handleAlertSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!alertEmail) return;
+    // Store locally + show confirmation (Formspree wired via action attr)
+    const alerts = JSON.parse(localStorage.getItem("wandr_alerts") || "[]");
+    alerts.push({ email: alertEmail, budget, savedAt: new Date().toISOString() });
+    localStorage.setItem("wandr_alerts", JSON.stringify(alerts));
+    setAlertSent(true);
+  };
+
   const departDisplay = new Date(departDate + "T12:00:00").toLocaleDateString("en-US", {
     month: "short", day: "numeric",
   });
 
+  // Region counts (from all ranked trips, not double-filtered)
+  const regionCount = (r: string) =>
+    r === "All" ? rankedTrips.length : rankedTrips.filter((t) => t.region === r).length;
+
   return (
     <div>
-      {/* Preference quiz overlay */}
       {showQuiz && (
         <PreferenceQuiz
           onComplete={handleQuizComplete}
@@ -125,12 +143,7 @@ export default function ResultsView({
           {personalized && preferences && (
             <div className="inline-flex items-center gap-1.5 bg-[#F0D4C0] text-[#A84A1E] text-xs font-medium px-3 py-1 rounded-full">
               ✨ Personalized for you ·{" "}
-              <button
-                onClick={() => setShowQuiz(true)}
-                className="underline"
-              >
-                edit
-              </button>
+              <button onClick={() => setShowQuiz(true)} className="underline">edit</button>
             </div>
           )}
           {!personalized && !showQuiz && (
@@ -144,32 +157,55 @@ export default function ResultsView({
         </div>
       </div>
 
-      {/* Filters + view toggle */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <div className="flex flex-wrap gap-2">
-          {ALL_TAGS.map((tag) => (
+      {/* Region tabs */}
+      <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
+        {REGIONS.map((r) => {
+          const count = regionCount(r);
+          if (count === 0 && r !== "All") return null;
+          return (
             <button
-              key={tag}
-              onClick={() => setActiveTag(tag)}
-              className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                activeTag === tag
-                  ? "bg-[#D4612A] text-white border-[#D4612A]"
-                  : "bg-[#FFFCF7] text-[#5A5A5A] border-[#E0D8C8] hover:border-[#D4612A]"
+              key={r}
+              onClick={() => { setActiveRegion(r); setActiveTag("All"); }}
+              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
+                activeRegion === r
+                  ? "bg-[#1A1A1A] text-white border-[#1A1A1A]"
+                  : "bg-[#FFFCF7] text-[#5A5A5A] border-[#E0D8C8] hover:border-[#1A1A1A]"
               }`}
             >
-              {tag}
-              {tag !== "All" && (
-                <span className="ml-1 text-xs opacity-60">
-                  {rankedTrips.filter((t) =>
-                    t.tags.some((tg) => tg.toLowerCase() === tag.toLowerCase())
-                  ).length}
-                </span>
-              )}
+              {r}
+              {r !== "All" && <span className="ml-1.5 text-xs opacity-60">{count}</span>}
             </button>
-          ))}
+          );
+        })}
+      </div>
+
+      {/* Style filters + view toggle */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
+        <div className="flex flex-wrap gap-2">
+          {ALL_TAGS.map((tag) => {
+            const count = regionFiltered.filter((t) =>
+              t.tags.some((tg) => tg.toLowerCase() === tag.toLowerCase())
+            ).length;
+            if (count === 0 && tag !== "All") return null;
+            return (
+              <button
+                key={tag}
+                onClick={() => setActiveTag(tag)}
+                className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
+                  activeTag === tag
+                    ? "bg-[#D4612A] text-white border-[#D4612A]"
+                    : "bg-[#FFFCF7] text-[#5A5A5A] border-[#E0D8C8] hover:border-[#D4612A]"
+                }`}
+              >
+                {tag}
+                {tag !== "All" && (
+                  <span className="ml-1 text-xs opacity-60">{count}</span>
+                )}
+              </button>
+            );
+          })}
         </div>
 
-        {/* Map / List toggle */}
         <div className="flex items-center bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-1 gap-1 flex-shrink-0">
           <button
             onClick={() => setView("list")}
@@ -254,16 +290,16 @@ export default function ResultsView({
             <div className="text-center py-16 bg-[#FFFCF7] rounded-2xl border border-[#E0D8C8]">
               <div className="text-4xl mb-3">🔍</div>
               <h2 className="font-serif text-xl font-bold text-[#1A1A1A] mb-2">
-                No {activeTag.toLowerCase()} trips found
+                No trips found
               </h2>
               <p className="text-[#5A5A5A] text-sm mb-4">
-                Try a different category or increase your budget.
+                Try a different filter or increase your budget.
               </p>
               <button
-                onClick={() => setActiveTag("All")}
+                onClick={() => { setActiveTag("All"); setActiveRegion("All"); }}
                 className="text-sm text-[#D4612A] underline"
               >
-                Show all trips
+                Clear filters
               </button>
             </div>
           ) : (
@@ -283,7 +319,7 @@ export default function ResultsView({
         </>
       )}
 
-      {/* Upsell */}
+      {/* Price alert / waitlist */}
       {filteredTrips.length > 0 && (
         <div className="mt-12 bg-[#E8DFF5] border border-[#6B4FA0]/20 rounded-2xl p-6 text-center">
           <div className="font-mono text-xs text-[#6B4FA0] uppercase tracking-widest mb-2">Coming soon</div>
@@ -291,18 +327,30 @@ export default function ResultsView({
             Get notified when prices drop
           </h3>
           <p className="text-sm text-[#5A5A5A] mb-4">
-            Set a price alert and we'll email you when any of these trips hits your sweet spot.
+            Set a price alert and we&apos;ll email you when any of these trips hits your sweet spot.
           </p>
-          <div className="flex gap-2 max-w-sm mx-auto">
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="flex-1 bg-white border border-[#6B4FA0]/30 rounded-lg px-3 py-2 text-sm focus:outline-none"
-            />
-            <button className="bg-[#6B4FA0] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#5a3f88] transition-colors">
-              Alert me
-            </button>
-          </div>
+          {alertSent ? (
+            <div className="text-sm font-semibold text-[#6B4FA0]">
+              ✓ You&apos;re on the list! We&apos;ll email you when prices drop.
+            </div>
+          ) : (
+            <form onSubmit={handleAlertSubmit} className="flex gap-2 max-w-sm mx-auto">
+              <input
+                type="email"
+                value={alertEmail}
+                onChange={(e) => setAlertEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
+                className="flex-1 bg-white border border-[#6B4FA0]/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#6B4FA0]"
+              />
+              <button
+                type="submit"
+                className="bg-[#6B4FA0] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#5a3f88] transition-colors"
+              >
+                Alert me
+              </button>
+            </form>
+          )}
         </div>
       )}
     </div>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import BudgetInput from "@/components/BudgetInput";
 
@@ -169,24 +172,53 @@ export default function Home() {
 }
 
 function WaitlistForm() {
+  const [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await fetch("/api/waitlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+      // Also save locally as backup
+      const list = JSON.parse(localStorage.getItem("wandr_waitlist") || "[]");
+      list.push({ email, savedAt: new Date().toISOString() });
+      localStorage.setItem("wandr_waitlist", JSON.stringify(list));
+      setSubmitted(true);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (submitted) {
+    return (
+      <div className="text-sm font-semibold text-[#6B4FA0]">
+        ✓ You&apos;re on the list! We&apos;ll notify you when it&apos;s ready.
+      </div>
+    );
+  }
+
   return (
-    <form
-      action="/api/waitlist"
-      method="POST"
-      className="flex gap-2"
-    >
+    <form onSubmit={handleSubmit} className="flex gap-2">
       <input
         type="email"
-        name="email"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
         placeholder="your@email.com"
         required
         className="flex-1 bg-white border border-[#6B4FA0]/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#6B4FA0]/30"
       />
       <button
         type="submit"
-        className="bg-[#6B4FA0] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#5a3f88] transition-colors"
+        disabled={loading}
+        className="bg-[#6B4FA0] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#5a3f88] transition-colors disabled:opacity-60"
       >
-        Notify me
+        {loading ? "…" : "Notify me"}
       </button>
     </form>
   );

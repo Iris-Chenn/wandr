@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import Navbar from "@/components/Navbar";
 import SaveShareButtons from "@/components/SaveShareButtons";
+import BudgetSliders from "@/components/BudgetSliders";
 import destinationsRaw from "@/data/destinations.json";
 import type { Destination } from "@/lib/ranking";
 
@@ -254,6 +255,16 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                   </div>
                 </div>
               </div>
+
+              {/* Budget sliders */}
+              <BudgetSliders
+                flightCost={flightCost}
+                hotelCost={hotelCost}
+                foodCost={foodCost}
+                activitiesCost={activitiesCost}
+                budget={budget}
+                nights={nights}
+              />
 
               {/* Stretch / Save */}
               <div className="grid sm:grid-cols-2 gap-4">
