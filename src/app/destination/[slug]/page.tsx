@@ -2,15 +2,17 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import Navbar from "@/components/Navbar";
+import WandrNavbar from "@/components/WandrNavbar";
+import WandrFooter from "@/components/WandrFooter";
 import SaveShareButtons from "@/components/SaveShareButtons";
 import BudgetSliders from "@/components/BudgetSliders";
+import ItineraryBuilder from "@/components/ItineraryBuilder";
 import destinationsRaw from "@/data/destinations.json";
 import type { Destination } from "@/lib/ranking";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ budget?: string; origin?: string; nights?: string; depart?: string; return?: string; flight?: string }>;
+  searchParams: Promise<{ budget?: string; origin?: string; nights?: string; depart?: string; return?: string; flight?: string; vibes?: string; tripLength?: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -109,6 +111,8 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   const origin = sp.origin || "JFK";
   const depart = sp.depart || "";
   const ret = sp.return || "";
+  const vibes = sp.vibes || "";
+  const tripLength = sp.tripLength || "5-7";
 
   const isLiveFlight = !!sp.flight;
   const flightCost = sp.flight ? Number(sp.flight) : Math.round(destination.avgFlightCostFromJFK);
@@ -175,8 +179,8 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-[#f2f0eb]">
-      <Navbar />
+    <div className="min-h-screen" style={{ background: 'var(--w-canvas)' }}>
+      <WandrNavbar />
 
       {/* Hero photo */}
       <div className="relative h-64 sm:h-80 bg-[#1E3932] mt-14">
@@ -196,7 +200,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
 
         <div className="absolute top-4 left-4">
           <Link
-            href={`/results?budget=${budget}&origin=${origin}&nights=${nights}`}
+            href={`/results?budget=${budget}&origin=${origin}&tripLength=${tripLength}`}
             className="text-white/80 hover:text-white text-sm bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full transition-colors"
           >
             ← Back to results
@@ -293,6 +297,21 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                 activitiesCost={activitiesCost}
                 budget={budget}
                 nights={nights}
+              />
+
+              {/* AI Itinerary Builder */}
+              <ItineraryBuilder
+                city={destination.city}
+                country={destination.country}
+                flag={destination.flag}
+                nights={nights}
+                budget={budget}
+                flightCost={flightCost}
+                hotelCost={hotelCost}
+                foodCost={foodCost}
+                activitiesCost={activitiesCost}
+                origin={origin}
+                vibes={vibes}
               />
 
               {/* Flights */}
@@ -474,6 +493,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
           </div>
         </div>
       </main>
+      <WandrFooter />
     </div>
   );
 }

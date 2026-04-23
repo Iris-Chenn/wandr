@@ -22,23 +22,26 @@ const VIBES = [
 ];
 
 const AIRPORTS = [
-  'New York (JFK)',
-  'Los Angeles (LAX)',
-  'Chicago (ORD)',
-  'London (LHR)',
-  'San Francisco (SFO)',
-  'Toronto (YYZ)',
-  'Singapore (SIN)',
+  { label: 'New York (JFK)',      code: 'JFK' },
+  { label: 'Los Angeles (LAX)',   code: 'LAX' },
+  { label: 'Chicago (ORD)',       code: 'ORD' },
+  { label: 'London (LHR)',        code: 'LHR' },
+  { label: 'San Francisco (SFO)', code: 'SFO' },
+  { label: 'Toronto (YYZ)',       code: 'YYZ' },
+  { label: 'Singapore (SIN)',     code: 'SIN' },
 ];
 
 const MONTHS = [
-  "I'm flexible (best price)",
-  'May 2026',
-  'June 2026',
-  'July 2026',
-  'August 2026',
-  'September 2026',
+  { label: "I'm flexible (best price)", value: 'flexible' },
+  { label: 'May 2026',    value: 'may-2026' },
+  { label: 'June 2026',   value: 'june-2026' },
+  { label: 'July 2026',   value: 'july-2026' },
+  { label: 'August 2026', value: 'august-2026' },
+  { label: 'September 2026', value: 'september-2026' },
 ];
+
+// Map tripIdx → tripLength param format for /results
+const TRIP_LENGTH_PARAMS = ['3-4', '5-7', '8-10', '11-14'];
 
 function fmt(n: number) {
   return '$' + Math.round(n).toLocaleString();
@@ -49,6 +52,8 @@ export default function PlanForm() {
   const [budget, setBudget] = useState(1200);
   const [tripIdx, setTripIdx] = useState(1); // default: 5–7 days
   const [vibes, setVibes] = useState<Set<number>>(new Set([1, 4])); // Beach, Culture
+  const [airportCode, setAirportCode] = useState('JFK');
+  const [month, setMonth] = useState('flexible');
 
   const trip = TRIP_LENGTHS[tripIdx];
   const flights = Math.round(budget * 0.42);
@@ -72,10 +77,12 @@ export default function PlanForm() {
   const handleSubmit = () => {
     const params = new URLSearchParams({
       budget: String(budget),
-      nights: String(trip.nights),
+      origin: airportCode,
+      tripLength: TRIP_LENGTH_PARAMS[tripIdx],
+      month,
       vibes: [...vibes].map(i => VIBES[i].label).join(','),
     });
-    router.push(`/explore?${params.toString()}`);
+    router.push(`/results?${params.toString()}`);
   };
 
   return (
@@ -115,8 +122,12 @@ export default function PlanForm() {
             {/* Airport */}
             <div className="plan-field">
               <div className="plan-label"><span>Flying from</span></div>
-              <select className="plan-select">
-                {AIRPORTS.map(a => <option key={a}>{a}</option>)}
+              <select
+                className="plan-select"
+                value={airportCode}
+                onChange={e => setAirportCode(e.target.value)}
+              >
+                {AIRPORTS.map(a => <option key={a.code} value={a.code}>{a.label}</option>)}
               </select>
             </div>
 
@@ -163,8 +174,12 @@ export default function PlanForm() {
                 <span>When</span>
                 <span style={{ color: 'var(--w-ink-lightest)' }}>optional</span>
               </div>
-              <select className="plan-select">
-                {MONTHS.map(m => <option key={m}>{m}</option>)}
+              <select
+                className="plan-select"
+                value={month}
+                onChange={e => setMonth(e.target.value)}
+              >
+                {MONTHS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
               </select>
             </div>
 

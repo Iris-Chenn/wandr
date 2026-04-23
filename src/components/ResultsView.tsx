@@ -41,6 +41,7 @@ type Props = {
   origin: string;
   tripLengthLabel: string;
   month: string;
+  vibes?: string;
 };
 
 export default function ResultsView({
@@ -52,6 +53,7 @@ export default function ResultsView({
   origin,
   tripLengthLabel,
   month,
+  vibes: _vibes,
 }: Props) {
   const [view, setView] = useState<"list" | "map">("list");
   const [activeRegion, setActiveRegion] = useState("All");

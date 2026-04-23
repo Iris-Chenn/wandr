@@ -1,7 +1,8 @@
 import { rankDestinations } from "@/lib/ranking";
 import { getCheapestFlight, getDepartureDates } from "@/lib/duffel";
 import ResultsView from "@/components/ResultsView";
-import Navbar from "@/components/Navbar";
+import WandrNavbar from "@/components/WandrNavbar";
+import WandrFooter from "@/components/WandrFooter";
 import Link from "next/link";
 import destinationsRaw from "@/data/destinations.json";
 import type { Destination } from "@/lib/ranking";
@@ -12,6 +13,7 @@ type Props = {
     origin?: string;
     tripLength?: string;
     month?: string;
+    vibes?: string;
   }>;
 };
 
@@ -31,6 +33,7 @@ export default async function ResultsPage({ searchParams }: Props) {
   const origin = params.origin || "JFK";
   const tripLength = params.tripLength || "5-7";
   const month = params.month || "flexible";
+  const vibes = params.vibes || "";
 
   const { departDate, returnDate } = getDepartureDates(tripLength, month);
 
@@ -53,25 +56,31 @@ export default async function ResultsPage({ searchParams }: Props) {
   const results = rankDestinations(budget, origin, tripLength, undefined, realPrices);
 
   return (
-    <div className="min-h-screen bg-[#f2f0eb]">
-      <Navbar />
-      <main className="pt-20 pb-16 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="pt-6 pb-2">
-            <Link href="/" className="text-sm text-[#00754A] hover:text-[#006241] hover:underline transition-colors">← Change budget</Link>
-          </div>
-          <ResultsView
-            trips={results}
-            budget={budget}
-            hasDuffelPrices={hasDuffelPrices}
-            departDate={departDate}
-            returnDate={returnDate}
-            origin={ORIGIN_LABELS[origin] ?? origin}
-            tripLengthLabel={TRIP_LENGTH_LABELS[tripLength]}
-            month={month}
-          />
+    <>
+      <WandrNavbar />
+      <main>
+        <div className="wrap" style={{ paddingTop: 32, paddingBottom: 16 }}>
+          <Link
+            href="/plan"
+            className="wd-mono"
+            style={{ fontSize: 13, color: 'var(--w-accent)', textDecoration: 'none' }}
+          >
+            ← Change search
+          </Link>
         </div>
+        <ResultsView
+          trips={results}
+          budget={budget}
+          hasDuffelPrices={hasDuffelPrices}
+          departDate={departDate}
+          returnDate={returnDate}
+          origin={ORIGIN_LABELS[origin] ?? origin}
+          tripLengthLabel={TRIP_LENGTH_LABELS[tripLength]}
+          month={month}
+          vibes={vibes}
+        />
       </main>
-    </div>
+      <WandrFooter />
+    </>
   );
 }
