@@ -77,7 +77,6 @@ export default function ResultsView({
     }
   }, [trips]);
 
-  // Region → tag double filter
   const regionFiltered = activeRegion === "All"
     ? rankedTrips
     : rankedTrips.filter((t) => t.region === activeRegion);
@@ -98,13 +97,11 @@ export default function ResultsView({
   const handleAlertSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!alertEmail) return;
-    // Send to Formspree via waitlist endpoint
     await fetch("/api/waitlist", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email: alertEmail, note: `Price alert — budget $${budget}` }),
     });
-    // localStorage backup
     const alerts = JSON.parse(localStorage.getItem("wandr_alerts") || "[]");
     alerts.push({ email: alertEmail, budget, savedAt: new Date().toISOString() });
     localStorage.setItem("wandr_alerts", JSON.stringify(alerts));
@@ -115,7 +112,6 @@ export default function ResultsView({
     month: "short", day: "numeric",
   });
 
-  // Region counts (from all ranked trips, not double-filtered)
   const regionCount = (r: string) =>
     r === "All" ? rankedTrips.length : rankedTrips.filter((t) => t.region === r).length;
 
@@ -129,32 +125,32 @@ export default function ResultsView({
       )}
 
       {/* Header */}
-      <div className="py-8 border-b border-[#E0D8C8] mb-6">
+      <div className="py-8 border-b border-[#e7e7e7] mb-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <div className="font-mono text-xs text-[#8A8A8A] uppercase tracking-widest mb-1">
+            <div className="font-mono text-xs text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-1">
               {origin} · {tripLengthLabel}{month !== "flexible" && ` · ${month}`} · Departing {departDisplay}
             </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-[#0A0A0A]">
+            <h1 className="text-3xl sm:text-4xl font-bold text-[rgba(0,0,0,0.87)]">
               {filteredTrips.length} trips for{" "}
-              <span className="text-[#D4612A]">${budget.toLocaleString()}</span>
+              <span className="text-[#006241]">${budget.toLocaleString()}</span>
             </h1>
           </div>
           <div className="flex flex-wrap gap-2 pt-1">
             {hasDuffelPrices && (
-              <div className="inline-flex items-center gap-1.5 bg-[#D0ECE7] text-[#1A7A6D] text-xs font-medium px-3 py-1.5 rounded-full">
+              <div className="inline-flex items-center gap-1.5 bg-[#d4e9e2] text-[#006241] text-xs font-medium px-3 py-1.5 rounded-full">
                 ✓ Live prices via Duffel
               </div>
             )}
             {personalized && preferences ? (
-              <div className="inline-flex items-center gap-1.5 bg-[#FEE9DC] text-[#A84A1E] text-xs font-medium px-3 py-1.5 rounded-full">
+              <div className="inline-flex items-center gap-1.5 bg-[#d4e9e2] text-[#006241] text-xs font-medium px-3 py-1.5 rounded-full">
                 Personalized ·{" "}
                 <button onClick={() => setShowQuiz(true)} className="underline">edit</button>
               </div>
             ) : !showQuiz && (
               <button
                 onClick={() => setShowQuiz(true)}
-                className="inline-flex items-center gap-1.5 bg-[#EDE9F8] text-[#6B4FA0] text-xs font-medium px-3 py-1.5 rounded-full hover:bg-[#D8CFF0] transition-colors"
+                className="inline-flex items-center gap-1.5 bg-[#e8f0ec] text-[#2b5148] text-xs font-medium px-3 py-1.5 rounded-full hover:bg-[#d4e9e2] transition-colors"
               >
                 ✦ Personalize
               </button>
@@ -174,8 +170,8 @@ export default function ResultsView({
               onClick={() => { setActiveRegion(r); setActiveTag("All"); }}
               className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
                 activeRegion === r
-                  ? "bg-[#1A1A1A] text-white border-[#1A1A1A]"
-                  : "bg-[#FFFCF7] text-[#5A5A5A] border-[#E0D8C8] hover:border-[#1A1A1A]"
+                  ? "bg-[#1E3932] text-white border-[#1E3932]"
+                  : "bg-white text-[rgba(0,0,0,0.58)] border-[#e7e7e7] hover:border-[#1E3932]"
               }`}
             >
               {r}
@@ -199,8 +195,8 @@ export default function ResultsView({
                 onClick={() => setActiveTag(tag)}
                 className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
                   activeTag === tag
-                    ? "bg-[#D4612A] text-white border-[#D4612A]"
-                    : "bg-[#FFFCF7] text-[#5A5A5A] border-[#E0D8C8] hover:border-[#D4612A]"
+                    ? "bg-[#00754A] text-white border-[#00754A]"
+                    : "bg-white text-[rgba(0,0,0,0.58)] border-[#e7e7e7] hover:border-[#00754A]"
                 }`}
               >
                 {tag}
@@ -212,11 +208,11 @@ export default function ResultsView({
           })}
         </div>
 
-        <div className="flex items-center bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-1 gap-1 flex-shrink-0">
+        <div className="flex items-center bg-white border border-[#e7e7e7] rounded-xl p-1 gap-1 flex-shrink-0">
           <button
             onClick={() => setView("list")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              view === "list" ? "bg-[#D4612A] text-white" : "text-[#5A5A5A] hover:text-[#1A1A1A]"
+              view === "list" ? "bg-[#00754A] text-white" : "text-[rgba(0,0,0,0.58)] hover:text-[rgba(0,0,0,0.87)]"
             }`}
           >
             ≡ List
@@ -224,7 +220,7 @@ export default function ResultsView({
           <button
             onClick={() => setView("map")}
             className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              view === "map" ? "bg-[#D4612A] text-white" : "text-[#5A5A5A] hover:text-[#1A1A1A]"
+              view === "map" ? "bg-[#00754A] text-white" : "text-[rgba(0,0,0,0.58)] hover:text-[rgba(0,0,0,0.87)]"
             }`}
           >
             🗺 Map
@@ -235,11 +231,11 @@ export default function ResultsView({
       {/* Map view */}
       {view === "map" && (
         <div className="mb-6">
-          <div className="flex flex-wrap gap-4 mb-3 text-xs text-[#8A8A8A]">
+          <div className="flex flex-wrap gap-4 mb-3 text-xs text-[rgba(0,0,0,0.58)]">
             {[
-              { color: "#1A7A6D", label: "Within budget" },
-              { color: "#D4612A", label: "Great value" },
-              { color: "#6B4FA0", label: "Slight stretch" },
+              { color: "#006241", label: "Within budget" },
+              { color: "#00754A", label: "Great value" },
+              { color: "#2b5148", label: "Slight stretch" },
             ].map(({ color, label }) => (
               <div key={label} className="flex items-center gap-1.5">
                 <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
@@ -247,10 +243,10 @@ export default function ResultsView({
               </div>
             ))}
           </div>
-          <div className="w-full h-[420px] sm:h-[500px] rounded-2xl overflow-hidden border border-[#E0D8C8] shadow-sm">
+          <div className="w-full h-[420px] sm:h-[500px] rounded-2xl overflow-hidden border border-[#e7e7e7] shadow-sm">
             <Suspense fallback={
-              <div className="w-full h-full bg-[#FFFCF7] flex items-center justify-center">
-                <div className="text-[#8A8A8A] text-sm animate-pulse">Loading map…</div>
+              <div className="w-full h-full bg-white flex items-center justify-center">
+                <div className="text-[rgba(0,0,0,0.38)] text-sm animate-pulse">Loading map…</div>
               </div>
             }>
               <WorldMap
@@ -279,17 +275,17 @@ export default function ResultsView({
       {view === "list" && (
         <>
           {filteredTrips.length === 0 ? (
-            <div className="text-center py-16 bg-[#FFFCF7] rounded-2xl border border-[#E0D8C8]">
+            <div className="text-center py-16 bg-white rounded-2xl border border-[#e7e7e7]">
               <div className="text-4xl mb-3">🔍</div>
-              <h2 className="font-serif text-xl font-bold text-[#1A1A1A] mb-2">
+              <h2 className="text-xl font-bold text-[rgba(0,0,0,0.87)] mb-2">
                 No trips found
               </h2>
-              <p className="text-[#5A5A5A] text-sm mb-4">
+              <p className="text-[rgba(0,0,0,0.58)] text-sm mb-4">
                 Try a different filter or increase your budget.
               </p>
               <button
                 onClick={() => { setActiveTag("All"); setActiveRegion("All"); }}
-                className="text-sm text-[#D4612A] underline"
+                className="text-sm text-[#00754A] underline"
               >
                 Clear filters
               </button>
@@ -311,18 +307,18 @@ export default function ResultsView({
         </>
       )}
 
-      {/* Price alert / waitlist */}
+      {/* Price alert / waitlist — House Green band */}
       {filteredTrips.length > 0 && (
-        <div className="mt-12 bg-[#E8DFF5] border border-[#6B4FA0]/20 rounded-2xl p-6 text-center">
-          <div className="font-mono text-xs text-[#6B4FA0] uppercase tracking-widest mb-2">Coming soon</div>
-          <h3 className="font-serif text-xl font-bold text-[#1A1A1A] mb-2">
+        <div className="mt-12 bg-[#1E3932] rounded-2xl p-6 text-center">
+          <div className="font-mono text-xs text-[#d4e9e2] uppercase tracking-widest mb-2">Coming soon</div>
+          <h3 className="text-xl font-bold text-white mb-2">
             Get notified when prices drop
           </h3>
-          <p className="text-sm text-[#5A5A5A] mb-4">
+          <p className="text-sm text-[rgba(255,255,255,0.70)] mb-4">
             Set a price alert and we&apos;ll email you when any of these trips hits your sweet spot.
           </p>
           {alertSent ? (
-            <div className="text-sm font-semibold text-[#6B4FA0]">
+            <div className="text-sm font-semibold text-[#d4e9e2]">
               ✓ You&apos;re on the list! We&apos;ll email you when prices drop.
             </div>
           ) : (
@@ -333,11 +329,11 @@ export default function ResultsView({
                 onChange={(e) => setAlertEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
-                className="flex-1 bg-white border border-[#6B4FA0]/30 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-[#6B4FA0]"
+                className="flex-1 bg-white/10 border border-white/20 rounded-full px-3 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#d4e9e2]"
               />
               <button
                 type="submit"
-                className="bg-[#6B4FA0] text-white text-sm font-semibold px-4 py-2 rounded-lg hover:bg-[#5a3f88] transition-colors"
+                className="bg-[#00754A] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#006241] active:scale-95 transition-all"
               >
                 Alert me
               </button>

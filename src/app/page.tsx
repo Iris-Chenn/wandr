@@ -1,259 +1,537 @@
-"use client";
-
-import { useState } from "react";
-import Navbar from "@/components/Navbar";
-import BudgetInput from "@/components/BudgetInput";
-
-const STATS = [
-  { value: "60+", label: "Destinations" },
-  { value: "Live", label: "Flight prices" },
-  { value: "$200–$5K", label: "Budget range" },
-  { value: "Free", label: "To use" },
-];
-
-const HOW_IT_WORKS = [
-  { n: "01", title: "Enter your budget", desc: "One number covers everything — flights, hotel, food, and activities." },
-  { n: "02", title: "See your world", desc: "A live map shows every destination you can actually afford right now." },
-  { n: "03", title: "Book in one click", desc: "Flight and hotel in one flow. No 12 open tabs." },
-];
-
-const FEATURES = [
-  {
-    title: "Total trip cost",
-    desc: "We break down every dollar — flights, hotel, food, activities. No hidden surprises when you land.",
-    tag: "Unique",
-    tagColor: "#D4612A",
-    tagBg: "rgba(212,97,42,0.15)",
-    borderFrom: "from-orange-500/25",
-    borderTo: "to-cyan-500/10",
-  },
-  {
-    title: "AI personalization",
-    desc: "Two people with the same $800 budget get different trips. We match destinations to how you travel.",
-    tag: "AI-powered",
-    tagColor: "#22D3EE",
-    tagBg: "rgba(6,182,212,0.12)",
-    borderFrom: "from-cyan-500/25",
-    borderTo: "to-violet-500/10",
-  },
-  {
-    title: "Stretch & save",
-    desc: "Every result shows a base trip, a +10% upgrade, and a budget-cut version. You decide how to spend.",
-    tag: "Fintech",
-    tagColor: "#A78BFA",
-    tagBg: "rgba(139,92,246,0.15)",
-    borderFrom: "from-violet-500/25",
-    borderTo: "to-orange-500/10",
-  },
-];
+import Link from "next/link";
+import WandrNavbar from "@/components/WandrNavbar";
+import WandrFooter from "@/components/WandrFooter";
+import RotatingHero from "@/components/RotatingHero";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#050A18]">
-      <Navbar />
+    <>
+      <WandrNavbar />
 
-      {/* 1 — Hero */}
-      <section className="relative bg-[#050A18] min-h-[90vh] flex flex-col items-center justify-center px-4 sm:px-6 text-center pt-14 overflow-hidden">
-        <div className="absolute inset-0 dot-grid" />
-        <div className="aurora-1" />
-        <div className="aurora-2" />
-        <div className="aurora-3" />
+      <main>
+        {/* ── Hero (rotating headline + live ticker) ── */}
+        <RotatingHero />
 
-        <div className="relative z-10 max-w-3xl mx-auto">
-          <div className="inline-flex items-center gap-2 border border-cyan-500/30 bg-cyan-500/5 rounded-full px-4 py-1.5 mb-8">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#D4612A] animate-pulse" />
-            <span className="font-mono text-xs text-cyan-400/80 uppercase tracking-widest">Budget-first travel search</span>
-          </div>
-
-          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold leading-[1.08] text-white mb-6 tracking-tight">
-            Tell us your budget.<br />
-            <span className="text-[#D4612A]">We&apos;ll find your</span><br />
-            next adventure.
-          </h1>
-
-          <p className="text-lg sm:text-xl text-white/40 leading-relaxed mb-10 max-w-xl mx-auto">
-            Stop searching destinations you can&apos;t afford. One number — your total budget — unlocks every trip you can actually take.
-          </p>
-
-          <a
-            href="#search"
-            className="inline-flex items-center gap-2 bg-[#D4612A] hover:bg-[#A84A1E] text-white font-semibold px-8 py-4 rounded-lg transition-colors text-base"
-          >
-            Find my trip →
-          </a>
-
-          <div className="mt-12 flex flex-wrap justify-center gap-3">
-            {["🇵🇹 Lisbon · $612", "🇲🇽 Mexico City · $490", "🇹🇭 Bangkok · $680"].map((item) => (
-              <span
-                key={item}
-                className="text-sm font-mono text-cyan-300/70 bg-cyan-500/5 border border-cyan-500/20 rounded px-4 py-1.5 shadow-[0_0_14px_rgba(6,182,212,0.08)]"
-              >
-                {item}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 2 — Search */}
-      <section id="search" className="py-20 px-4 sm:px-6 bg-[#080F25] border-y border-white/5">
-        <div className="max-w-xl mx-auto">
-          <div className="text-center mb-8">
-            <div className="font-mono text-xs text-cyan-400/60 uppercase tracking-widest mb-2">Start here</div>
-            <h2 className="text-2xl font-bold text-white">How much do you have to spend?</h2>
-          </div>
-          <BudgetInput />
-        </div>
-      </section>
-
-      {/* 3 — Stats strip */}
-      <section className="py-12 px-4 sm:px-6 bg-[#050A18] border-b border-white/5">
-        <div className="max-w-4xl mx-auto grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-          {STATS.map((s) => (
-            <div
-              key={s.label}
-              className="bg-white/[0.03] border border-white/8 rounded-xl py-5 px-4 backdrop-blur-sm hover:border-cyan-500/20 transition-colors"
-            >
-              <div className="font-mono text-2xl font-bold text-[#D4612A]">{s.value}</div>
-              <div className="text-xs text-white/40 mt-1 font-mono uppercase tracking-widest">{s.label}</div>
+        {/* ── How it works ── */}
+        <section className="sec sec-sand" style={{ paddingTop: "88px" }}>
+          <div className="wrap">
+            <div className="sec-head">
+              <span className="wd-eyebrow">How it works</span>
+              <h2 className="head">
+                Four steps.{" "}
+                <span className="serif em">One honest number.</span>
+              </h2>
+              <p className="sub">
+                Most travel sites start with &quot;where to?&quot; — which is a
+                fine question if you already know. We start with what you
+                actually have, and work backwards from there.
+              </p>
             </div>
-          ))}
-        </div>
-      </section>
 
-      {/* 4 — How it works */}
-      <section className="py-24 px-4 sm:px-6 bg-[#080F25] border-b border-white/5">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-16">
-            <div className="font-mono text-xs text-cyan-400/60 uppercase tracking-widest mb-3">How it works</div>
-            <h2 className="text-3xl font-bold text-white">Three steps to your next trip.</h2>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-12">
-            {HOW_IT_WORKS.map((step) => (
-              <div key={step.n}>
-                <div className="font-mono text-xs text-cyan-400 font-bold mb-4 tracking-widest">{step.n}</div>
-                <h3 className="font-bold text-white text-lg mb-2">{step.title}</h3>
-                <p className="text-sm text-white/40 leading-relaxed">{step.desc}</p>
+            <div className="how-grid">
+              <div className="how-rail" />
+
+              {/* Step 1 */}
+              <div className="how-step">
+                <div className="how-num"><span>01</span></div>
+                <div className="how-ph how-ph-budget">
+                  <div className="hp-tag">
+                    <span className="hp-tag-dot" />
+                    Step 1 · Budget
+                  </div>
+                  <div className="hp-body">
+                    <div className="hp-row">
+                      <span className="hp-lbl">Your budget</span>
+                      <span className="hp-pill">USD</span>
+                    </div>
+                    <div className="hp-amt">
+                      $<span>2,400</span>
+                    </div>
+                    <div className="hp-track">
+                      <div className="hp-fill" />
+                      <div className="hp-dot" />
+                    </div>
+                  </div>
+                  <div className="hp-foot">
+                    <span>$500</span>
+                    <span>$10k+</span>
+                  </div>
+                </div>
+                <h4>Tell us your number.</h4>
+                <p>
+                  Budget first. Always. One slider, total all-in — flights,
+                  hotel, food, fun. No line-by-line yet.
+                </p>
               </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
-      {/* 5 — Features */}
-      <section className="py-24 px-4 sm:px-6 bg-[#050A18] border-b border-white/5">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-16">
-            <div className="font-mono text-xs text-cyan-400/60 uppercase tracking-widest mb-3">Why Wandr</div>
-            <h2 className="text-3xl font-bold text-white">Nobody owns the full budget.<br />Until now.</h2>
+              {/* Step 2 */}
+              <div className="how-step">
+                <div className="how-num"><span>02</span></div>
+                <div className="how-ph how-ph-match">
+                  <div className="hp-tag">
+                    <span className="hp-tag-dot" />
+                    Step 2 · Vibe
+                  </div>
+                  <div className="hp-body">
+                    <div className="hp-chip-row">
+                      <span className="hp-chip active">City</span>
+                      <span className="hp-chip">Beach</span>
+                      <span className="hp-chip">Nature</span>
+                      <span className="hp-chip">Food</span>
+                    </div>
+                    <div className="hp-where">
+                      <div className="hp-from">
+                        <span className="hp-mono">JFK</span>
+                        <span className="hp-arrow">→</span>
+                        <span className="hp-mono hp-any">Anywhere</span>
+                      </div>
+                      <span className="hp-dates">Apr 14 · 5 nights</span>
+                    </div>
+                  </div>
+                  <div className="hp-foot hp-foot-live">
+                    <span className="hp-dot-live" />
+                    42 trips match your number
+                  </div>
+                </div>
+                <h4>Add a vibe.</h4>
+                <p>
+                  Where you&apos;re leaving from, when, and what kind of trip.
+                  Cities, beaches, nature — or &quot;surprise me.&quot;
+                </p>
+              </div>
+
+              {/* Step 3 */}
+              <div className="how-step">
+                <div className="how-num"><span>03</span></div>
+                <div className="how-ph how-ph-results">
+                  <div className="hp-tag">
+                    <span className="hp-tag-dot" />
+                    Step 3 · Matches
+                  </div>
+                  <div className="hp-body">
+                    <div className="hp-result">
+                      <span className="hp-flag">🇵🇹</span>
+                      <div className="hp-result-txt">
+                        <div className="hp-city">Lisbon</div>
+                        <div className="hp-sub">5 nights · all-in</div>
+                      </div>
+                      <div className="hp-price">$1,940</div>
+                    </div>
+                    <div className="hp-result hp-best">
+                      <span className="hp-flag">🇲🇽</span>
+                      <div className="hp-result-txt">
+                        <div className="hp-city">Mexico City</div>
+                        <div className="hp-sub">5 nights · all-in</div>
+                      </div>
+                      <div className="hp-price">$1,620</div>
+                    </div>
+                    <div className="hp-result">
+                      <span className="hp-flag">🇹🇭</span>
+                      <div className="hp-result-txt">
+                        <div className="hp-city">Bangkok</div>
+                        <div className="hp-sub">7 nights · all-in</div>
+                      </div>
+                      <div className="hp-price">$2,280</div>
+                    </div>
+                  </div>
+                  <div className="hp-foot">
+                    <span>3 of 42</span>
+                    <span>Ranked by fit</span>
+                  </div>
+                </div>
+                <h4>See what&apos;s actually possible.</h4>
+                <p>
+                  Live flight + hotel + per-diem pricing across 60+
+                  destinations.
+                </p>
+              </div>
+
+              {/* Step 4 */}
+              <div className="how-step">
+                <div className="how-num"><span>04</span></div>
+                <div className="how-ph how-ph-trip">
+                  <div className="hp-tag">
+                    <span className="hp-tag-dot" />
+                    Step 4 · Itinerary
+                  </div>
+                  <div className="hp-body">
+                    <div className="hp-trip-item">
+                      <span className="hp-trip-ic hi-fl">✈</span>
+                      <span className="hp-trip-lbl">Flight · JFK → LIS</span>
+                      <span className="hp-trip-drag">⋮⋮</span>
+                    </div>
+                    <div className="hp-trip-item">
+                      <span className="hp-trip-ic hi-ho">⌂</span>
+                      <span className="hp-trip-lbl">Hotel · Alfama boutique</span>
+                      <span className="hp-trip-drag">⋮⋮</span>
+                    </div>
+                    <div className="hp-trip-item hp-trip-drag-active">
+                      <span className="hp-trip-ic hi-ac">◉</span>
+                      <span className="hp-trip-lbl">Activities · Sintra day trip</span>
+                      <span className="hp-trip-drag">⋮⋮</span>
+                    </div>
+                    <div className="hp-trip-item">
+                      <span className="hp-trip-ic hi-re">◓</span>
+                      <span className="hp-trip-lbl">Restaurants · 6 picks</span>
+                      <span className="hp-trip-drag">⋮⋮</span>
+                    </div>
+                  </div>
+                  <div className="hp-foot hp-foot-live">
+                    <span className="hp-dot-live" />
+                    Drag to swap anything
+                  </div>
+                </div>
+                <h4>Book it. Tweak it. Done.</h4>
+                <p>
+                  Select the trip that includes flights, hotels, activities, and
+                  restaurants in one click. Looking to add or switch something,
+                  just drag.
+                </p>
+              </div>
+            </div>
+
+            <div className="how-cta">
+              <Link href="/plan" className="btn btn-primary btn-lg">
+                Start with your number →
+              </Link>
+              <span className="how-cta-note">
+                No sign-up required · Takes about 40 seconds
+              </span>
+            </div>
           </div>
-          <div className="grid sm:grid-cols-3 gap-6">
-            {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className={`relative p-px rounded-xl bg-gradient-to-br ${f.borderFrom} ${f.borderTo} hover:opacity-90 transition-opacity`}
-              >
-                <div className="bg-[#080F25] rounded-xl p-6 h-full">
-                  <div className="mb-4">
-                    <span
-                      className="text-xs font-mono font-semibold px-2.5 py-1 rounded-full"
-                      style={{ color: f.tagColor, backgroundColor: f.tagBg }}
-                    >
-                      {f.tag}
+        </section>
+
+        {/* ── Insights / Spending chart ── */}
+        <section className="sec">
+          <div className="wrap">
+            <div className="split">
+              <div>
+                <div className="chart-card">
+                  <div className="chart-title">Total spend · this trip</div>
+                  <div className="chart-big">
+                    $1,240.
+                    <span style={{ fontSize: "28px", color: "var(--w-ink-muted)" }}>
+                      80
                     </span>
                   </div>
-                  <h3 className="font-bold text-white mb-2">{f.title}</h3>
-                  <p className="text-sm text-white/40 leading-relaxed">{f.desc}</p>
+                  <div className="bars">
+                    <div className="bar" style={{ height: "45%" }}>
+                      <span className="lbl">Mon</span>
+                    </div>
+                    <div className="bar" style={{ height: "62%" }}>
+                      <span className="lbl">Tue</span>
+                    </div>
+                    <div className="bar" style={{ height: "38%" }}>
+                      <span className="lbl">Wed</span>
+                    </div>
+                    <div className="bar" style={{ height: "72%" }}>
+                      <span className="lbl">Thu</span>
+                    </div>
+                    <div className="bar hi" style={{ height: "92%" }}>
+                      <span className="top">$264</span>
+                      <span className="lbl">Fri</span>
+                    </div>
+                    <div className="bar" style={{ height: "55%" }}>
+                      <span className="lbl">Sat</span>
+                    </div>
+                    <div className="bar" style={{ height: "48%" }}>
+                      <span className="lbl">Sun</span>
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      marginTop: "40px",
+                      fontFamily: "var(--w-font-mono)",
+                      fontSize: "11px",
+                      color: "var(--w-ink-muted-2)",
+                      display: "flex",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <span>↗ 12% under budget</span>
+                    <span>BUDGET · $1,400</span>
+                  </div>
                 </div>
               </div>
-            ))}
+
+              <div>
+                <span className="wd-eyebrow">Insights</span>
+                <h3
+                  style={{
+                    margin: "14px 0 16px",
+                    fontSize: "40px",
+                    fontWeight: 700,
+                    letterSpacing: "-0.025em",
+                    lineHeight: 1.1,
+                    color: "var(--w-ink)",
+                    fontFamily: "var(--w-font-sans)",
+                  }}
+                >
+                  Master your spending with{" "}
+                  <span
+                    style={{
+                      fontFamily: "var(--w-font-serif)",
+                      fontStyle: "italic",
+                      fontWeight: 700,
+                    }}
+                  >
+                    Insights
+                  </span>
+                  .
+                </h3>
+                <p
+                  style={{
+                    color: "var(--w-ink-muted)",
+                    fontSize: "16px",
+                    lineHeight: 1.65,
+                    margin: "0 0 24px",
+                  }}
+                >
+                  Every transaction on your Wandr card is auto-categorized, so
+                  you know exactly how much of your budget went to flights,
+                  hotels, food, and the fun stuff.
+                </p>
+                <div style={{ display: "flex", flexDirection: "column", gap: "18px" }}>
+                  {[
+                    {
+                      title: "Automatic transaction categorization",
+                      body: "No manual tagging. A clear picture of where your money went, the moment you tap your card.",
+                    },
+                    {
+                      title: "Daily budget vs. actual",
+                      body: "See your pace at a glance — and get a gentle nudge before the overspend, not after.",
+                    },
+                    {
+                      title: "Trip cost history",
+                      body: "Every trip, stored and searchable. Know what Lisbon really cost you before you book the next one.",
+                    },
+                  ].map((item) => (
+                    <div key={item.title}>
+                      <div
+                        style={{
+                          fontWeight: 600,
+                          marginBottom: "4px",
+                          color: "var(--w-ink)",
+                        }}
+                      >
+                        {item.title}
+                      </div>
+                      <p
+                        style={{
+                          margin: 0,
+                          color: "var(--w-ink-muted)",
+                          fontSize: "14px",
+                          lineHeight: 1.55,
+                        }}
+                      >
+                        {item.body}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* 6 — The gap */}
-      <section className="py-24 px-4 sm:px-6 bg-[#080F25] border-b border-white/5">
-        <div className="max-w-3xl mx-auto">
-          <div className="font-mono text-xs text-cyan-400/60 uppercase tracking-widest mb-6">The gap</div>
-          <h2 className="text-4xl sm:text-5xl font-bold text-white leading-tight mb-6">
-            Google Flights asks<br />&quot;Where to?&quot;
-          </h2>
-          <p className="text-2xl font-bold text-[#D4612A] mb-6">We ask &quot;How much?&quot;</p>
-          <p className="text-white/40 leading-relaxed max-w-xl">
-            Skyscanner, Expedia, and Google Flights assume you know where you&apos;re going.
-            Wandr flips the model — your budget is the starting point, not an afterthought.
-          </p>
-        </div>
-      </section>
+        {/* ── Why Wandr — bright feature block ── */}
+        <section className="sec sec-sand" style={{ paddingTop: "64px" }}>
+          <div className="wrap">
+            <div className="bright-block">
+              <div className="bb-orb bb-orb-1" />
+              <div className="bb-orb bb-orb-2" />
+              <div className="bb-orb bb-orb-3" />
+              <div className="bb-dots" />
+              <div className="bb-head">
+                <span className="wd-eyebrow">Why Wandr</span>
+                <h3 className="bh">
+                  Start your journey to
+                  <br />
+                  <span className="serif em">financial freedom</span> abroad.
+                </h3>
+              </div>
+              <div className="bright-grid">
+                {[
+                  {
+                    cls: "bc-teal",
+                    icon: "⌖",
+                    title: "Manage your accounts",
+                    body: "Our app integrates seamlessly with your bank accounts, so you can keep flights, hotels, and daily spend in one view.",
+                  },
+                  {
+                    cls: "bc-sun",
+                    icon: "⛨",
+                    title: "Secure and reliable",
+                    body: "Bank-grade encryption, per-trip virtual cards, and instant freeze. Rest assured — your money stays your money.",
+                  },
+                  {
+                    cls: "bc-coral",
+                    icon: "▭",
+                    title: "Multi-device support",
+                    body: "Start on your laptop, finish on your phone. Real-time sync across web, iOS, and Android.",
+                  },
+                  {
+                    cls: "bc-teal",
+                    icon: "☺",
+                    title: "No app juggling",
+                    body: "Book flights, send money, check balance. One Wandr login covers the whole trip, before and during.",
+                  },
+                  {
+                    cls: "bc-coral",
+                    icon: "◷",
+                    title: "Offline, when you need it",
+                    body: "Boarding passes, itineraries, and saved maps stay accessible without signal — because the worst moment to lose your trip is at immigration.",
+                  },
+                  {
+                    cls: "bc-sun",
+                    icon: "✦",
+                    title: "Personalized alerts",
+                    body: "Price drops, FX dips, and visa-window reminders — sent only when it actually matters.",
+                  },
+                ].map((card) => (
+                  <div key={card.title} className={`bright-card ${card.cls}`}>
+                    <div className="ic">{card.icon}</div>
+                    <h4>{card.title}</h4>
+                    <p>{card.body}</p>
+                  </div>
+                ))}
+              </div>
+              <div className="bright-footer">
+                <p>
+                  Wandr is a regulated fintech partnered with Duffel. We are on
+                  a mission to make travel simpler, easier, and more accessible.
+                </p>
+                <Link
+                  href="/pricing"
+                  className="btn btn-primary"
+                  style={{ flexShrink: 0 }}
+                >
+                  Explore more →
+                </Link>
+              </div>
+            </div>
+          </div>
+        </section>
 
-      {/* 7 — Waitlist CTA */}
-      <section className="relative bg-[#050A18] py-24 px-4 sm:px-6 overflow-hidden">
-        <div className="aurora-waitlist" />
-        <div className="relative z-10 max-w-xl mx-auto text-center">
-          <div className="font-mono text-xs text-[#D4612A] uppercase tracking-widest mb-4">Early access</div>
-          <h2 className="text-3xl font-bold text-white mb-3">Be first to know.</h2>
-          <p className="text-white/40 mb-8">
-            Get notified when price alerts and savings goals launch.
-          </p>
-          <WaitlistForm />
-        </div>
-      </section>
+        {/* ── Destinations preview ── */}
+        <section className="sec">
+          <div className="wrap">
+            <div className="sec-head">
+              <span className="wd-eyebrow">What $700 gets you today</span>
+              <h2 className="head">
+                Real trips, <span className="em">live prices</span>.
+              </h2>
+            </div>
+            <div className="dgrid">
+              {[
+                {
+                  img: "https://images.unsplash.com/photo-1513735492246-483525079686?auto=format&fit=crop&w=700&q=75",
+                  alt: "Lisbon",
+                  flag: "🇵🇹",
+                  city: "Lisbon",
+                  country: "Portugal",
+                  match: "perfect",
+                  matchLabel: "Within budget",
+                  tags: ["city", "culture", "food"],
+                  price: "$612",
+                  under: "$88 under",
+                  nights: "5 nights all-in",
+                  live: true,
+                },
+                {
+                  img: "https://images.unsplash.com/photo-1518638150340-f706e86654de?auto=format&fit=crop&w=700&q=75",
+                  alt: "Mexico City",
+                  flag: "🇲🇽",
+                  city: "Mexico City",
+                  country: "Mexico",
+                  match: "great",
+                  matchLabel: "Great value",
+                  tags: ["city", "food", "culture"],
+                  price: "$490",
+                  under: "$210 under",
+                  nights: "5 nights all-in",
+                  live: false,
+                },
+                {
+                  img: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=700&q=75",
+                  alt: "Bangkok",
+                  flag: "🇹🇭",
+                  city: "Bangkok",
+                  country: "Thailand",
+                  match: "perfect",
+                  matchLabel: "Within budget",
+                  tags: ["city", "food", "culture"],
+                  price: "$680",
+                  under: "$20 under",
+                  nights: "7 nights all-in",
+                  live: true,
+                },
+              ].map((dest) => (
+                <Link key={dest.city} className="dcard" href="/explore">
+                  <div className="ph">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={dest.img} alt={dest.alt} />
+                    <div className="ovr" />
+                    <div className="tag">
+                      <div>
+                        <span className="flag">{dest.flag}</span>
+                        <div
+                          style={{
+                            display: "inline-block",
+                            verticalAlign: "middle",
+                            marginLeft: "6px",
+                          }}
+                        >
+                          <div className="city">{dest.city}</div>
+                          <div className="cc">{dest.country}</div>
+                        </div>
+                      </div>
+                      <span className={`match ${dest.match}`}>
+                        {dest.matchLabel}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="body">
+                    {dest.tags.map((t) => (
+                      <span key={t} className="chip-pill">
+                        {t}
+                      </span>
+                    ))}
+                    <div className="foot">
+                      <div>
+                        <span className="price">{dest.price}</span>
+                        {dest.live && (
+                          <span className="live-badge">LIVE</span>
+                        )}
+                        <div className="nights">{dest.nights}</div>
+                      </div>
+                      <div style={{ textAlign: "right" }}>
+                        <div
+                          style={{
+                            fontSize: "11px",
+                            color: "var(--w-accent)",
+                            fontWeight: 500,
+                          }}
+                        >
+                          {dest.under}
+                        </div>
+                        <span className="view">View →</span>
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            <div style={{ textAlign: "center", marginTop: "40px" }}>
+              <Link href="/explore" className="btn btn-ghost">
+                See all 60+ destinations →
+              </Link>
+            </div>
+          </div>
+        </section>
+      </main>
 
-      {/* Footer */}
-      <footer className="bg-[#050A18] border-t border-white/5 py-8 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-          <span className="font-mono font-bold text-white">wandr</span>
-          <span className="text-sm text-white/20 font-mono">© 2026 Wandr · Travel made accessible</span>
-        </div>
-      </footer>
-    </div>
-  );
-}
-
-function WaitlistForm() {
-  const [email, setEmail] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [loading, setLoading] = useState(false);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      await fetch("/api/waitlist", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-      const list = JSON.parse(localStorage.getItem("wandr_waitlist") || "[]");
-      list.push({ email, savedAt: new Date().toISOString() });
-      localStorage.setItem("wandr_waitlist", JSON.stringify(list));
-      setSubmitted(true);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  if (submitted) {
-    return <p className="text-[#D4612A] font-semibold font-mono">✓ You&apos;re on the list.</p>;
-  }
-
-  return (
-    <form onSubmit={handleSubmit} className="flex gap-2 max-w-sm mx-auto">
-      <input
-        type="email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        placeholder="your@email.com"
-        required
-        className="flex-1 bg-white/5 border border-white/10 rounded-lg px-4 py-3 text-sm text-white placeholder-white/30 focus:outline-none focus:ring-1 focus:ring-cyan-500/50 focus:border-cyan-500/40 font-mono"
-      />
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-[#D4612A] hover:bg-[#A84A1E] text-white text-sm font-semibold px-5 py-3 rounded-lg transition-colors disabled:opacity-60 whitespace-nowrap"
-      >
-        {loading ? "…" : "Notify me"}
-      </button>
-    </form>
+      <WandrFooter />
+    </>
   );
 }

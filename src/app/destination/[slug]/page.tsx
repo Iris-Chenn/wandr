@@ -28,9 +28,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-// Curated Unsplash photo IDs per destination
 const UNSPLASH_PHOTOS: Record<string, string> = {
-  // Europe
   "lisbon":              "1555881400-74d7acaacd47",
   "paris":               "1499856845952-5870d4ab4cf7",
   "rome":                "1552832230-c0197dd311b5",
@@ -63,7 +61,6 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
   "edinburgh":           "1558618047-2df7e76e2697",
   "valletta":            "1535040534350-4f68dc3aea3e",
   "tbilisi":             "1565008576344-b6a91cd7c4d1",
-  // Americas
   "mexico-city":         "1518638150340-f706e86654de",
   "cancun":              "1510097467424-192d713fd8b2",
   "tulum":               "1518500335-7e822c9b4f3b",
@@ -86,11 +83,9 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
   "montevideo":          "1592861777091-f9d2dd0e6ff6",
   "quito":               "1531572753322-ad063cecc140",
   "nassau":              "1548504769-b93f8db14534",
-  // Africa
   "marrakech":           "1597212720753-4d00e55eab4d",
   "cape-town":           "1580060839134-75a5edca2e99",
   "nairobi":             "IaJm3mq0F5o",
-  // Asia
   "bangkok":             "1508009603885-50cf7c579365",
   "bali":                "1537996194471-e657df975ab4",
   "tokyo":               "1540959733332-eab4deabeeaf",
@@ -115,7 +110,6 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   const depart = sp.depart || "";
   const ret = sp.return || "";
 
-  // Use live Duffel price if passed from results page, else fall back to static estimate
   const isLiveFlight = !!sp.flight;
   const flightCost = sp.flight ? Number(sp.flight) : Math.round(destination.avgFlightCostFromJFK);
   const hotelCost = destination.avgHotelNightly * nights;
@@ -132,7 +126,6 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   const stretchTotal = Math.round(totalCost * 1.15);
   const saveTotal = Math.round(totalCost * 0.82);
 
-  // Hotel tiers based on avg nightly rate
   const hotelNightly = destination.avgHotelNightly;
   const hotelTiers = [
     {
@@ -158,7 +151,6 @@ export default async function DestinationPage({ params, searchParams }: Props) {
     },
   ];
 
-  // Common carriers by region
   const carriers: Record<string, string> = {
     Americas: "Delta, American, United",
     Europe: "Delta, American, TAP, Iberia",
@@ -183,11 +175,11 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   };
 
   return (
-    <div className="min-h-screen bg-[#F5F0E8]">
+    <div className="min-h-screen bg-[#f2f0eb]">
       <Navbar />
 
       {/* Hero photo */}
-      <div className="relative h-64 sm:h-80 bg-[#1A1A1A] mt-14">
+      <div className="relative h-64 sm:h-80 bg-[#1E3932] mt-14">
         {unsplashUrl ? (
           <Image
             src={unsplashUrl}
@@ -198,11 +190,10 @@ export default async function DestinationPage({ params, searchParams }: Props) {
             unoptimized
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#1A1A1A] to-[#3A3A3A]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1E3932] to-[#2b5148]" />
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-[#1A1A1A] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#1E3932] via-transparent to-transparent" />
 
-        {/* Back link */}
         <div className="absolute top-4 left-4">
           <Link
             href={`/results?budget=${budget}&origin=${origin}&nights=${nights}`}
@@ -212,7 +203,6 @@ export default async function DestinationPage({ params, searchParams }: Props) {
           </Link>
         </div>
 
-        {/* Title overlay */}
         <div className="absolute bottom-6 left-4 sm:left-6 text-white">
           <div className="flex items-center gap-3 mb-1">
             <span className="text-4xl">{destination.flag}</span>
@@ -232,7 +222,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
 
       <main className="pb-16 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
-          <p className="text-[#5A5A5A] text-sm leading-relaxed py-5 max-w-xl">
+          <p className="text-[rgba(0,0,0,0.58)] text-sm leading-relaxed py-5 max-w-xl">
             {destination.description}
           </p>
 
@@ -241,36 +231,36 @@ export default async function DestinationPage({ params, searchParams }: Props) {
             <div className="lg:col-span-2 space-y-5">
 
               {/* Cost breakdown */}
-              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
+              <div className="bg-white border border-[#e7e7e7] rounded-2xl p-6 card-shadow">
                 <div className="flex items-baseline justify-between mb-5">
-                  <h2 className="font-semibold text-[#1A1A1A] text-lg">Your {nights}-night budget</h2>
-                  <div className="font-mono font-bold text-2xl text-[#D4612A]">${totalCost.toLocaleString()}</div>
+                  <h2 className="font-semibold text-[rgba(0,0,0,0.87)] text-lg">Your {nights}-night budget</h2>
+                  <div className="font-mono font-bold text-2xl text-[#006241]">${totalCost.toLocaleString()}</div>
                 </div>
 
                 <div className="flex h-3 rounded-full overflow-hidden gap-0.5 mb-4">
-                  <div className="bg-[#D4612A]" style={{ width: `${flightPct}%` }} />
-                  <div className="bg-[#1A7A6D]" style={{ width: `${hotelPct}%` }} />
-                  <div className="bg-[#6B4FA0]" style={{ width: `${foodPct}%` }} />
-                  <div className="bg-[#E0D8C8]" style={{ width: `${activitiesPct}%` }} />
+                  <div className="bg-[#006241]" style={{ width: `${flightPct}%` }} />
+                  <div className="bg-[#00754A]" style={{ width: `${hotelPct}%` }} />
+                  <div className="bg-[#1E3932]" style={{ width: `${foodPct}%` }} />
+                  <div className="bg-[#d4e9e2]" style={{ width: `${activitiesPct}%` }} />
                 </div>
 
                 <div className="space-y-3">
                   {[
-                    { label: `Flights (round trip)${isLiveFlight ? " · live" : " · est."}`, cost: flightCost, pct: flightPct, color: "#D4612A", bg: "#F0D4C0" },
-                    { label: `Hotel (${nights} nights)`, cost: hotelCost, pct: hotelPct, color: "#1A7A6D", bg: "#D0ECE7" },
-                    { label: `Food & drinks`, cost: foodCost, pct: foodPct, color: "#6B4FA0", bg: "#E8DFF5" },
-                    { label: `Activities & transport`, cost: activitiesCost, pct: activitiesPct, color: "#8A8A8A", bg: "#F5F0E8" },
+                    { label: `Flights (round trip)${isLiveFlight ? " · live" : " · est."}`, cost: flightCost, pct: flightPct, color: "#006241", bg: "#d4e9e2" },
+                    { label: `Hotel (${nights} nights)`, cost: hotelCost, pct: hotelPct, color: "#00754A", bg: "#d4e9e2" },
+                    { label: `Food & drinks`, cost: foodCost, pct: foodPct, color: "#1E3932", bg: "#e8f0ec" },
+                    { label: `Activities & transport`, cost: activitiesCost, pct: activitiesPct, color: "#2b5148", bg: "#f2f0eb" },
                   ].map((item) => (
                     <div key={item.label} className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
                         <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: item.color }} />
-                        <span className="text-sm text-[#5A5A5A]">{item.label}</span>
+                        <span className="text-sm text-[rgba(0,0,0,0.58)]">{item.label}</span>
                       </div>
                       <div className="flex items-center gap-3">
                         <span className="text-xs font-mono px-2 py-0.5 rounded-full" style={{ color: item.color, backgroundColor: item.bg }}>
                           {item.pct}%
                         </span>
-                        <span className="font-mono font-semibold text-[#1A1A1A] w-16 text-right">
+                        <span className="font-mono font-semibold text-[rgba(0,0,0,0.87)] w-16 text-right">
                           ${item.cost.toLocaleString()}
                         </span>
                       </div>
@@ -278,19 +268,19 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                   ))}
                 </div>
 
-                <div className={`mt-4 rounded-xl p-4 ${savings >= 0 ? "bg-[#D0ECE7] border border-[#1A7A6D]/20" : "bg-[#F0D4C0] border border-[#D4612A]/20"}`}>
-                  <div className={`text-sm font-semibold ${savings >= 0 ? "text-[#1A7A6D]" : "text-[#A84A1E]"}`}>
+                <div className={`mt-4 rounded-xl p-4 ${savings >= 0 ? "bg-[#d4e9e2] border border-[#006241]/20" : "bg-[#fee2e2] border border-red-300/20"}`}>
+                  <div className={`text-sm font-semibold ${savings >= 0 ? "text-[#006241]" : "text-red-700"}`}>
                     {savings >= 0
                       ? `✓ $${savings.toLocaleString()} under your $${budget.toLocaleString()} budget`
                       : `$${Math.abs(savings).toLocaleString()} over your $${budget.toLocaleString()} budget`}
                   </div>
-                  <div className="text-xs text-[#5A5A5A] mt-1">
+                  <div className="text-xs text-[rgba(0,0,0,0.58)] mt-1">
                     {savings >= 0
                       ? "You could upgrade your hotel or add another activity with what's left."
                       : "Try flexible dates or a slightly longer savings plan to make this work."}
                   </div>
                 </div>
-                <p className="text-[10px] text-[#8A8A8A] mt-3 leading-relaxed">
+                <p className="text-[10px] text-[rgba(0,0,0,0.38)] mt-3 leading-relaxed">
                   {isLiveFlight ? "✈ Flight price is live from Duffel." : "✈ Flight price is an estimate."} Hotel, food & activity costs are averages — actual prices may vary.
                 </p>
               </div>
@@ -306,51 +296,50 @@ export default async function DestinationPage({ params, searchParams }: Props) {
               />
 
               {/* Flights */}
-              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
+              <div className="bg-white border border-[#e7e7e7] rounded-2xl p-6 card-shadow">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-[#0A0A0A]">Flights</h3>
+                  <h3 className="font-semibold text-[rgba(0,0,0,0.87)]">Flights</h3>
                   {isLiveFlight
-                    ? <span className="text-[10px] bg-[#D0ECE7] text-[#1A7A6D] font-mono font-semibold px-2 py-0.5 rounded">LIVE PRICE</span>
-                    : <span className="text-[10px] bg-[#F5F0E8] text-[#8A8A8A] font-mono px-2 py-0.5 rounded">ESTIMATE</span>}
+                    ? <span className="text-[10px] bg-[#d4e9e2] text-[#006241] font-mono font-semibold px-2 py-0.5 rounded">LIVE PRICE</span>
+                    : <span className="text-[10px] bg-[#f2f0eb] text-[rgba(0,0,0,0.38)] font-mono px-2 py-0.5 rounded">ESTIMATE</span>}
                 </div>
 
-                {/* Route */}
                 <div className="flex items-center gap-3 mb-4">
                   <div className="text-center">
-                    <div className="font-mono font-bold text-lg text-[#0A0A0A]">{origin}</div>
-                    <div className="text-xs text-[#8A8A8A]">Origin</div>
+                    <div className="font-mono font-bold text-lg text-[rgba(0,0,0,0.87)]">{origin}</div>
+                    <div className="text-xs text-[rgba(0,0,0,0.38)]">Origin</div>
                   </div>
                   <div className="flex-1 flex items-center gap-1">
-                    <div className="flex-1 border-t border-dashed border-[#E0D8C8]" />
-                    <span className="text-xs text-[#D4612A]">✈</span>
-                    <div className="flex-1 border-t border-dashed border-[#E0D8C8]" />
+                    <div className="flex-1 border-t border-dashed border-[#e7e7e7]" />
+                    <span className="text-xs text-[#00754A]">✈</span>
+                    <div className="flex-1 border-t border-dashed border-[#e7e7e7]" />
                   </div>
                   <div className="text-center">
-                    <div className="font-mono font-bold text-lg text-[#0A0A0A]">{destination.iataCode}</div>
-                    <div className="text-xs text-[#8A8A8A]">{destination.city}</div>
+                    <div className="font-mono font-bold text-lg text-[rgba(0,0,0,0.87)]">{destination.iataCode}</div>
+                    <div className="text-xs text-[rgba(0,0,0,0.38)]">{destination.city}</div>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mb-4 text-sm">
                   {depart && (
                     <div>
-                      <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-0.5">Depart</div>
-                      <div className="font-medium text-[#0A0A0A]">{new Date(depart + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
+                      <div className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-0.5">Depart</div>
+                      <div className="font-medium text-[rgba(0,0,0,0.87)]">{new Date(depart + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
                     </div>
                   )}
                   {ret && (
                     <div>
-                      <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-0.5">Return</div>
-                      <div className="font-medium text-[#0A0A0A]">{new Date(ret + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
+                      <div className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-0.5">Return</div>
+                      <div className="font-medium text-[rgba(0,0,0,0.87)]">{new Date(ret + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}</div>
                     </div>
                   )}
                   <div>
-                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-0.5">Round trip</div>
-                    <div className="font-mono font-bold text-[#D4612A] text-lg">${flightCost.toLocaleString()}</div>
+                    <div className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-0.5">Round trip</div>
+                    <div className="font-mono font-bold text-[#006241] text-lg">${flightCost.toLocaleString()}</div>
                   </div>
                   <div>
-                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-0.5">Common carriers</div>
-                    <div className="text-xs text-[#5A5A5A]">{carrierHint}</div>
+                    <div className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-0.5">Common carriers</div>
+                    <div className="text-xs text-[rgba(0,0,0,0.58)]">{carrierHint}</div>
                   </div>
                 </div>
 
@@ -358,14 +347,14 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                   <a
                     href={`https://www.kiwi.com/en/search/results/${origin}/${destination.iataCode}/${depart || "anytime"}/${ret || "anytime"}`}
                     target="_blank" rel="noopener noreferrer"
-                    className="block bg-[#D4612A] hover:bg-[#A84A1E] text-white font-semibold py-2.5 rounded-lg transition-colors text-center text-xs"
+                    className="block bg-[#00754A] hover:bg-[#006241] text-white font-semibold py-2.5 rounded-full active:scale-95 transition-all text-center text-xs"
                   >
                     Search Kiwi.com ↗
                   </a>
                   <a
                     href={`https://www.google.com/travel/flights/search?q=flights+from+${origin}+to+${destination.iataCode}${depart ? `+${depart}` : ""}`}
                     target="_blank" rel="noopener noreferrer"
-                    className="block bg-[#F5F0E8] hover:bg-[#E8E0D0] text-[#0A0A0A] font-semibold py-2.5 rounded-lg transition-colors text-center text-xs border border-[#E0D8C8]"
+                    className="block bg-[#f2f0eb] hover:bg-[#e8e4dc] text-[rgba(0,0,0,0.87)] font-semibold py-2.5 rounded-full active:scale-95 transition-all text-center text-xs border border-[#e7e7e7]"
                   >
                     Search Google Flights ↗
                   </a>
@@ -373,10 +362,10 @@ export default async function DestinationPage({ params, searchParams }: Props) {
               </div>
 
               {/* Hotels */}
-              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
+              <div className="bg-white border border-[#e7e7e7] rounded-2xl p-6 card-shadow">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="font-semibold text-[#0A0A0A]">Hotel options</h3>
-                  <span className="text-xs text-[#8A8A8A]">{nights} nights</span>
+                  <h3 className="font-semibold text-[rgba(0,0,0,0.87)]">Hotel options</h3>
+                  <span className="text-xs text-[rgba(0,0,0,0.38)]">{nights} nights</span>
                 </div>
 
                 <div className="space-y-3 mb-4">
@@ -385,71 +374,71 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                       key={tier.label}
                       href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination.city)}&checkin=${depart}&checkout=${ret}&price=1-${tier.nightly * 1.2}`}
                       target="_blank" rel="noopener noreferrer"
-                      className="flex items-center justify-between p-3 border border-[#E0D8C8] rounded-lg hover:border-[#D4612A]/40 hover:bg-[#F5F0E8] transition-all group"
+                      className="flex items-center justify-between p-3 border border-[#e7e7e7] rounded-xl hover:border-[#00754A]/40 hover:bg-[#f2f0eb] transition-all group"
                     >
                       <div>
                         <div className="flex items-center gap-2 mb-0.5">
-                          <span className="text-xs font-semibold text-[#0A0A0A]">{tier.label}</span>
-                          <span className="text-[10px] text-[#D4612A]">{tier.stars}</span>
+                          <span className="text-xs font-semibold text-[rgba(0,0,0,0.87)]">{tier.label}</span>
+                          <span className="text-[10px] text-[#00754A]">{tier.stars}</span>
                         </div>
-                        <div className="text-xs text-[#8A8A8A]">{tier.type}</div>
+                        <div className="text-xs text-[rgba(0,0,0,0.38)]">{tier.type}</div>
                       </div>
                       <div className="text-right">
-                        <div className="font-mono font-bold text-[#0A0A0A] text-sm">${tier.total.toLocaleString()}</div>
-                        <div className="text-[10px] text-[#8A8A8A]">${tier.nightly}/night · Browse ↗</div>
+                        <div className="font-mono font-bold text-[rgba(0,0,0,0.87)] text-sm">${tier.total.toLocaleString()}</div>
+                        <div className="text-[10px] text-[rgba(0,0,0,0.38)]">${tier.nightly}/night · Browse ↗</div>
                       </div>
                     </a>
                   ))}
                 </div>
 
-                <p className="text-[10px] text-[#8A8A8A]">
+                <p className="text-[10px] text-[rgba(0,0,0,0.38)]">
                   Prices are estimates. Click any tier to search live availability on Booking.com.
                 </p>
               </div>
 
               {/* Stretch / Save */}
               <div className="grid sm:grid-cols-2 gap-4">
-                <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-5">
-                  <div className="font-mono text-xs text-[#6B4FA0] uppercase tracking-widest mb-2">Stretch option</div>
-                  <div className="font-mono font-bold text-xl text-[#1A1A1A] mb-1">${stretchTotal.toLocaleString()}</div>
-                  <p className="text-xs text-[#5A5A5A] leading-relaxed">
+                <div className="bg-white border border-[#e7e7e7] rounded-2xl p-5 card-shadow">
+                  <div className="font-mono text-xs text-[#2b5148] uppercase tracking-widest mb-2">Stretch option</div>
+                  <div className="font-mono font-bold text-xl text-[rgba(0,0,0,0.87)] mb-1">${stretchTotal.toLocaleString()}</div>
+                  <p className="text-xs text-[rgba(0,0,0,0.58)] leading-relaxed">
                     4-star hotel + guided excursion.{stretchTotal > budget ? ` $${stretchTotal - budget} over budget — reachable with a short savings plan.` : " Still within budget!"}
                   </p>
                 </div>
-                <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-5">
-                  <div className="font-mono text-xs text-[#1A7A6D] uppercase tracking-widest mb-2">Save option</div>
-                  <div className="font-mono font-bold text-xl text-[#1A1A1A] mb-1">${saveTotal.toLocaleString()}</div>
-                  <p className="text-xs text-[#5A5A5A] leading-relaxed">
+                <div className="bg-white border border-[#e7e7e7] rounded-2xl p-5 card-shadow">
+                  <div className="font-mono text-xs text-[#006241] uppercase tracking-widest mb-2">Save option</div>
+                  <div className="font-mono font-bold text-xl text-[rgba(0,0,0,0.87)] mb-1">${saveTotal.toLocaleString()}</div>
+                  <p className="text-xs text-[rgba(0,0,0,0.58)] leading-relaxed">
                     Hostel private room + street food. Same experience, lower cost.
                   </p>
                 </div>
               </div>
 
               {/* Trip details */}
-              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-6">
-                <h3 className="font-semibold text-[#1A1A1A] mb-4">Trip details</h3>
+              <div className="bg-white border border-[#e7e7e7] rounded-2xl p-6 card-shadow">
+                <h3 className="font-semibold text-[rgba(0,0,0,0.87)] mb-4">Trip details</h3>
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div>
-                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">Best months</div>
-                    <div className="text-sm text-[#1A1A1A]">{destination.bestMonths.join(", ")}</div>
+                    <div className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-1">Best months</div>
+                    <div className="text-sm text-[rgba(0,0,0,0.87)]">{destination.bestMonths.join(", ")}</div>
                   </div>
                   <div>
-                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">Visa (US citizens)</div>
+                    <div className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-1">Visa (US citizens)</div>
                     <div className="text-sm">
                       {destination.visaRequired ? "Check requirements" : "No visa needed"}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">Trip style</div>
+                    <div className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-1">Trip style</div>
                     <div className="flex flex-wrap gap-1">
                       {destination.tags.map((tag) => (
-                        <span key={tag} className="text-xs bg-[#F5F0E8] text-[#5A5A5A] px-2 py-0.5 rounded-full capitalize">{tag}</span>
+                        <span key={tag} className="text-xs bg-[#f2f0eb] text-[rgba(0,0,0,0.58)] px-2 py-0.5 rounded-full capitalize">{tag}</span>
                       ))}
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-1">Daily budget</div>
-                    <div className="text-sm text-[#1A1A1A]">~${destination.avgDailyCost}/day incl. hotel</div>
+                    <div className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-1">Daily budget</div>
+                    <div className="text-sm text-[rgba(0,0,0,0.87)]">~${destination.avgDailyCost}/day incl. hotel</div>
                   </div>
                 </div>
               </div>
@@ -457,16 +446,16 @@ export default async function DestinationPage({ params, searchParams }: Props) {
 
             {/* Sidebar */}
             <div className="space-y-4">
-              <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl p-5 sticky top-20">
-                <div className="text-xs font-mono text-[#8A8A8A] uppercase tracking-widest mb-3">Ready to book?</div>
-                <div className="font-mono font-bold text-2xl text-[#D4612A] mb-0.5">${totalCost.toLocaleString()}</div>
-                <div className="text-xs text-[#8A8A8A] mb-4">{nights} nights all-in</div>
+              <div className="bg-white border border-[#e7e7e7] rounded-2xl p-5 sticky top-20 card-shadow">
+                <div className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-3">Ready to book?</div>
+                <div className="font-mono font-bold text-2xl text-[#006241] mb-0.5">${totalCost.toLocaleString()}</div>
+                <div className="text-xs text-[rgba(0,0,0,0.38)] mb-4">{nights} nights all-in</div>
 
                 <a
                   href={`https://www.kiwi.com/en/search/results/${origin}/${destination.iataCode}/${depart || "anytime"}/${ret || "anytime"}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full bg-[#D4612A] hover:bg-[#A84A1E] text-white font-semibold py-3 rounded-xl transition-colors text-center text-sm mb-3"
+                  className="block w-full bg-[#00754A] hover:bg-[#006241] text-white font-semibold py-3 rounded-full active:scale-95 transition-all text-center text-sm mb-3"
                 >
                   Search flights ↗
                 </a>
@@ -474,7 +463,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                   href={`https://www.booking.com/searchresults.html?ss=${encodeURIComponent(destination.city)}&checkin=${depart}&checkout=${ret}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="block w-full bg-[#F5F0E8] hover:bg-[#E8E0D0] text-[#1A1A1A] font-semibold py-3 rounded-xl transition-colors text-center text-sm mb-4 border border-[#E0D8C8]"
+                  className="block w-full bg-[#f2f0eb] hover:bg-[#e8e4dc] text-[rgba(0,0,0,0.87)] font-semibold py-3 rounded-full active:scale-95 transition-all text-center text-sm mb-4 border border-[#e7e7e7]"
                 >
                   Search hotels ↗
                 </a>

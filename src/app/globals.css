@@ -1,99 +1,57 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-sand: #F9FAFB;
-  --color-sand-dark: #F3F4F6;
+  --color-canvas: #FAFAF8;
+  --color-card: #FFFCF7;
+  --color-border: #E0D8C8;
   --color-ink: #0A0A0A;
-  --color-ink-muted: #6B7280;
-  --color-ink-light: #9CA3AF;
-  --color-accent: #D4612A;
-  --color-accent-light: #FEE9DC;
-  --color-accent-dark: #A84A1E;
-  --color-teal: #1A7A6D;
-  --color-teal-light: #D0ECE7;
-  --color-teal-dark: #0F5C52;
-  --color-purple: #6B4FA0;
-  --color-purple-light: #EDE9F8;
-  --color-card: #FFFFFF;
-  --color-border: #E5E7EB;
-  --font-sans: 'DM Sans', system-ui, sans-serif;
-  --font-mono: 'DM Mono', monospace;
-  --font-serif: 'DM Sans', system-ui, sans-serif;
+  --color-ink-muted: #5A5A5A;
+  --color-ink-light: #8A8A8A;
+  --color-accent: #5DA89A;
+  --color-accent-dark: #3F8577;
+  --font-sans: var(--font-dm-sans);
+  --font-mono: var(--font-dm-mono);
+  --font-serif: var(--font-playfair);
 }
 
 body {
-  background-color: #050A18;
-  color: #0A0A0A;
+  background-color: var(--w-canvas);
+  color: var(--w-ink);
+  font-family: var(--w-font-sans);
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── Dot-matrix grid ── */
-.dot-grid {
-  background-image: radial-gradient(circle, rgba(255, 255, 255, 0.06) 1px, transparent 1px);
-  background-size: 28px 28px;
-  pointer-events: none;
-}
-
-/* ── Aurora keyframes ── */
-@keyframes aurora-move {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(4%, -6%) scale(1.08); }
-  66%       { transform: translate(-3%, 4%) scale(0.95); }
-}
-
-@keyframes aurora-move-2 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  33%       { transform: translate(-5%, 3%) scale(1.05); }
-  66%       { transform: translate(6%, -4%) scale(1.1); }
-}
-
-@keyframes aurora-move-3 {
-  0%, 100% { transform: translate(0, 0) scale(1); }
-  50%       { transform: translate(3%, 5%) scale(1.08); }
-}
-
-/* ── Aurora blobs ── */
-.aurora-1 {
-  position: absolute;
-  width: 700px;
-  height: 500px;
-  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.13) 0%, transparent 70%);
-  top: -15%;
-  left: -10%;
-  animation: aurora-move 14s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.aurora-2 {
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(ellipse, rgba(139, 92, 246, 0.1) 0%, transparent 70%);
-  top: 10%;
-  right: -15%;
-  animation: aurora-move-2 18s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.aurora-3 {
-  position: absolute;
-  width: 500px;
-  height: 350px;
-  background: radial-gradient(ellipse, rgba(212, 97, 42, 0.09) 0%, transparent 70%);
-  bottom: 0;
-  left: 25%;
-  animation: aurora-move-3 11s ease-in-out infinite;
-  pointer-events: none;
-}
-
-.aurora-waitlist {
-  position: absolute;
-  width: 700px;
-  height: 500px;
-  background: radial-gradient(ellipse, rgba(6, 182, 212, 0.08) 0%, transparent 65%);
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  animation: aurora-move 16s ease-in-out infinite;
-  pointer-events: none;
+/* ── Wandr Design System tokens ── */
+:root {
+  --w-canvas:         #FAFAF8;
+  --w-canvas-sand:    #F5F0E8;
+  --w-surface-card:   #FFFCF7;
+  --w-surface-white:  #FFFFFF;
+  --w-surface-cool:   #F9FAFB;
+  --w-border-warm:    #E0D8C8;
+  --w-border-cool:    #E5E7EB;
+  --w-ink:            #0A0A0A;
+  --w-ink-soft:       #1A1A1A;
+  --w-ink-muted:      #5A5A5A;
+  --w-ink-muted-2:    #6B7280;
+  --w-ink-light:      #8A8A8A;
+  --w-ink-lightest:   #9CA3AF;
+  --w-accent:         #5DA89A;
+  --w-accent-dark:    #3F8577;
+  --w-accent-darker:  #2F6B5E;
+  --w-accent-tint:    #DCECE7;
+  --w-accent-tint-2:  #C5DED6;
+  --w-amber:          #C48A3A;
+  --w-amber-dark:     #9E6C24;
+  --w-amber-tint:     #F6EBD4;
+  --w-rose:           #B97A7A;
+  --w-rose-dark:      #9A5F5F;
+  --w-rose-tint:      #F0DFDF;
+  --w-font-sans:      'DM Sans', system-ui, -apple-system, sans-serif;
+  --w-font-mono:      'DM Mono', ui-monospace, Menlo, monospace;
+  --w-font-serif:     'Playfair Display', Georgia, serif;
+  --w-shadow-sm:  0 1px 2px 0 rgb(0 0 0 / 0.05);
+  --w-shadow-md:  0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  --w-shadow-lg:  0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --w-shadow-xl:  0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }

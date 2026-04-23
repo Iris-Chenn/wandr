@@ -59,31 +59,31 @@ export default function BudgetSliders({
     : "Fine dining";
 
   return (
-    <div className="bg-[#FFFCF7] border border-[#E0D8C8] rounded-2xl p-6">
+    <div className="bg-white border border-[#e7e7e7] rounded-2xl p-6 card-shadow">
       <div className="flex items-center justify-between mb-5">
-        <h3 className="font-semibold text-[#1A1A1A]">Customize your budget</h3>
-        <div className="text-xs text-[#8A8A8A]">Drag to adjust</div>
+        <h3 className="font-semibold text-[rgba(0,0,0,0.87)]">Customize your budget</h3>
+        <div className="text-xs text-[rgba(0,0,0,0.38)]">Drag to adjust</div>
       </div>
 
       {/* Live total bar */}
       <div className="flex h-3 rounded-full overflow-hidden gap-0.5 mb-5">
-        <div className="bg-[#D4612A] transition-all duration-200" style={{ width: `${flightPct}%` }} />
-        <div className="bg-[#1A7A6D] transition-all duration-200" style={{ width: `${hotelPct}%` }} />
-        <div className="bg-[#6B4FA0] transition-all duration-200" style={{ width: `${foodPct}%` }} />
-        <div className="bg-[#E0D8C8] transition-all duration-200" style={{ width: `${activitiesPct}%` }} />
+        <div className="bg-[#006241] transition-all duration-200" style={{ width: `${flightPct}%` }} />
+        <div className="bg-[#00754A] transition-all duration-200" style={{ width: `${hotelPct}%` }} />
+        <div className="bg-[#1E3932] transition-all duration-200" style={{ width: `${foodPct}%` }} />
+        <div className="bg-[#d4e9e2] transition-all duration-200" style={{ width: `${activitiesPct}%` }} />
       </div>
 
       {/* Flight (fixed) */}
       <div className="mb-5">
         <div className="flex justify-between items-center mb-2">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#D4612A]" />
-            <span className="text-sm text-[#5A5A5A]">Flights (fixed)</span>
+            <div className="w-2 h-2 rounded-full bg-[#006241]" />
+            <span className="text-sm text-[rgba(0,0,0,0.58)]">Flights (fixed)</span>
           </div>
-          <span className="font-mono font-semibold text-[#1A1A1A]">${flightCost.toLocaleString()}</span>
+          <span className="font-mono font-semibold text-[rgba(0,0,0,0.87)]">${flightCost.toLocaleString()}</span>
         </div>
-        <div className="h-2 bg-[#F5F0E8] rounded-full overflow-hidden">
-          <div className="h-full bg-[#D4612A]/30 rounded-full" style={{ width: "100%" }} />
+        <div className="h-2 bg-[#f2f0eb] rounded-full overflow-hidden">
+          <div className="h-full bg-[#006241]/30 rounded-full" style={{ width: "100%" }} />
         </div>
       </div>
 
@@ -91,15 +91,15 @@ export default function BudgetSliders({
       <div className="mb-5">
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#1A7A6D]" />
-            <span className="text-sm text-[#5A5A5A]">Hotel</span>
+            <div className="w-2 h-2 rounded-full bg-[#00754A]" />
+            <span className="text-sm text-[rgba(0,0,0,0.58)]">Hotel</span>
           </div>
           <div className="text-right">
-            <span className="font-mono font-semibold text-[#1A1A1A]">${hotel.toLocaleString()}</span>
-            <span className="text-xs text-[#8A8A8A] ml-1">(${hotelNightly}/night)</span>
+            <span className="font-mono font-semibold text-[rgba(0,0,0,0.87)]">${hotel.toLocaleString()}</span>
+            <span className="text-xs text-[rgba(0,0,0,0.38)] ml-1">(${hotelNightly}/night)</span>
           </div>
         </div>
-        <div className="text-xs text-[#8A8A8A] mb-2">{hotelLabel}</div>
+        <div className="text-xs text-[rgba(0,0,0,0.38)] mb-2">{hotelLabel}</div>
         <input
           type="range"
           min={hotelMin}
@@ -107,10 +107,10 @@ export default function BudgetSliders({
           step={10}
           value={hotel}
           onChange={(e) => setHotel(Number(e.target.value))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-[#1A7A6D]"
-          style={{ background: `linear-gradient(to right, #1A7A6D ${((hotel - hotelMin) / (hotelMax - hotelMin)) * 100}%, #E0D8C8 0%)` }}
+          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-[#00754A]"
+          style={{ background: `linear-gradient(to right, #00754A ${((hotel - hotelMin) / (hotelMax - hotelMin)) * 100}%, #e7e7e7 0%)` }}
         />
-        <div className="flex justify-between text-xs text-[#8A8A8A] mt-1">
+        <div className="flex justify-between text-xs text-[rgba(0,0,0,0.38)] mt-1">
           <span>Hostel</span>
           <span>Luxury</span>
         </div>
@@ -120,15 +120,15 @@ export default function BudgetSliders({
       <div className="mb-5">
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#6B4FA0]" />
-            <span className="text-sm text-[#5A5A5A]">Food & drinks</span>
+            <div className="w-2 h-2 rounded-full bg-[#1E3932]" />
+            <span className="text-sm text-[rgba(0,0,0,0.58)]">Food & drinks</span>
           </div>
           <div className="text-right">
-            <span className="font-mono font-semibold text-[#1A1A1A]">${food.toLocaleString()}</span>
-            <span className="text-xs text-[#8A8A8A] ml-1">(${foodDaily}/day)</span>
+            <span className="font-mono font-semibold text-[rgba(0,0,0,0.87)]">${food.toLocaleString()}</span>
+            <span className="text-xs text-[rgba(0,0,0,0.38)] ml-1">(${foodDaily}/day)</span>
           </div>
         </div>
-        <div className="text-xs text-[#8A8A8A] mb-2">{foodLabel}</div>
+        <div className="text-xs text-[rgba(0,0,0,0.38)] mb-2">{foodLabel}</div>
         <input
           type="range"
           min={foodMin}
@@ -136,10 +136,10 @@ export default function BudgetSliders({
           step={5}
           value={food}
           onChange={(e) => setFood(Number(e.target.value))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-[#6B4FA0]"
-          style={{ background: `linear-gradient(to right, #6B4FA0 ${((food - foodMin) / (foodMax - foodMin)) * 100}%, #E0D8C8 0%)` }}
+          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-[#1E3932]"
+          style={{ background: `linear-gradient(to right, #1E3932 ${((food - foodMin) / (foodMax - foodMin)) * 100}%, #e7e7e7 0%)` }}
         />
-        <div className="flex justify-between text-xs text-[#8A8A8A] mt-1">
+        <div className="flex justify-between text-xs text-[rgba(0,0,0,0.38)] mt-1">
           <span>Street food</span>
           <span>Fine dining</span>
         </div>
@@ -149,12 +149,12 @@ export default function BudgetSliders({
       <div className="mb-5">
         <div className="flex justify-between items-center mb-1">
           <div className="flex items-center gap-2">
-            <div className="w-2 h-2 rounded-full bg-[#8A8A8A]" />
-            <span className="text-sm text-[#5A5A5A]">Activities & transport</span>
+            <div className="w-2 h-2 rounded-full bg-[#2b5148]" />
+            <span className="text-sm text-[rgba(0,0,0,0.58)]">Activities & transport</span>
           </div>
           <div className="text-right">
-            <span className="font-mono font-semibold text-[#1A1A1A]">${activities.toLocaleString()}</span>
-            <span className="text-xs text-[#8A8A8A] ml-1">(${activitiesDaily}/day)</span>
+            <span className="font-mono font-semibold text-[rgba(0,0,0,0.87)]">${activities.toLocaleString()}</span>
+            <span className="text-xs text-[rgba(0,0,0,0.38)] ml-1">(${activitiesDaily}/day)</span>
           </div>
         </div>
         <input
@@ -164,26 +164,26 @@ export default function BudgetSliders({
           step={5}
           value={activities}
           onChange={(e) => setActivities(Number(e.target.value))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-[#8A8A8A]"
-          style={{ background: `linear-gradient(to right, #8A8A8A ${((activities - activitiesMin) / (activitiesMax - activitiesMin)) * 100}%, #E0D8C8 0%)` }}
+          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-[#2b5148]"
+          style={{ background: `linear-gradient(to right, #2b5148 ${((activities - activitiesMin) / (activitiesMax - activitiesMin)) * 100}%, #e7e7e7 0%)` }}
         />
-        <div className="flex justify-between text-xs text-[#8A8A8A] mt-1">
+        <div className="flex justify-between text-xs text-[rgba(0,0,0,0.38)] mt-1">
           <span>Self-guided</span>
           <span>Guided tours</span>
         </div>
       </div>
 
       {/* Live total */}
-      <div className={`rounded-xl p-4 border ${savings >= 0 ? "bg-[#D0ECE7] border-[#1A7A6D]/20" : "bg-[#F0D4C0] border-[#D4612A]/20"}`}>
+      <div className={`rounded-xl p-4 border ${savings >= 0 ? "bg-[#d4e9e2] border-[#006241]/20" : "bg-[#fee2e2] border-red-300/20"}`}>
         <div className="flex justify-between items-center">
-          <span className={`text-sm font-semibold ${savings >= 0 ? "text-[#1A7A6D]" : "text-[#A84A1E]"}`}>
+          <span className={`text-sm font-semibold ${savings >= 0 ? "text-[#006241]" : "text-red-700"}`}>
             {savings >= 0
               ? `✓ $${savings.toLocaleString()} under your $${budget.toLocaleString()} budget`
               : `$${Math.abs(savings).toLocaleString()} over your $${budget.toLocaleString()} budget`}
           </span>
-          <span className="font-mono font-bold text-xl text-[#1A1A1A]">${total.toLocaleString()}</span>
+          <span className="font-mono font-bold text-xl text-[rgba(0,0,0,0.87)]">${total.toLocaleString()}</span>
         </div>
-        <div className="text-xs text-[#5A5A5A] mt-1">
+        <div className="text-xs text-[rgba(0,0,0,0.58)] mt-1">
           {savings >= 0
             ? "Your custom breakdown fits the budget."
             : "Try sliding hotel or activities down to fit."}

@@ -75,9 +75,9 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
 };
 
 const BUDGET_MATCH_STYLES = {
-  perfect: { label: "Within budget", color: "#1A7A6D", bg: "#D0ECE7" },
-  great:   { label: "Great value",   color: "#D4612A", bg: "#FEE9DC" },
-  stretch: { label: "Slight stretch", color: "#6B4FA0", bg: "#EDE9F8" },
+  perfect: { label: "Within budget", color: "#006241", bg: "#d4e9e2" },
+  great:   { label: "Great value",   color: "#00754A", bg: "#d4e9e2" },
+  stretch: { label: "Slight stretch", color: "#2b5148", bg: "#e8f0ec" },
 };
 
 type Props = {
@@ -100,7 +100,7 @@ export default function DestinationCard({ trip, budget, isLivePrice, departDate,
   return (
     <Link
       href={`/destination/${trip.id}?budget=${budget}&origin=JFK&nights=${trip.nights}&flight=${trip.flightCost}${departDate ? `&depart=${departDate}&return=${returnDate}` : ""}`}
-      className="block bg-[#FFFCF7] border border-[#E0D8C8] rounded-xl overflow-hidden hover:shadow-lg hover:border-[#D4612A]/30 transition-all group"
+      className="block bg-white border border-[#e7e7e7] rounded-2xl overflow-hidden card-shadow hover:border-[#00754A]/30 hover:shadow-lg transition-all group"
     >
       {/* Photo */}
       <div className="relative h-44 bg-[#1A1A1A] overflow-hidden">
@@ -114,12 +114,10 @@ export default function DestinationCard({ trip, budget, isLivePrice, departDate,
             onError={() => setImgError(true)}
           />
         ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-[#2A2A2A] to-[#1A1A1A]" />
+          <div className="absolute inset-0 bg-gradient-to-br from-[#1E3932] to-[#2b5148]" />
         )}
-        {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
-        {/* City name on photo */}
         <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
           <div className="flex items-center gap-2">
             <span className="text-2xl">{trip.flag}</span>
@@ -139,32 +137,30 @@ export default function DestinationCard({ trip, budget, isLivePrice, departDate,
 
       {/* Info */}
       <div className="p-4">
-        {/* Tags */}
         <div className="flex flex-wrap gap-1 mb-3">
           {trip.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="text-xs text-[#8A8A8A] bg-[#F5F0E8] px-2 py-0.5 rounded-full capitalize">
+            <span key={tag} className="text-xs text-[rgba(0,0,0,0.58)] bg-[#f2f0eb] px-2 py-0.5 rounded-full capitalize">
               {tag}
             </span>
           ))}
         </div>
 
-        {/* Price row */}
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-1.5">
-              <span className="font-mono font-bold text-[#D4612A] text-xl">${trip.totalCost.toLocaleString()}</span>
+              <span className="font-mono font-bold text-[#006241] text-xl">${trip.totalCost.toLocaleString()}</span>
               {isLivePrice && (
-                <span className="text-[10px] bg-[#D0ECE7] text-[#1A7A6D] font-mono font-semibold px-1.5 py-0.5 rounded">LIVE</span>
+                <span className="text-[10px] bg-[#d4e9e2] text-[#006241] font-mono font-semibold px-1.5 py-0.5 rounded">LIVE</span>
               )}
             </div>
-            <div className="text-xs text-[#8A8A8A]">{trip.nights} nights all-in</div>
+            <div className="text-xs text-[rgba(0,0,0,0.58)]">{trip.nights} nights all-in</div>
           </div>
 
           <div className="text-right">
             {savings > 0 && (
-              <div className="text-xs text-[#1A7A6D] font-medium mb-1">${savings} under</div>
+              <div className="text-xs text-[#006241] font-medium mb-1">${savings} under</div>
             )}
-            <span className="text-[#D4612A] text-sm font-semibold group-hover:translate-x-0.5 transition-transform inline-block">
+            <span className="text-[#00754A] text-sm font-semibold group-hover:translate-x-0.5 transition-transform inline-block">
               View →
             </span>
           </div>

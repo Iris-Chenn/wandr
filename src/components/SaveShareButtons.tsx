@@ -26,7 +26,6 @@ export default function SaveShareButtons({ trip }: { trip: Trip }) {
 
   const handleSave = async () => {
     if (saved) {
-      // Remove
       const savedTrips: Trip[] = JSON.parse(localStorage.getItem("wandr_saved") || "[]");
       localStorage.setItem("wandr_saved", JSON.stringify(savedTrips.filter((t) => t.id !== trip.id)));
       if (user && supabase) {
@@ -34,7 +33,6 @@ export default function SaveShareButtons({ trip }: { trip: Trip }) {
       }
       setSaved(false);
     } else {
-      // Save
       const savedTrips: Trip[] = JSON.parse(localStorage.getItem("wandr_saved") || "[]");
       savedTrips.push(trip);
       localStorage.setItem("wandr_saved", JSON.stringify(savedTrips));
@@ -69,13 +67,13 @@ export default function SaveShareButtons({ trip }: { trip: Trip }) {
   };
 
   return (
-    <div className="border-t border-[#E0D8C8] pt-4 space-y-2">
+    <div className="border-t border-[#e7e7e7] pt-4 space-y-2">
       <button
         onClick={handleSave}
         className={`w-full text-left text-sm py-2 px-3 rounded-lg flex items-center gap-2 transition-colors ${
           saved
-            ? "bg-[#D0ECE7] text-[#1A7A6D] font-medium"
-            : "text-[#5A5A5A] hover:bg-[#F5F0E8] hover:text-[#1A1A1A]"
+            ? "bg-[#d4e9e2] text-[#006241] font-medium"
+            : "text-[rgba(0,0,0,0.58)] hover:bg-[#f2f0eb] hover:text-[rgba(0,0,0,0.87)]"
         }`}
       >
         <span>{saved ? "✓" : "💾"}</span>
@@ -83,14 +81,14 @@ export default function SaveShareButtons({ trip }: { trip: Trip }) {
       </button>
 
       {!user && saved && (
-        <p className="text-[10px] text-[#8A8A8A] px-3">
+        <p className="text-[10px] text-[rgba(0,0,0,0.38)] px-3">
           Sign in to sync your saved trips across devices.
         </p>
       )}
 
       <button
         onClick={handleShare}
-        className="w-full text-left text-sm text-[#5A5A5A] hover:bg-[#F5F0E8] hover:text-[#1A1A1A] transition-colors py-2 px-3 rounded-lg flex items-center gap-2"
+        className="w-full text-left text-sm text-[rgba(0,0,0,0.58)] hover:bg-[#f2f0eb] hover:text-[rgba(0,0,0,0.87)] transition-colors py-2 px-3 rounded-lg flex items-center gap-2"
       >
         <span>🔗</span>
         {copied ? "Link copied!" : "Share with friends"}

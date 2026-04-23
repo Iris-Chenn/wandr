@@ -53,12 +53,12 @@ export default async function ResultsPage({ searchParams }: Props) {
   const results = rankDestinations(budget, origin, tripLength, undefined, realPrices);
 
   return (
-    <div className="min-h-screen bg-[#F5F0E8]">
+    <div className="min-h-screen bg-[#f2f0eb]">
       <Navbar />
       <main className="pt-20 pb-16 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <div className="pt-6 pb-2">
-            <Link href="/" className="text-sm text-[#D4612A] hover:underline">← Change budget</Link>
+            <Link href="/" className="text-sm text-[#00754A] hover:text-[#006241] hover:underline transition-colors">← Change budget</Link>
           </div>
           <ResultsView
             trips={results}
