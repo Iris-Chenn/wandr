@@ -155,23 +155,32 @@ export default function DestinationCard({
 
       {/* Info */}
       <div className="p-4">
-        <div className="flex flex-wrap gap-1 mb-3">
+        {/* Tags */}
+        <div className="flex flex-wrap gap-1 mb-2.5">
           {trip.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="text-xs text-[rgba(0,0,0,0.58)] bg-[#f2f0eb] px-2 py-0.5 rounded-full capitalize">
+            <span key={tag} className="text-xs text-[rgba(0,0,0,0.50)] bg-[#f2f0eb] px-2 py-0.5 rounded-full capitalize">
               {tag}
             </span>
           ))}
         </div>
 
-        <div className="flex items-center justify-between">
+        {/* Flight cost hint */}
+        <div className="flex items-center gap-2 text-xs text-[rgba(0,0,0,0.38)] mb-2.5 font-mono">
+          <span>✈ ${trip.flightCost.toLocaleString()} flight</span>
+          <span>·</span>
+          <span>🏨 ${Math.round(trip.hotelCost / trip.nights).toLocaleString()}/night</span>
+        </div>
+
+        {/* Price + CTA */}
+        <div className="flex items-end justify-between">
           <div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-baseline gap-1.5">
               <span className="font-mono font-bold text-[#006241] text-xl">${trip.totalCost.toLocaleString()}</span>
               {isLivePrice && (
                 <span className="text-[10px] bg-[#d4e9e2] text-[#006241] font-mono font-semibold px-1.5 py-0.5 rounded">LIVE</span>
               )}
             </div>
-            <div className="text-xs text-[rgba(0,0,0,0.58)]">
+            <div className="text-xs text-[rgba(0,0,0,0.50)]">
               {trip.nights} nights · per person
               {party > 1 && (
                 <span className="ml-1 text-[#006241] font-medium">
@@ -181,11 +190,15 @@ export default function DestinationCard({
             </div>
           </div>
 
-          <div className="text-right">
+          <div className="text-right pb-0.5">
             {savings > 0 ? (
-              <div className="text-xs text-[#005c38] font-medium mb-1">${savings.toLocaleString()} under budget</div>
+              <div className="text-[11px] text-[#005c38] font-medium mb-1">
+                ${savings.toLocaleString()} under
+              </div>
             ) : (
-              <div className="text-xs text-[#7a5c00] font-medium mb-1">${Math.abs(savings).toLocaleString()} over</div>
+              <div className="text-[11px] text-[#7a5c00] font-medium mb-1">
+                ${Math.abs(savings).toLocaleString()} over
+              </div>
             )}
             <span className="text-[#00754A] text-sm font-semibold group-hover:translate-x-0.5 transition-transform inline-block">
               View →

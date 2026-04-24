@@ -61,29 +61,31 @@ export default async function ResultsPage({ searchParams }: Props) {
     <>
       <WandrNavbar />
       <main>
-        <div className="wrap" style={{ paddingTop: 32, paddingBottom: 16 }}>
-          <Link
-            href="/plan"
-            className="wd-mono"
-            style={{ fontSize: 13, color: 'var(--w-accent)', textDecoration: 'none' }}
-          >
-            ← Change search
-          </Link>
+        <div className="wrap" style={{ paddingBottom: 80 }}>
+          <div style={{ paddingTop: 24, paddingBottom: 12 }}>
+            <Link
+              href="/plan"
+              className="wd-mono"
+              style={{ fontSize: 13, color: 'var(--w-accent)', textDecoration: 'none' }}
+            >
+              ← Change search
+            </Link>
+          </div>
+          <ResultsView
+            trips={results}
+            budget={budget}
+            hasDuffelPrices={hasDuffelPrices}
+            departDate={departDate}
+            returnDate={returnDate}
+            origin={ORIGIN_LABELS[origin] ?? origin}
+            originCode={origin}
+            tripLengthLabel={TRIP_LENGTH_LABELS[tripLength]}
+            tripLength={tripLength}
+            month={month}
+            vibes={vibes}
+            party={party}
+          />
         </div>
-        <ResultsView
-          trips={results}
-          budget={budget}
-          hasDuffelPrices={hasDuffelPrices}
-          departDate={departDate}
-          returnDate={returnDate}
-          origin={ORIGIN_LABELS[origin] ?? origin}
-          originCode={origin}
-          tripLengthLabel={TRIP_LENGTH_LABELS[tripLength]}
-          tripLength={tripLength}
-          month={month}
-          vibes={vibes}
-          party={party}
-        />
       </main>
       <WandrFooter />
     </>

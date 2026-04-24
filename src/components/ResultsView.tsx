@@ -10,6 +10,8 @@ const WorldMap = lazy(() => import("./WorldMap"));
 const REGIONS = ["All", "Americas", "Europe", "Asia", "Africa"];
 const ALL_TAGS = ["All", "Beach", "City", "Nature", "Culture", "Adventure", "Food"];
 
+type SortOption = "value" | "price-asc" | "price-desc";
+
 function applyPreferences(trips: TripEstimate[], prefs: Preferences): TripEstimate[] {
   return [...trips].sort((a, b) => {
     let scoreA = a.valueScore;
@@ -64,12 +66,18 @@ export default function ResultsView({
   const [view, setView] = useState<"list" | "map">("list");
   const [activeRegion, setActiveRegion] = useState("All");
   const [activeTag, setActiveTag] = useState("All");
+  const [sortBy, setSortBy] = useState<SortOption>("value");
   const [selectedTrip, setSelectedTrip] = useState<TripEstimate | null>(null);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [rankedTrips, setRankedTrips] = useState(trips);
   const [personalized, setPersonalized] = useState(false);
   const [alertEmail, setAlertEmail] = useState("");
   const [alertSent, setAlertSent] = useState(false);
+
+  // Parse vibes from plan form into a Set for fast lookup
+  const vibeSet = new Set(
+    vibes.split(",").map(v => v.trim().toLowerCase()).filter(Boolean)
+  );
 
   useEffect(() => {
     const saved = localStorage.getItem("wandr_prefs");
@@ -83,13 +91,21 @@ export default function ResultsView({
 
   const regionFiltered = activeRegion === "All"
     ? rankedTrips
-    : rankedTrips.filter((t) => t.region === activeRegion);
+    : rankedTrips.filter(t => t.region === activeRegion);
 
   const filteredTrips = activeTag === "All"
     ? regionFiltered
-    : regionFiltered.filter((t) =>
-        t.tags.some((tag) => tag.toLowerCase() === activeTag.toLowerCase())
+    : regionFiltered.filter(t =>
+        t.tags.some(tag => tag.toLowerCase() === activeTag.toLowerCase())
       );
+
+  // Sort within each group (value = already sorted by rankDestinations)
+  function applySort(arr: TripEstimate[]) {
+    if (sortBy === "value") return arr;
+    return [...arr].sort((a, b) =>
+      sortBy === "price-asc" ? a.totalCost - b.totalCost : b.totalCost - a.totalCost
+    );
+  }
 
   const handleAlertSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -110,129 +126,175 @@ export default function ResultsView({
   });
 
   const regionCount = (r: string) =>
-    r === "All" ? rankedTrips.length : rankedTrips.filter((t) => t.region === r).length;
+    r === "All" ? rankedTrips.length : rankedTrips.filter(t => t.region === r).length;
+
+  const withinBudgetCount = filteredTrips.filter(t => t.totalCost <= budget).length;
+  const overBudgetCount   = filteredTrips.filter(t => t.totalCost > budget).length;
+
+  const cardProps = {
+    budget, isLivePrice: hasDuffelPrices, departDate, returnDate,
+    party, originCode, tripLength, vibes,
+  };
 
   return (
     <div>
-      {/* Header */}
-      <div className="py-8 border-b border-[#e7e7e7] mb-6">
-        <div className="flex flex-wrap items-start justify-between gap-4">
-          <div>
-            <div className="font-mono text-xs text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-1">
-              {origin} · {tripLengthLabel} · Departing {departDisplay}
-              {party > 1 && ` · ${party} travelers`}
-              {month !== "flexible" && ` · ${month.replace(/-\d{4}$/, "")}`}
-            </div>
-            <h1 className="text-3xl sm:text-4xl font-bold text-[rgba(0,0,0,0.87)]">
-              {filteredTrips.filter(t => t.totalCost <= budget).length} trips within{" "}
-              <span className="text-[#006241]">${budget.toLocaleString()}</span>
-            </h1>
-            <div className="text-sm text-[rgba(0,0,0,0.58)] mt-1">
-              {party === 1
-                ? `Budget is per person · all-in (flights + hotel + food + activities)`
-                : `$${budget.toLocaleString()}/person · $${(budget * party).toLocaleString()} total for ${party} travelers · hotel costs split`}
-            </div>
-            {filteredTrips.filter(t => t.totalCost > budget).length > 0 && (
-              <div className="text-xs text-[rgba(0,0,0,0.38)] mt-1">
-                +{filteredTrips.filter(t => t.totalCost > budget).length} trips slightly over budget also shown below
-              </div>
-            )}
-          </div>
-          <div className="flex flex-wrap gap-2 pt-1">
-            {hasDuffelPrices && (
-              <div className="inline-flex items-center gap-1.5 bg-[#d4e9e2] text-[#006241] text-xs font-medium px-3 py-1.5 rounded-full">
-                ✓ Live prices via Duffel
-              </div>
-            )}
-            {personalized && (
-              <div className="inline-flex items-center gap-1.5 bg-[#d4e9e2] text-[#006241] text-xs font-medium px-3 py-1.5 rounded-full">
-                ✦ Personalized
-              </div>
-            )}
-          </div>
+      {/* ── Header ── */}
+      <div className="pt-6 pb-5 border-b border-[#ebe9e3]">
+        {/* Meta line */}
+        <div className="font-mono text-xs text-[rgba(0,0,0,0.35)] uppercase tracking-widest mb-2">
+          {origin} · {tripLengthLabel} · Departing {departDisplay}
+          {party > 1 && ` · ${party} travelers`}
+          {month !== "flexible" && ` · ${month.replace(/-\d{4}$/, "")}`}
+        </div>
+
+        {/* Headline */}
+        <h1 className="text-3xl sm:text-4xl font-bold text-[rgba(0,0,0,0.87)] leading-tight mb-1">
+          {withinBudgetCount} trips within{" "}
+          <span className="text-[#006241]">${budget.toLocaleString()}</span>
+        </h1>
+
+        {/* Sub-line */}
+        <p className="text-sm text-[rgba(0,0,0,0.52)] mb-3">
+          {party === 1
+            ? "Per person · all-in (flights + hotel + food + activities)"
+            : `$${budget.toLocaleString()}/person · $${(budget * party).toLocaleString()} total for ${party} travelers · hotel shared`}
+          {overBudgetCount > 0 && (
+            <span className="ml-1.5 text-[rgba(0,0,0,0.35)]">
+              · +{overBudgetCount} slightly over budget also shown
+            </span>
+          )}
+        </p>
+
+        {/* Badge row — live price · personalized · selected vibes */}
+        <div className="flex flex-wrap gap-2">
+          {hasDuffelPrices && (
+            <span className="inline-flex items-center gap-1 bg-[#d4e9e2] text-[#006241] text-xs font-semibold px-2.5 py-1 rounded-full">
+              ✓ Live prices via Duffel
+            </span>
+          )}
+          {personalized && (
+            <span className="inline-flex items-center gap-1 bg-[#d4e9e2] text-[#006241] text-xs font-semibold px-2.5 py-1 rounded-full">
+              ✦ Personalized
+            </span>
+          )}
+          {vibeSet.size > 0 && (
+            <>
+              <span className="text-xs text-[rgba(0,0,0,0.35)] self-center">Vibes:</span>
+              {[...vibeSet].map(v => (
+                <span
+                  key={v}
+                  className="inline-flex items-center gap-1 bg-[#f2f0eb] text-[rgba(0,0,0,0.65)] text-xs font-medium px-2.5 py-1 rounded-full capitalize"
+                >
+                  {v}
+                </span>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
-      {/* Region tabs */}
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-1 scrollbar-hide">
-        {REGIONS.map((r) => {
-          const count = regionCount(r);
-          if (count === 0 && r !== "All") return null;
-          return (
-            <button
-              key={r}
-              onClick={() => { setActiveRegion(r); setActiveTag("All"); }}
-              className={`flex-shrink-0 px-4 py-1.5 rounded-full text-sm font-medium border transition-colors ${
-                activeRegion === r
-                  ? "bg-[#1E3932] text-white border-[#1E3932]"
-                  : "bg-white text-[rgba(0,0,0,0.58)] border-[#e7e7e7] hover:border-[#1E3932]"
-              }`}
-            >
-              {r}
-              {r !== "All" && <span className="ml-1.5 text-xs opacity-60">{count}</span>}
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Style filters + view toggle */}
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-5">
-        <div className="flex flex-wrap gap-2">
-          {ALL_TAGS.map((tag) => {
-            const count = regionFiltered.filter((t) =>
-              t.tags.some((tg) => tg.toLowerCase() === tag.toLowerCase())
-            ).length;
-            if (count === 0 && tag !== "All") return null;
+      {/* ── Sticky filter bar ── */}
+      <div className="sticky top-0 z-20 bg-[#f9f8f5]/96 backdrop-blur-md border-b border-[#ebe9e3] -mx-7 px-7 pt-3 pb-2.5 mb-6">
+        {/* Region tabs */}
+        <div className="flex gap-2 mb-2.5 overflow-x-auto scrollbar-hide">
+          {REGIONS.map(r => {
+            const count = regionCount(r);
+            if (count === 0 && r !== "All") return null;
             return (
               <button
-                key={tag}
-                onClick={() => setActiveTag(tag)}
-                className={`px-3 py-1.5 rounded-full text-sm border transition-colors ${
-                  activeTag === tag
-                    ? "bg-[#00754A] text-white border-[#00754A]"
-                    : "bg-white text-[rgba(0,0,0,0.58)] border-[#e7e7e7] hover:border-[#00754A]"
+                key={r}
+                onClick={() => { setActiveRegion(r); setActiveTag("All"); }}
+                className={`flex-shrink-0 px-3.5 py-1 rounded-full text-sm font-medium border transition-all ${
+                  activeRegion === r
+                    ? "bg-[#1E3932] text-white border-[#1E3932]"
+                    : "bg-white text-[rgba(0,0,0,0.55)] border-[#e0ded8] hover:border-[#1E3932] hover:text-[rgba(0,0,0,0.87)]"
                 }`}
               >
-                {tag}
-                {tag !== "All" && (
-                  <span className="ml-1 text-xs opacity-60">{count}</span>
-                )}
+                {r}
+                {r !== "All" && <span className="ml-1 text-xs opacity-60">{count}</span>}
               </button>
             );
           })}
         </div>
 
-        <div className="flex items-center bg-white border border-[#e7e7e7] rounded-xl p-1 gap-1 flex-shrink-0">
-          <button
-            onClick={() => setView("list")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              view === "list" ? "bg-[#00754A] text-white" : "text-[rgba(0,0,0,0.58)] hover:text-[rgba(0,0,0,0.87)]"
-            }`}
-          >
-            ≡ List
-          </button>
-          <button
-            onClick={() => setView("map")}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-all ${
-              view === "map" ? "bg-[#00754A] text-white" : "text-[rgba(0,0,0,0.58)] hover:text-[rgba(0,0,0,0.87)]"
-            }`}
-          >
-            🗺 Map
-          </button>
+        {/* Tag filters + sort + view toggle */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          {/* Tag chips — vibe-matching ones are highlighted */}
+          <div className="flex flex-wrap gap-1.5">
+            {ALL_TAGS.map(tag => {
+              const count = regionFiltered.filter(t =>
+                t.tags.some(tg => tg.toLowerCase() === tag.toLowerCase())
+              ).length;
+              if (count === 0 && tag !== "All") return null;
+              const isVibe = tag !== "All" && vibeSet.has(tag.toLowerCase());
+              const isActive = activeTag === tag;
+              return (
+                <button
+                  key={tag}
+                  onClick={() => setActiveTag(tag)}
+                  className={`px-3 py-1 rounded-full text-sm border transition-all ${
+                    isActive
+                      ? "bg-[#00754A] text-white border-[#00754A]"
+                      : isVibe
+                      ? "bg-[#edf7f2] text-[#006241] border-[#a8d5be] hover:border-[#00754A] font-medium"
+                      : "bg-white text-[rgba(0,0,0,0.55)] border-[#e0ded8] hover:border-[#00754A] hover:text-[rgba(0,0,0,0.87)]"
+                  }`}
+                >
+                  {isVibe && !isActive && <span className="mr-0.5 text-[10px]">✦</span>}
+                  {tag}
+                  {tag !== "All" && <span className="ml-1 text-xs opacity-55">{count}</span>}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Right controls */}
+          <div className="flex items-center gap-2 flex-shrink-0">
+            {/* Sort */}
+            <select
+              value={sortBy}
+              onChange={e => setSortBy(e.target.value as SortOption)}
+              className="text-xs border border-[#e0ded8] rounded-full px-3 py-1.5 bg-white text-[rgba(0,0,0,0.58)] focus:outline-none focus:border-[#00754A] cursor-pointer"
+            >
+              <option value="value">Best match</option>
+              <option value="price-asc">Price: Low → High</option>
+              <option value="price-desc">Price: High → Low</option>
+            </select>
+
+            {/* List / Map toggle */}
+            <div className="flex items-center bg-white border border-[#e0ded8] rounded-xl p-1 gap-1">
+              <button
+                onClick={() => setView("list")}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                  view === "list" ? "bg-[#00754A] text-white" : "text-[rgba(0,0,0,0.55)] hover:text-[rgba(0,0,0,0.87)]"
+                }`}
+              >
+                ≡ List
+              </button>
+              <button
+                onClick={() => setView("map")}
+                className={`px-3 py-1 rounded-lg text-sm font-medium transition-all ${
+                  view === "map" ? "bg-[#00754A] text-white" : "text-[rgba(0,0,0,0.55)] hover:text-[rgba(0,0,0,0.87)]"
+                }`}
+              >
+                🗺 Map
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Map view */}
+      {/* ── Map view ── */}
       {view === "map" && (
         <div className="mb-6">
-          <div className="flex flex-wrap gap-4 mb-3 text-xs text-[rgba(0,0,0,0.58)]">
+          <div className="flex flex-wrap gap-4 mb-3 text-xs text-[rgba(0,0,0,0.52)]">
             {[
+              { color: "#005c38", label: "Great value" },
               { color: "#006241", label: "Within budget" },
-              { color: "#00754A", label: "Great value" },
-              { color: "#2b5148", label: "Slight stretch" },
+              { color: "#b59a4a", label: "Slight stretch" },
             ].map(({ color, label }) => (
               <div key={label} className="flex items-center gap-1.5">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: color }} />
+                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
                 {label}
               </div>
             ))}
@@ -253,35 +315,29 @@ export default function ResultsView({
           </div>
           {selectedTrip && (
             <div className="mt-4">
-              <DestinationCard
-                trip={selectedTrip}
-                budget={budget}
-                isLivePrice={hasDuffelPrices}
-                departDate={departDate}
-                returnDate={returnDate}
-                party={party}
-                originCode={originCode}
-                tripLength={tripLength}
-                vibes={vibes}
-              />
+              <DestinationCard trip={selectedTrip} {...cardProps} />
             </div>
           )}
         </div>
       )}
 
-      {/* List view */}
+      {/* ── List view ── */}
       {view === "list" && (() => {
-        const withinBudget = filteredTrips.filter(t => t.totalCost <= budget);
-        const overBudget   = filteredTrips.filter(t => t.totalCost >  budget);
-        const cardProps = { budget, isLivePrice: hasDuffelPrices, departDate, returnDate, party, originCode, tripLength, vibes };
+        const withinBudget = applySort(filteredTrips.filter(t => t.totalCost <= budget));
+        const overBudget   = applySort(filteredTrips.filter(t => t.totalCost > budget));
 
         if (filteredTrips.length === 0) {
           return (
             <div className="text-center py-16 bg-white rounded-2xl border border-[#e7e7e7]">
               <div className="text-4xl mb-3">🔍</div>
               <h2 className="text-xl font-bold text-[rgba(0,0,0,0.87)] mb-2">No trips found</h2>
-              <p className="text-[rgba(0,0,0,0.58)] text-sm mb-4">Try a different filter or increase your budget.</p>
-              <button onClick={() => { setActiveTag("All"); setActiveRegion("All"); }} className="text-sm text-[#00754A] underline">
+              <p className="text-[rgba(0,0,0,0.52)] text-sm mb-4">
+                Try a different filter or increase your budget.
+              </p>
+              <button
+                onClick={() => { setActiveTag("All"); setActiveRegion("All"); }}
+                className="text-sm text-[#00754A] underline"
+              >
                 Clear filters
               </button>
             </div>
@@ -292,7 +348,7 @@ export default function ResultsView({
           <>
             {/* Within-budget trips */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {withinBudget.map((trip) => (
+              {withinBudget.map(trip => (
                 <DestinationCard key={trip.id} trip={trip} {...cardProps} />
               ))}
             </div>
@@ -301,14 +357,14 @@ export default function ResultsView({
             {overBudget.length > 0 && (
               <>
                 <div className="flex items-center gap-3 mt-10 mb-5">
-                  <div className="flex-1 border-t border-dashed border-[#e7e7e7]" />
-                  <span className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest whitespace-nowrap px-2">
+                  <div className="flex-1 border-t border-dashed border-[#dedad4]" />
+                  <span className="text-xs font-mono text-[rgba(0,0,0,0.35)] uppercase tracking-widest whitespace-nowrap px-2">
                     Slight stretch · up to 20% over your budget
                   </span>
-                  <div className="flex-1 border-t border-dashed border-[#e7e7e7]" />
+                  <div className="flex-1 border-t border-dashed border-[#dedad4]" />
                 </div>
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {overBudget.map((trip) => (
+                  {overBudget.map(trip => (
                     <DestinationCard key={trip.id} trip={trip} {...cardProps} />
                   ))}
                 </div>
@@ -318,14 +374,16 @@ export default function ResultsView({
         );
       })()}
 
-      {/* Price alert / waitlist — House Green band */}
+      {/* ── Price alert / waitlist ── */}
       {filteredTrips.length > 0 && (
-        <div className="mt-12 bg-[#1E3932] rounded-2xl p-6 text-center">
-          <div className="font-mono text-xs text-[#d4e9e2] uppercase tracking-widest mb-2">Coming soon</div>
+        <div className="mt-14 bg-[#1E3932] rounded-2xl p-8 text-center">
+          <div className="font-mono text-xs text-[#d4e9e2] uppercase tracking-widest mb-2">
+            Coming soon
+          </div>
           <h3 className="text-xl font-bold text-white mb-2">
             Get notified when prices drop
           </h3>
-          <p className="text-sm text-[rgba(255,255,255,0.70)] mb-4">
+          <p className="text-sm text-[rgba(255,255,255,0.65)] mb-5 max-w-sm mx-auto">
             Set a price alert and we&apos;ll email you when any of these trips hits your sweet spot.
           </p>
           {alertSent ? (
@@ -337,14 +395,14 @@ export default function ResultsView({
               <input
                 type="email"
                 value={alertEmail}
-                onChange={(e) => setAlertEmail(e.target.value)}
+                onChange={e => setAlertEmail(e.target.value)}
                 placeholder="your@email.com"
                 required
-                className="flex-1 bg-white/10 border border-white/20 rounded-full px-3 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#d4e9e2]"
+                className="flex-1 bg-white/10 border border-white/20 rounded-full px-4 py-2 text-sm text-white placeholder-white/40 focus:outline-none focus:border-[#d4e9e2]"
               />
               <button
                 type="submit"
-                className="bg-[#00754A] text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-[#006241] active:scale-95 transition-all"
+                className="bg-[#00754A] text-white text-sm font-semibold px-5 py-2 rounded-full hover:bg-[#006241] active:scale-95 transition-all"
               >
                 Alert me
               </button>
