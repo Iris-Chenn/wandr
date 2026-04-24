@@ -1,338 +1,509 @@
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import destinationsRaw from "@/data/destinations.json";
+import type { Destination } from "@/lib/ranking";
+import PlanWorldMap, { type MapDestination } from "./PlanWorldMap";
+import "./plan-page.css";
 
-// nights = mid-point of range, must match TRIP_LENGTH_NIGHTS in ranking.ts + duffel.ts
+// ─── Constants ───────────────────────────────────────────
 const TRIP_LENGTHS = [
-  { label: '3–4 days', icon: '⏱', nights: 4,  days: 4  },
-  { label: '5–7 days', icon: '✦', nights: 6,  days: 6  },
-  { label: '8–10 days', icon: '☀', nights: 9,  days: 9  },
-  { label: '11–14',    icon: '∞', nights: 12, days: 12 },
-];
-
-const VIBES = [
-  { label: 'City', icon: '🏙️' },
-  { label: 'Beach', icon: '🏖️' },
-  { label: 'Nature', icon: '🏔️' },
-  { label: 'Food', icon: '🍜' },
-  { label: 'Culture', icon: '🎭' },
-  { label: 'Adventure', icon: '🧗' },
-  { label: 'Chill', icon: '🛏️' },
-  { label: 'Nightlife', icon: '💃' },
+  { label: "3-4",   display: "3–4",   nights: 4  },
+  { label: "5-7",   display: "5–7",   nights: 6  },
+  { label: "8-10",  display: "8–10",  nights: 9  },
+  { label: "11-14", display: "11–14", nights: 12 },
 ];
 
 const AIRPORTS = [
-  { label: 'New York (JFK)',      code: 'JFK' },
-  { label: 'Los Angeles (LAX)',   code: 'LAX' },
-  { label: 'Chicago (ORD)',       code: 'ORD' },
-  { label: 'London (LHR)',        code: 'LHR' },
-  { label: 'San Francisco (SFO)', code: 'SFO' },
-  { label: 'Toronto (YYZ)',       code: 'YYZ' },
-  { label: 'Singapore (SIN)',     code: 'SIN' },
+  { c: "JFK", n: "New York"      },
+  { c: "LAX", n: "Los Angeles"   },
+  { c: "ORD", n: "Chicago"       },
+  { c: "SFO", n: "San Francisco" },
+  { c: "LHR", n: "London"        },
+  { c: "YYZ", n: "Toronto"       },
+  { c: "SIN", n: "Singapore"     },
 ];
 
-const MONTHS = [
-  { label: "I'm flexible (best price)", value: 'flexible' },
-  { label: 'May 2026',    value: 'may-2026' },
-  { label: 'June 2026',   value: 'june-2026' },
-  { label: 'July 2026',   value: 'july-2026' },
-  { label: 'August 2026', value: 'august-2026' },
-  { label: 'September 2026', value: 'september-2026' },
+const MONTHS = ["Flexible", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov"];
+const MONTH_PARAMS: Record<string, string> = {
+  Flexible: "flexible",
+  May: "may-2026", Jun: "june-2026", Jul: "july-2026",
+  Aug: "august-2026", Sep: "september-2026",
+  Oct: "october-2026", Nov: "november-2026",
+};
+
+const VIBES = [
+  { k: "city",      label: "City",      icon: "◉" },
+  { k: "beach",     label: "Beach",     icon: "≈"  },
+  { k: "nature",    label: "Nature",    icon: "▲"  },
+  { k: "food",      label: "Food",      icon: "◍"  },
+  { k: "culture",   label: "Culture",   icon: "❋"  },
+  { k: "adventure", label: "Adventure", icon: "✕"  },
+  { k: "chill",     label: "Chill",     icon: "◐"  },
+  { k: "nightlife", label: "Nightlife", icon: "✦"  },
 ];
 
-// Map tripIdx → tripLength param format for /results
-const TRIP_LENGTH_PARAMS = ['3-4', '5-7', '8-10', '11-14'];
+const ORIGIN_MULTIPLIERS: Record<string, number> = {
+  JFK: 1.0, LAX: 1.05, ORD: 1.02, YYZ: 0.98,
+  LHR: 0.80, SFO: 1.05, SIN: 1.0,
+};
 
-function fmt(n: number) {
-  return '$' + Math.round(n).toLocaleString();
+const BUDGET_TICKS = [300, 1000, 2000, 3000, 4000, 5000];
+
+type Split = { flights: number; hotel: number; food: number; activities: number };
+
+const DEFAULT_SPLIT: Split = { flights: 0.42, hotel: 0.28, food: 0.18, activities: 0.12 };
+
+function fmt(n: number) { return "$" + Math.round(n).toLocaleString(); }
+
+// ─── BudgetBar ───────────────────────────────────────────
+function BudgetBar({ split, onChange, budget }: { split: Split; onChange: (s: Split) => void; budget: number }) {
+  const [dragging, setDragging] = useState<number | null>(null);
+  const barRef = useRef<HTMLDivElement>(null);
+
+  const seg = [
+    { k: "flights",    label: "Flights",    color: "#5DA89A", frac: split.flights    },
+    { k: "hotel",      label: "Hotel",      color: "#C48A3A", frac: split.hotel      },
+    { k: "food",       label: "Food",       color: "#B97A7A", frac: split.food       },
+    { k: "activities", label: "Activities", color: "#8A8A8A", frac: split.activities },
+  ];
+
+  const onDown = (i: number) => (e: React.MouseEvent) => {
+    e.preventDefault();
+    setDragging(i);
+  };
+
+  useEffect(() => {
+    if (dragging == null) return;
+    const move = (e: MouseEvent) => {
+      if (!barRef.current) return;
+      const r = barRef.current.getBoundingClientRect();
+      const x = Math.max(0, Math.min(r.width, e.clientX - r.left));
+      const pos = x / r.width;
+      const cum: [number, number, number] = [
+        seg[0].frac,
+        seg[0].frac + seg[1].frac,
+        seg[0].frac + seg[1].frac + seg[2].frac,
+      ];
+      const newCum = [...cum] as [number, number, number];
+      newCum[dragging] = Math.max(
+        dragging > 0 ? cum[dragging - 1] + 0.05 : 0.08,
+        Math.min(dragging < 2 ? cum[dragging + 1] - 0.05 : 0.95, pos)
+      );
+      onChange({
+        flights:    newCum[0],
+        hotel:      newCum[1] - newCum[0],
+        food:       newCum[2] - newCum[1],
+        activities: 1 - newCum[2],
+      });
+    };
+    const up = () => setDragging(null);
+    window.addEventListener("mousemove", move);
+    window.addEventListener("mouseup", up);
+    return () => { window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up); };
+  }, [dragging, seg, onChange]);
+
+  return (
+    <div className="budbar-wrap">
+      <div className="budbar" ref={barRef}>
+        {seg.map((s) => (
+          <div key={s.k} className="budbar-seg" style={{ flex: s.frac, background: s.color }}>
+            <span className="budbar-lbl">
+              <span className="budbar-pct">{Math.round(s.frac * 100)}%</span>
+              <span className="budbar-name">{s.label}</span>
+            </span>
+          </div>
+        ))}
+        {[0, 1, 2].map((i) => {
+          const left = seg.slice(0, i + 1).reduce((a, s) => a + s.frac, 0) * 100;
+          return (
+            <div
+              key={i}
+              className={`budbar-handle${dragging === i ? " dragging" : ""}`}
+              style={{ left: `${left}%` }}
+              onMouseDown={onDown(i)}
+            >
+              <div className="budbar-handle-grip" />
+            </div>
+          );
+        })}
+      </div>
+      <div className="budbar-help">
+        <span style={{ fontFamily: "var(--w-font-mono)", fontSize: 10, letterSpacing: "0.12em", color: "var(--w-ink-lightest)", textTransform: "uppercase" }}>
+          Drag handles to reallocate
+        </span>
+      </div>
+    </div>
+  );
 }
 
+// ─── Main PlanForm ────────────────────────────────────────
 export default function PlanForm() {
   const router = useRouter();
-  const [budget, setBudget] = useState(1200);
-  const [tripIdx, setTripIdx] = useState(1); // default: 5–7 days
-  const [vibes, setVibes] = useState<Set<number>>(new Set([1, 4])); // Beach, Culture
-  const [airportCode, setAirportCode] = useState('JFK');
-  const [month, setMonth] = useState('flexible');
-  const [party, setParty] = useState(2); // default: couple
+  const [tone, setTone] = useState<"cream" | "dark">("cream");
+  const [budget, setBudget] = useState(1800);
+  const [origin, setOrigin] = useState("JFK");
+  const [tripIdx, setTripIdx] = useState(1); // default 5–7
+  const [month, setMonth] = useState("Flexible");
+  const [party, setParty] = useState(2);
+  const [vibes, setVibes] = useState<Set<string>>(new Set(["culture", "food"]));
+  const [split, setSplit] = useState<Split>(DEFAULT_SPLIT);
+  const [activeId, setActiveId] = useState<string | null>(null);
 
-  const trip = TRIP_LENGTHS[tripIdx];
-
-  // Flights: per person (doesn't change with party)
-  const flights = Math.round(budget * 0.42);
-
-  // Hotel: shared rooms — 2 people per room
-  const rooms = Math.ceil(party / 2);
-  const hotelSolo = Math.round(budget * 0.28); // what 1 person pays solo
-  const hotel = party === 1
-    ? hotelSolo
-    : Math.round(hotelSolo * rooms / party);
-
-  // Food + activities: redistribute hotel savings
-  const remaining = budget - flights - hotel;
-  const food = Math.round(remaining * 0.60);  // ~60% of non-flight/hotel
-  const activities = remaining - food;
-  const foodPerDay = Math.round(food / trip.days);
-
-  // Group totals
-  const totalTrip = budget * party;
-
-  const toggleVibe = useCallback((i: number) => {
+  const toggleVibe = useCallback((k: string) => {
     setVibes(prev => {
       const next = new Set(prev);
-      if (next.has(i)) {
-        next.delete(i);
-      } else if (next.size < 3) {
-        next.add(i);
-      }
+      if (next.has(k)) next.delete(k);
+      else if (next.size < 3) next.add(k);
       return next;
     });
   }, []);
 
+  const trip = TRIP_LENGTHS[tripIdx];
+
+  // Compute ranked destinations for the map + results list
+  const results = useMemo(() => {
+    const { nights } = trip;
+    const multiplier = ORIGIN_MULTIPLIERS[origin] ?? 1.0;
+    const rooms = Math.ceil(party / 2);
+    const hotelShareFactor = party === 1 ? 1 : rooms / party;
+    const vibeKeys = new Set([...vibes].map(k => k.toLowerCase()));
+
+    return (destinationsRaw as Destination[])
+      .map(dest => {
+        const flightCost = Math.round(dest.avgFlightCostFromJFK * multiplier);
+        const hotelCost  = Math.round(dest.avgHotelNightly * nights * hotelShareFactor);
+        const onGround   = Math.round(dest.avgDailyCost * 0.80 * nights);
+        const total      = flightCost + hotelCost + onGround;
+        const ratio      = total / budget;
+
+        const tier: MapDestination["tier"] =
+          ratio <= 0.85 ? "perfect" :
+          ratio <= 1.0  ? "great"   :
+          ratio <= 1.15 ? "stretch" : "over";
+
+        const vibeMatch = dest.tags.filter(t => vibeKeys.has(t.toLowerCase())).length;
+        const tierRank  = tier === "perfect" ? 0 : tier === "great" ? 1 : tier === "stretch" ? 2 : 3;
+        const score     = tierRank * 1000 - vibeMatch * 50 - dest.popularityScore * 0.3;
+
+        return { ...dest, total, ratio, tier, score, flightCost };
+      })
+      .sort((a, b) => a.score - b.score);
+  }, [budget, trip, origin, party, vibes]);
+
+  const counts = useMemo(() => ({
+    perfect: results.filter(r => r.tier === "perfect").length,
+    great:   results.filter(r => r.tier === "great").length,
+    stretch: results.filter(r => r.tier === "stretch").length,
+    over:    results.filter(r => r.tier === "over").length,
+  }), [results]);
+
+  const topMatch = results[0];
+
+  // Map data: pass lat/lng + tier to the map
+  const mapDests: MapDestination[] = useMemo(() => results.map(d => ({
+    id: d.id, city: d.city, lat: d.lat, lng: d.lng,
+    total: d.total, tier: d.tier, popularityScore: d.popularityScore,
+  })), [results]);
+
   const handleSubmit = () => {
+    const vibesParam = [...vibes].map(k => k.charAt(0).toUpperCase() + k.slice(1)).join(",");
     const params = new URLSearchParams({
       budget: String(budget),
-      origin: airportCode,
-      tripLength: TRIP_LENGTH_PARAMS[tripIdx],
-      month,
-      vibes: [...vibes].map(i => VIBES[i].label).join(','),
+      origin,
+      tripLength: trip.label,
+      month: MONTH_PARAMS[month] ?? "flexible",
+      vibes: vibesParam,
       party: String(party),
     });
     router.push(`/results?${params.toString()}`);
   };
 
   return (
-    <section className="sec sec-sand" style={{ paddingTop: 56 }}>
-      <div className="wrap">
-        <div className="plan-grid">
-          {/* ── Left: form card ── */}
-          <div className="plan-card">
-            {/* Budget slider */}
-            <div className="plan-field">
-              <div className="plan-label">
-                <span>My total budget</span>
-                <span style={{ color: 'var(--w-ink-lightest)' }}>all-in · per person</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-                <span className="plan-big">{fmt(budget)}</span>
-                <span className="wd-mono" style={{ fontSize: 12, color: 'var(--w-ink-muted-2)' }}>
-                  Flights + hotel + food + fun
-                </span>
-              </div>
-              <input
-                type="range"
-                min={200}
-                max={5000}
-                step={50}
-                value={budget}
-                onChange={e => setBudget(Number(e.target.value))}
-                className="plan-range"
-              />
-              <div className="plan-range-lbls">
-                <span>$200</span>
-                <span>$2,600</span>
-                <span>$5,000</span>
-              </div>
-            </div>
-
-            {/* Airport */}
-            <div className="plan-field">
-              <div className="plan-label"><span>Flying from</span></div>
-              <select
-                className="plan-select"
-                value={airportCode}
-                onChange={e => setAirportCode(e.target.value)}
-              >
-                {AIRPORTS.map(a => <option key={a.code} value={a.code}>{a.label}</option>)}
-              </select>
-            </div>
-
-            {/* Party size slider */}
-            <div className="plan-field">
-              <div className="plan-label">
-                <span>Who&apos;s going?</span>
-                <span style={{ color: 'var(--w-ink-lightest)' }}>travelers</span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
-                <span className="plan-big">
-                  {party === 1 ? 'Solo' : party === 2 ? '2 people' : `${party} people`}
-                </span>
-                <span className="wd-mono" style={{ fontSize: 12, color: 'var(--w-ink-muted-2)' }}>
-                  {party === 1 ? 'Just me' : `${Math.ceil(party / 2)} ${Math.ceil(party / 2) === 1 ? 'room' : 'rooms'} · hotel shared`}
-                </span>
-              </div>
-              <input
-                type="range"
-                min={1}
-                max={15}
-                step={1}
-                value={party}
-                onChange={e => setParty(Number(e.target.value))}
-                className="plan-range"
-              />
-              <div className="plan-range-lbls">
-                <span>Solo</span>
-                <span>8</span>
-                <span>15</span>
-              </div>
-            </div>
-
-            {/* Trip length chips */}
-            <div className="plan-field">
-              <div className="plan-label"><span>Trip length</span></div>
-              <div className="plan-chips">
-                {TRIP_LENGTHS.map((t, i) => (
-                  <button
-                    key={t.label}
-                    className={`plan-chip${tripIdx === i ? ' on' : ''}`}
-                    onClick={() => setTripIdx(i)}
-                  >
-                    <span className="ic">{t.icon}</span>
-                    {t.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Vibe chips */}
-            <div className="plan-field">
-              <div className="plan-label">
-                <span>Vibe</span>
-                <span style={{ color: 'var(--w-ink-lightest)' }}>pick up to 3</span>
-              </div>
-              <div className="plan-chips">
-                {VIBES.map((v, i) => (
-                  <button
-                    key={v.label}
-                    className={`plan-chip${vibes.has(i) ? ' on' : ''}`}
-                    onClick={() => toggleVibe(i)}
-                  >
-                    <span className="ic">{v.icon}</span>
-                    {v.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* When */}
-            <div className="plan-field">
-              <div className="plan-label">
-                <span>When</span>
-                <span style={{ color: 'var(--w-ink-lightest)' }}>optional</span>
-              </div>
-              <select
-                className="plan-select"
-                value={month}
-                onChange={e => setMonth(e.target.value)}
-              >
-                {MONTHS.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-              </select>
-            </div>
-
-            <button className="plan-cta" onClick={handleSubmit}>
-              Show me where I can go →
-            </button>
-            <div className="plan-help">
-              No credit card needed · 60+ destinations · Live flight prices from Duffel
-            </div>
-          </div>
-
-          {/* ── Right: budget breakdown ── */}
-          <div className="planside">
-            <h3>How Wandr splits your budget</h3>
-            <p>
-              {party === 1
-                ? 'Solo trip breakdown — all per-person. Flights are live (Duffel). Hotel, food, and activities use our median-spend data from 60+ cities.'
-                : `Breakdown for ${party} travelers. Hotel costs split across shared rooms. Flights are live (Duffel).`
-              }
-            </p>
-            <div className="breakdown">
-              {/* Stacked bar — widths proportional to per-person spend */}
-              <div className="bar-break">
-                <span style={{ width: `${Math.round(flights / budget * 100)}%`, background: 'var(--w-accent)' }} />
-                <span style={{ width: `${Math.round(hotel / budget * 100)}%`, background: 'var(--w-amber)' }} />
-                <span style={{ width: `${Math.round(food / budget * 100)}%`, background: 'var(--w-rose)' }} />
-                <span style={{ width: `${Math.round(activities / budget * 100)}%`, background: '#8A8A8A' }} />
-              </div>
-              <div className="row flights">
-                <span className="c">Flights · round trip</span>
-                <span className="v">{fmt(flights)}</span>
-              </div>
-              <div className="row hotel">
-                <span className="c">
-                  Hotel · {trip.nights} nights
-                  {party > 1 && (
-                    <span style={{ fontSize: 11, color: 'var(--w-ink-lightest)', marginLeft: 6 }}>
-                      ({rooms} {rooms === 1 ? 'room' : 'rooms'}, shared)
-                    </span>
-                  )}
-                </span>
-                <span className="v">{fmt(hotel)}</span>
-              </div>
-              <div className="row food">
-                <span className="c">Food · ~{fmt(foodPerDay)}/day</span>
-                <span className="v">{fmt(food)}</span>
-              </div>
-              <div className="row activities">
-                <span className="c">Activities &amp; transit</span>
-                <span className="v">{fmt(activities)}</span>
-              </div>
-              <div className="row" style={{ borderTop: '1px solid var(--w-border-warm)', paddingTop: 10, marginTop: 4 }}>
-                <span style={{ color: 'var(--w-ink-muted)' }}>Per person</span>
-                <span className="v">{fmt(budget)}</span>
-              </div>
-              {party > 1 && (
-                <div className="row" style={{ marginTop: 2 }}>
-                  <span style={{ fontWeight: 600 }}>Total for {party} travelers</span>
-                  <span className="v" style={{ color: 'var(--w-accent)', fontWeight: 700 }}>{fmt(totalTrip)}</span>
-                </div>
-              )}
-            </div>
-
-            <div style={{
-              marginTop: 24,
-              background: 'var(--w-canvas-sand)',
-              border: '1px dashed var(--w-border-warm)',
-              borderRadius: 14,
-              padding: 18,
-            }}>
-              <div className="wd-mono" style={{
-                fontSize: 11,
-                color: 'var(--w-ink-muted-2)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.15em',
-                marginBottom: 8,
-              }}>
-                Price match guarantee
-              </div>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--w-ink-muted)', lineHeight: 1.55 }}>
-                Find a cheaper flight+hotel combo within 24 hours of booking? We refund the
-                difference, full stop.
-              </p>
-            </div>
-          </div>
+    <div className={`plan-split plan-tone-${tone}`}>
+      {/* ── Top bar ── */}
+      <div className="ps-topbar">
+        <div className="ps-crumb">
+          <Link href="/" className="ps-mark">W</Link>
+          <span className="ps-crumb-txt">Wandr</span>
+          <span className="ps-crumb-sep">/</span>
+          <span className="ps-crumb-here">Plan a trip</span>
         </div>
-
-        {/* ── Bottom: how it works steps ── */}
-        <div className="plan-steps">
-          <div className="plan-step">
-            <div className="n">01 Enter your budget</div>
-            <h4>One number — that&apos;s it.</h4>
-            <p>Your whole-trip total. Wandr figures out the rest.</p>
-          </div>
-          <div className="plan-step">
-            <div className="n">02 See your world</div>
-            <h4>A live map of the possible.</h4>
-            <p>Every destination you can actually afford, color-coded by fit.</p>
-          </div>
-          <div className="plan-step">
-            <div className="n">03 Book in one click</div>
-            <h4>Flight + hotel in one flow.</h4>
-            <p>No 12 tabs. Paid from your Wandr wallet at the mid-market rate.</p>
+        <div className="ps-top-meta">
+          <span className="ps-live">
+            <span className="ps-dot" /> Live flight prices · Duffel
+          </span>
+          <span className="ps-sep">·</span>
+          <span style={{ fontFamily: "var(--w-font-mono)", fontSize: 11, color: "var(--w-ink-lightest)" }}>
+            {new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+          </span>
+          {/* Light / Dark toggle */}
+          <div className="ps-theme-toggle" role="group" aria-label="Color theme">
+            <button
+              className={`ps-theme-btn${tone === "cream" ? " on" : ""}`}
+              onClick={() => setTone("cream")}
+              aria-label="Light mode"
+            >
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="3.2" stroke="currentColor" strokeWidth="1.4" />
+                <path d="M8 1.5v2M8 12.5v2M1.5 8h2M12.5 8h2M3.5 3.5l1.4 1.4M11.1 11.1l1.4 1.4M3.5 12.5l1.4-1.4M11.1 4.9l1.4-1.4" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              <span>Light</span>
+            </button>
+            <button
+              className={`ps-theme-btn${tone === "dark" ? " on" : ""}`}
+              onClick={() => setTone("dark")}
+              aria-label="Dark mode"
+            >
+              <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                <path d="M13.5 9.5A6 6 0 016.5 2.5a6 6 0 107 7z" stroke="currentColor" strokeWidth="1.4" strokeLinejoin="round" />
+              </svg>
+              <span>Dark</span>
+            </button>
           </div>
         </div>
       </div>
-    </section>
+
+      {/* ── Main grid (left: controls · right: map) ── */}
+      <div className="ps-grid">
+        {/* LEFT: controls */}
+        <aside className="ps-controls">
+          <header className="ps-hd">
+            <span className="wd-eyebrow"></span>
+            <h1>
+              <span className="ps-serif">Every trip</span> that fits appears.
+            </h1>
+          </header>
+
+          {/* Budget scrubber */}
+          <div className="ps-budget">
+            <div className="ps-budget-top">
+              <span className="ps-budget-big">{fmt(budget)}</span>
+              <span className="ps-budget-unit">per person · all-in</span>
+            </div>
+            <input
+              type="range" min={300} max={5000} step={50}
+              value={budget}
+              onChange={e => setBudget(Number(e.target.value))}
+              className="ps-range"
+            />
+            <div className="ps-range-ticks">
+              {BUDGET_TICKS.map(t => (
+                <button
+                  key={t}
+                  className={`ps-tick${Math.abs(budget - t) < 100 ? " on" : ""}`}
+                  onClick={() => setBudget(t)}
+                >
+                  {t >= 1000 ? `$${t / 1000}k` : `$${t}`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Allocation bar */}
+          <div className="ps-alloc">
+            <div className="ps-section-lbl">
+              <span>How it splits</span>
+              <span className="ps-hint">drag to reallocate</span>
+            </div>
+            <BudgetBar split={split} onChange={setSplit} budget={budget} />
+          </div>
+
+          {/* Flying from + When */}
+          <div className="ps-row">
+            <div className="ps-field">
+              <label>Flying from</label>
+              <select value={origin} onChange={e => setOrigin(e.target.value)} className="ps-select">
+                {AIRPORTS.map(a => <option key={a.c} value={a.c}>{a.n} ({a.c})</option>)}
+              </select>
+            </div>
+            <div className="ps-field">
+              <label>When</label>
+              <select value={month} onChange={e => setMonth(e.target.value)} className="ps-select">
+                {MONTHS.map(m => <option key={m} value={m}>{m === "Flexible" ? "I'm flexible" : m}</option>)}
+              </select>
+            </div>
+          </div>
+
+          {/* Trip length */}
+          <div className="ps-field">
+            <label>Trip length</label>
+            <div className="ps-seg">
+              {TRIP_LENGTHS.map((t, i) => (
+                <button
+                  key={t.label}
+                  className={`ps-seg-b${tripIdx === i ? " on" : ""}`}
+                  onClick={() => setTripIdx(i)}
+                >
+                  {t.display}
+                  <span className="ps-seg-u">days</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Party size */}
+          <div className="ps-field">
+            <label>
+              Who&apos;s going?
+              <span className="ps-mono-small">{party === 1 ? "solo" : `${party} travelers`}</span>
+            </label>
+            <div className="ps-party">
+              <button className="ps-party-btn" onClick={() => setParty(p => Math.max(1, p - 1))}>−</button>
+              <div className="ps-party-dots">
+                {Array.from({ length: 10 }).map((_, i) => (
+                  <span key={i} className={`ps-party-dot${i < party ? " on" : ""}`} />
+                ))}
+                {party > 10 && (
+                  <span style={{ fontFamily: "var(--w-font-mono)", fontSize: 10, color: "var(--w-accent)", marginLeft: 2 }}>
+                    +{party - 10}
+                  </span>
+                )}
+              </div>
+              <button className="ps-party-btn" onClick={() => setParty(p => Math.min(15, p + 1))}>+</button>
+            </div>
+          </div>
+
+          {/* Vibes */}
+          <div className="ps-field">
+            <label>Vibe <span className="ps-mono-small">pick up to 3</span></label>
+            <div className="vibe-chips">
+              {VIBES.map(v => (
+                <button
+                  key={v.k}
+                  className={`vchip${vibes.has(v.k) ? " on" : ""}`}
+                  onClick={() => toggleVibe(v.k)}
+                >
+                  <span className="vchip-icon">{v.icon}</span>
+                  <span>{v.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* CTA */}
+          <button className="ps-cta" onClick={handleSubmit}>
+            <span>Show me all {counts.perfect + counts.great} matches</span>
+            <span className="ps-cta-arrow">→</span>
+          </button>
+          <div className="ps-cta-note">
+            No credit card · No loyalty upsell · Live prices from Duffel
+          </div>
+        </aside>
+
+        {/* RIGHT: map + results */}
+        <main className="ps-main">
+          {/* Live fit counter strip */}
+          <div className="ps-countstrip">
+            <div className="ps-count">
+              <div className="ps-count-v" style={{ color: "#5DA89A" }}>{counts.perfect}</div>
+              <div className="ps-count-l">well under budget</div>
+            </div>
+            <div className="ps-count">
+              <div className="ps-count-v" style={{ color: "#5DA89A" }}>{counts.great}</div>
+              <div className="ps-count-l">within budget</div>
+            </div>
+            <div className="ps-count">
+              <div className="ps-count-v" style={{ color: "#C48A3A" }}>{counts.stretch}</div>
+              <div className="ps-count-l">slight stretch</div>
+            </div>
+            <div className="ps-count">
+              <div className="ps-count-v" style={{ color: "var(--w-ink-lightest)" }}>{counts.over}</div>
+              <div className="ps-count-l">over budget</div>
+            </div>
+            <div className="ps-countstrip-spacer" />
+            {topMatch && (
+              <div className="ps-top-pick">
+                <span className="ps-top-pick-lbl">top match</span>
+                <span className="ps-top-pick-flag">{topMatch.flag}</span>
+                <span className="ps-top-pick-city">{topMatch.city}</span>
+                <span className="ps-top-pick-price" style={{ fontFamily: "var(--w-font-mono)" }}>
+                  {fmt(topMatch.total)}
+                </span>
+              </div>
+            )}
+          </div>
+
+          {/* World map */}
+          <div className="ps-map-wrap">
+            <PlanWorldMap
+              destinations={mapDests}
+              budget={budget}
+              origin={origin}
+              activeId={activeId}
+              onHover={setActiveId}
+              onSelect={setActiveId}
+              tone={tone}
+            />
+            {/* Legend */}
+            <div className="ps-legend">
+              <div className="ps-legend-row">
+                <span className="ps-legend-dot" style={{ background: "#5DA89A" }} /> fits budget
+              </div>
+              <div className="ps-legend-row">
+                <span className="ps-legend-dot" style={{ background: "#C48A3A" }} /> slight stretch
+              </div>
+              <div className="ps-legend-row">
+                <span className="ps-legend-dot" style={{ background: "#B97A7A", opacity: 0.5 }} /> over budget
+              </div>
+            </div>
+            {/* Origin pill */}
+            <div className="ps-origin-tag">
+              <span className="ps-origin-dot" />
+              <span className="ps-origin-label">
+                Departing {AIRPORTS.find(a => a.c === origin)?.n}
+              </span>
+              <span className="ps-origin-code">{origin}</span>
+            </div>
+          </div>
+
+          {/* Top results preview */}
+          <div className="ps-results">
+            <div className="ps-results-hd">
+              <span className="wd-eyebrow">Best fits · ranked</span>
+              <span className="ps-results-meta" style={{ fontFamily: "var(--w-font-mono)" }}>
+                {trip.nights} nights · from {origin}
+              </span>
+            </div>
+            <div className="reslist">
+              {results.slice(0, 6).map((d, i) => (
+                <div
+                  key={d.id}
+                  className={`resrow${d.id === activeId ? " active" : ""} tier-${d.tier}`}
+                  onMouseEnter={() => setActiveId(d.id)}
+                  onMouseLeave={() => setActiveId(null)}
+                  onClick={handleSubmit}
+                  style={{ cursor: "pointer" }}
+                >
+                  <div className="resrow-rank">{String(i + 1).padStart(2, "0")}</div>
+                  <div className="resrow-flag">{d.flag}</div>
+                  <div className="resrow-main">
+                    <div className="resrow-city">
+                      {d.city}
+                      <span className="resrow-country">, {d.country}</span>
+                    </div>
+                    <div className="resrow-tags">{d.tags.slice(0, 3).join(" · ")}</div>
+                  </div>
+                  <div className="resrow-price">
+                    <div className="resrow-total">{fmt(d.total)}</div>
+                    <div className={`resrow-tier tier-${d.tier}`}>
+                      {d.tier === "perfect"
+                        ? `↓ ${Math.round((1 - d.ratio) * 100)}% under`
+                        : d.tier === "great"
+                        ? "exact fit"
+                        : d.tier === "stretch"
+                        ? `↑ ${Math.round((d.ratio - 1) * 100)}% over`
+                        : "over"}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
   );
 }
