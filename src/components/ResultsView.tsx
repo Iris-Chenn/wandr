@@ -3,7 +3,7 @@
 import { useState, useEffect, lazy, Suspense } from "react";
 import type { TripEstimate } from "@/lib/ranking";
 import DestinationCard from "./DestinationCard";
-import PreferenceQuiz, { type Preferences } from "./PreferenceQuiz";
+import type { Preferences } from "./PreferenceQuiz";
 
 const WorldMap = lazy(() => import("./WorldMap"));
 
@@ -65,7 +65,6 @@ export default function ResultsView({
   const [activeRegion, setActiveRegion] = useState("All");
   const [activeTag, setActiveTag] = useState("All");
   const [selectedTrip, setSelectedTrip] = useState<TripEstimate | null>(null);
-  const [showQuiz, setShowQuiz] = useState(false);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [rankedTrips, setRankedTrips] = useState(trips);
   const [personalized, setPersonalized] = useState(false);
@@ -79,9 +78,6 @@ export default function ResultsView({
       setPreferences(prefs);
       setRankedTrips(applyPreferences(trips, prefs));
       setPersonalized(true);
-    } else {
-      const timer = setTimeout(() => setShowQuiz(true), 1500);
-      return () => clearTimeout(timer);
     }
   }, [trips]);
 
@@ -94,13 +90,6 @@ export default function ResultsView({
     : regionFiltered.filter((t) =>
         t.tags.some((tag) => tag.toLowerCase() === activeTag.toLowerCase())
       );
-
-  const handleQuizComplete = (prefs: Preferences) => {
-    setPreferences(prefs);
-    setRankedTrips(applyPreferences(trips, prefs));
-    setPersonalized(true);
-    setShowQuiz(false);
-  };
 
   const handleAlertSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -125,13 +114,6 @@ export default function ResultsView({
 
   return (
     <div>
-      {showQuiz && (
-        <PreferenceQuiz
-          onComplete={handleQuizComplete}
-          onSkip={() => setShowQuiz(false)}
-        />
-      )}
-
       {/* Header */}
       <div className="py-8 border-b border-[#e7e7e7] mb-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
@@ -162,18 +144,10 @@ export default function ResultsView({
                 ✓ Live prices via Duffel
               </div>
             )}
-            {personalized && preferences ? (
+            {personalized && (
               <div className="inline-flex items-center gap-1.5 bg-[#d4e9e2] text-[#006241] text-xs font-medium px-3 py-1.5 rounded-full">
-                Personalized ·{" "}
-                <button onClick={() => setShowQuiz(true)} className="underline">edit</button>
+                ✦ Personalized
               </div>
-            ) : !showQuiz && (
-              <button
-                onClick={() => setShowQuiz(true)}
-                className="inline-flex items-center gap-1.5 bg-[#e8f0ec] text-[#2b5148] text-xs font-medium px-3 py-1.5 rounded-full hover:bg-[#d4e9e2] transition-colors"
-              >
-                ✦ Personalize
-              </button>
             )}
           </div>
         </div>
