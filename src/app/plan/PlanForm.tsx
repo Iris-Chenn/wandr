@@ -152,6 +152,41 @@ export default function PlanForm() {
   const [split, setSplit] = useState<Split>(DEFAULT_SPLIT);
   const [activeId, setActiveId] = useState<string | null>(null);
 
+  // ── Resizable split panel ──
+  const [controlsWidth, setControlsWidth] = useState(440);
+  const [collapsed, setCollapsed] = useState(false);
+  const isDragging = useRef(false);
+  const dragStart = useRef({ x: 0, w: 440 });
+
+  const onHandleDown = (e: React.MouseEvent) => {
+    isDragging.current = true;
+    dragStart.current = { x: e.clientX, w: controlsWidth };
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  };
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      const delta = e.clientX - dragStart.current.x;
+      const newW = Math.max(280, Math.min(720, dragStart.current.w + delta));
+      setControlsWidth(newW);
+      if (newW > 300) setCollapsed(false);
+    };
+    const onUp = () => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, []);
+
   const toggleVibe = useCallback((k: string) => {
     setVibes(prev => {
       const next = new Set(prev);
@@ -266,10 +301,10 @@ export default function PlanForm() {
         </div>
       </div>
 
-      {/* ── Main grid (left: controls · right: map) ── */}
-      <div className="ps-grid">
+      {/* ── Main grid (left: controls · resize handle · right: map) ── */}
+      <div className="ps-grid" style={{ gridTemplateColumns: `${collapsed ? 0 : controlsWidth}px 8px 1fr` }}>
         {/* LEFT: controls */}
-        <aside className="ps-controls">
+        <aside className="ps-controls" style={{ overflow: collapsed ? "hidden" : undefined, minWidth: 0 }}>
           <header className="ps-hd">
             <span className="wd-eyebrow"></span>
             <h1>
@@ -392,6 +427,17 @@ export default function PlanForm() {
             No credit card · No loyalty upsell · Live prices from Duffel
           </div>
         </aside>
+
+        {/* Resize handle */}
+        <div className="ps-resize-handle" onMouseDown={onHandleDown}>
+          <button
+            className="ps-collapse-btn"
+            onClick={() => setCollapsed(c => !c)}
+            title={collapsed ? "Expand controls" : "Collapse controls"}
+          >
+            {collapsed ? "›" : "‹"}
+          </button>
+        </div>
 
         {/* RIGHT: map + results */}
         <main className="ps-main">

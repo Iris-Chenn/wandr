@@ -57,7 +57,7 @@
 /* Grid */
 .ps-grid {
   display: grid;
-  grid-template-columns: 440px 1fr;
+  grid-template-columns: 440px 8px 1fr;
   flex: 1;
   min-height: 0;
 }
@@ -452,3 +452,55 @@
 .plan-tone-dark .resrow-tier.tier-great { color: #7FC9BB; }
 .plan-tone-dark .resrow-tier.tier-stretch { color: #E0B877; }
 .plan-tone-dark .resrow-tier.tier-over    { color: #D8A5A5; }
+
+/* ── Resize handle ── */
+.ps-resize-handle {
+  width: 8px;
+  background: var(--w-border-warm);
+  cursor: col-resize;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.ps-resize-handle:hover { background: var(--w-accent-tint); }
+
+.ps-collapse-btn {
+  position: absolute;
+  width: 22px;
+  height: 36px;
+  background: var(--w-surface-card);
+  border: 1px solid var(--w-border-warm);
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--w-ink-muted);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  transition: all 0.12s;
+  padding: 0;
+  line-height: 1;
+}
+.ps-collapse-btn:hover {
+  background: var(--w-accent);
+  color: #fff;
+  border-color: var(--w-accent);
+}
+
+.plan-tone-dark .ps-resize-handle { background: rgba(255,255,255,0.06); }
+.plan-tone-dark .ps-resize-handle:hover { background: rgba(127,201,187,0.15); }
+.plan-tone-dark .ps-collapse-btn {
+  background: #131F1D;
+  border-color: rgba(255,255,255,0.08);
+  color: rgba(255,255,255,0.6);
+}
+.plan-tone-dark .ps-collapse-btn:hover {
+  background: #7FC9BB;
+  color: #0A0A0A;
+  border-color: #7FC9BB;
+}
