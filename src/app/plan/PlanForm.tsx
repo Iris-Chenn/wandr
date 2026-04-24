@@ -44,14 +44,6 @@ const MONTHS = [
 // Map tripIdx → tripLength param format for /results
 const TRIP_LENGTH_PARAMS = ['3-4', '5-7', '8-10', '11-14'];
 
-const PARTY_OPTIONS = [
-  { label: 'Solo', value: 1 },
-  { label: 'Couple', value: 2 },
-  { label: '3', value: 3 },
-  { label: '4', value: 4 },
-  { label: '5+', value: 5 },
-];
-
 function fmt(n: number) {
   return '$' + Math.round(n).toLocaleString();
 }
@@ -156,22 +148,33 @@ export default function PlanForm() {
               </select>
             </div>
 
-            {/* Party size */}
+            {/* Party size slider */}
             <div className="plan-field">
               <div className="plan-label">
                 <span>Who&apos;s going?</span>
                 <span style={{ color: 'var(--w-ink-lightest)' }}>travelers</span>
               </div>
-              <div className="plan-chips">
-                {PARTY_OPTIONS.map(p => (
-                  <button
-                    key={p.value}
-                    className={`plan-chip${party === p.value ? ' on' : ''}`}
-                    onClick={() => setParty(p.value)}
-                  >
-                    {p.label}
-                  </button>
-                ))}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
+                <span className="plan-big">
+                  {party === 1 ? 'Solo' : party === 2 ? '2 people' : `${party} people`}
+                </span>
+                <span className="wd-mono" style={{ fontSize: 12, color: 'var(--w-ink-muted-2)' }}>
+                  {party === 1 ? 'Just me' : `${Math.ceil(party / 2)} ${Math.ceil(party / 2) === 1 ? 'room' : 'rooms'} · hotel shared`}
+                </span>
+              </div>
+              <input
+                type="range"
+                min={1}
+                max={15}
+                step={1}
+                value={party}
+                onChange={e => setParty(Number(e.target.value))}
+                className="plan-range"
+              />
+              <div className="plan-range-lbls">
+                <span>Solo</span>
+                <span>8</span>
+                <span>15</span>
               </div>
             </div>
 
