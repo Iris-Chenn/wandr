@@ -75,9 +75,9 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
 };
 
 const BUDGET_MATCH_STYLES = {
-  perfect: { label: "Within budget", color: "#006241", bg: "#d4e9e2" },
-  great:   { label: "Great value",   color: "#00754A", bg: "#d4e9e2" },
-  stretch: { label: "Slight stretch", color: "#2b5148", bg: "#e8f0ec" },
+  great:   { label: "Great value",    color: "#005c38", bg: "#c3e6d5" }, // ≥20% under — best
+  perfect: { label: "Within budget",  color: "#006241", bg: "#d4e9e2" }, // within budget
+  stretch: { label: "Slight stretch", color: "#7a5c00", bg: "#f6ebd4" }, // up to 20% over
 };
 
 type Props = {
@@ -182,8 +182,10 @@ export default function DestinationCard({
           </div>
 
           <div className="text-right">
-            {savings > 0 && (
-              <div className="text-xs text-[#006241] font-medium mb-1">${savings} under</div>
+            {savings > 0 ? (
+              <div className="text-xs text-[#005c38] font-medium mb-1">${savings.toLocaleString()} under budget</div>
+            ) : (
+              <div className="text-xs text-[#7a5c00] font-medium mb-1">${Math.abs(savings).toLocaleString()} over</div>
             )}
             <span className="text-[#00754A] text-sm font-semibold group-hover:translate-x-0.5 transition-transform inline-block">
               View →

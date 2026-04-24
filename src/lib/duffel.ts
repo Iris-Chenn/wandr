@@ -74,15 +74,28 @@ export function getDepartureDates(
     depart = new Date(today);
     depart.setDate(today.getDate() + 42);
   } else {
+    // Month values come in as "may-2026", "june-2026", etc.
+    // Extract the month name and optional year
+    const parts = month.split("-");
+    const monthName = parts[0].charAt(0).toUpperCase() + parts[0].slice(1);
+    const yearOverride = parts[1] ? parseInt(parts[1]) : null;
+
     const monthIndex = [
       "January", "February", "March", "April", "May", "June",
       "July", "August", "September", "October", "November", "December",
-    ].indexOf(month);
+    ].indexOf(monthName);
 
-    depart = new Date(today.getFullYear(), monthIndex, 15);
-    // If that date is in the past, use next year
-    if (depart < today) {
-      depart = new Date(today.getFullYear() + 1, monthIndex, 15);
+    if (monthIndex === -1) {
+      // Fallback: 6 weeks out
+      depart = new Date(today);
+      depart.setDate(today.getDate() + 42);
+    } else {
+      const year = yearOverride ?? today.getFullYear();
+      depart = new Date(year, monthIndex, 15);
+      // If that date is in the past, push to next year
+      if (depart < today) {
+        depart = new Date(year + 1, monthIndex, 15);
+      }
     }
   }
 

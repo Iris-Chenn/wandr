@@ -55,7 +55,7 @@ export default async function ResultsPage({ searchParams }: Props) {
   });
 
   const hasDuffelPrices = Object.keys(realPrices).length > 0;
-  const results = rankDestinations(budget, origin, tripLength, undefined, realPrices);
+  const results = rankDestinations(budget, origin, tripLength, undefined, realPrices, vibes, party);
 
   return (
     <>

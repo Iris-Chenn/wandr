@@ -3,11 +3,12 @@
 import { useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 
+// nights = mid-point of range, must match TRIP_LENGTH_NIGHTS in ranking.ts + duffel.ts
 const TRIP_LENGTHS = [
-  { label: '3–4 days', icon: '⏱', nights: 3, days: 3.5 },
-  { label: '5–7 days', icon: '✦', nights: 6, days: 6 },
-  { label: '8–10 days', icon: '☀', nights: 9, days: 9 },
-  { label: '11–14', icon: '∞', nights: 12, days: 12 },
+  { label: '3–4 days', icon: '⏱', nights: 4,  days: 4  },
+  { label: '5–7 days', icon: '✦', nights: 6,  days: 6  },
+  { label: '8–10 days', icon: '☀', nights: 9,  days: 9  },
+  { label: '11–14',    icon: '∞', nights: 12, days: 12 },
 ];
 
 const VIBES = [

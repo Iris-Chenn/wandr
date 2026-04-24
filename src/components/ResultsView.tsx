@@ -137,19 +137,22 @@ export default function ResultsView({
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
             <div className="font-mono text-xs text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-1">
-              {origin} · {tripLengthLabel}{month !== "flexible" && ` · ${month}`} · Departing {departDisplay}
+              {origin} · {tripLengthLabel} · Departing {departDisplay}
               {party > 1 && ` · ${party} travelers`}
+              {month !== "flexible" && ` · ${month.replace(/-\d{4}$/, "")}`}
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-[rgba(0,0,0,0.87)]">
-              {filteredTrips.length} trips for{" "}
+              {filteredTrips.filter(t => t.totalCost <= budget).length} trips within{" "}
               <span className="text-[#006241]">${budget.toLocaleString()}</span>
-              <span className="text-xl font-normal text-[rgba(0,0,0,0.38)]"> /person</span>
             </h1>
-            {party > 1 && (
-              <div className="text-sm text-[rgba(0,0,0,0.58)] mt-1">
-                Total trip budget:{" "}
-                <span className="font-semibold text-[#006241]">${(budget * party).toLocaleString()}</span>
-                {" "}for {party} travelers
+            <div className="text-sm text-[rgba(0,0,0,0.58)] mt-1">
+              {party === 1
+                ? `Budget is per person · all-in (flights + hotel + food + activities)`
+                : `$${budget.toLocaleString()}/person · $${(budget * party).toLocaleString()} total for ${party} travelers · hotel costs split`}
+            </div>
+            {filteredTrips.filter(t => t.totalCost > budget).length > 0 && (
+              <div className="text-xs text-[rgba(0,0,0,0.38)] mt-1">
+                +{filteredTrips.filter(t => t.totalCost > budget).length} trips slightly over budget also shown below
               </div>
             )}
           </div>
@@ -293,44 +296,53 @@ export default function ResultsView({
       )}
 
       {/* List view */}
-      {view === "list" && (
-        <>
-          {filteredTrips.length === 0 ? (
+      {view === "list" && (() => {
+        const withinBudget = filteredTrips.filter(t => t.totalCost <= budget);
+        const overBudget   = filteredTrips.filter(t => t.totalCost >  budget);
+        const cardProps = { budget, isLivePrice: hasDuffelPrices, departDate, returnDate, party, originCode, tripLength, vibes };
+
+        if (filteredTrips.length === 0) {
+          return (
             <div className="text-center py-16 bg-white rounded-2xl border border-[#e7e7e7]">
               <div className="text-4xl mb-3">🔍</div>
-              <h2 className="text-xl font-bold text-[rgba(0,0,0,0.87)] mb-2">
-                No trips found
-              </h2>
-              <p className="text-[rgba(0,0,0,0.58)] text-sm mb-4">
-                Try a different filter or increase your budget.
-              </p>
-              <button
-                onClick={() => { setActiveTag("All"); setActiveRegion("All"); }}
-                className="text-sm text-[#00754A] underline"
-              >
+              <h2 className="text-xl font-bold text-[rgba(0,0,0,0.87)] mb-2">No trips found</h2>
+              <p className="text-[rgba(0,0,0,0.58)] text-sm mb-4">Try a different filter or increase your budget.</p>
+              <button onClick={() => { setActiveTag("All"); setActiveRegion("All"); }} className="text-sm text-[#00754A] underline">
                 Clear filters
               </button>
             </div>
-          ) : (
+          );
+        }
+
+        return (
+          <>
+            {/* Within-budget trips */}
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {filteredTrips.map((trip) => (
-                <DestinationCard
-                  key={trip.id}
-                  trip={trip}
-                  budget={budget}
-                  isLivePrice={hasDuffelPrices}
-                  departDate={departDate}
-                  returnDate={returnDate}
-                  party={party}
-                  originCode={originCode}
-                  tripLength={tripLength}
-                  vibes={vibes}
-                />
+              {withinBudget.map((trip) => (
+                <DestinationCard key={trip.id} trip={trip} {...cardProps} />
               ))}
             </div>
-          )}
-        </>
-      )}
+
+            {/* Over-budget trips — with divider */}
+            {overBudget.length > 0 && (
+              <>
+                <div className="flex items-center gap-3 mt-10 mb-5">
+                  <div className="flex-1 border-t border-dashed border-[#e7e7e7]" />
+                  <span className="text-xs font-mono text-[rgba(0,0,0,0.38)] uppercase tracking-widest whitespace-nowrap px-2">
+                    Slight stretch · up to 20% over your budget
+                  </span>
+                  <div className="flex-1 border-t border-dashed border-[#e7e7e7]" />
+                </div>
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {overBudget.map((trip) => (
+                    <DestinationCard key={trip.id} trip={trip} {...cardProps} />
+                  ))}
+                </div>
+              </>
+            )}
+          </>
+        );
+      })()}
 
       {/* Price alert / waitlist — House Green band */}
       {filteredTrips.length > 0 && (
