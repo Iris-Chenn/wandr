@@ -86,9 +86,16 @@ type Props = {
   isLivePrice?: boolean;
   departDate?: string;
   returnDate?: string;
+  party?: number;
+  originCode?: string;
+  tripLength?: string;
+  vibes?: string;
 };
 
-export default function DestinationCard({ trip, budget, isLivePrice, departDate, returnDate }: Props) {
+export default function DestinationCard({
+  trip, budget, isLivePrice, departDate, returnDate,
+  party = 1, originCode = "JFK", tripLength = "5-7", vibes = "",
+}: Props) {
   const [imgError, setImgError] = useState(false);
   const match = BUDGET_MATCH_STYLES[trip.budgetMatch];
   const savings = budget - trip.totalCost;
@@ -97,9 +104,20 @@ export default function DestinationCard({ trip, budget, isLivePrice, departDate,
     ? `https://images.unsplash.com/photo-${photoId}?auto=format&fit=crop&w=600&q=75`
     : null;
 
+  const destParams = new URLSearchParams({
+    budget: String(budget),
+    origin: originCode,
+    nights: String(trip.nights),
+    flight: String(trip.flightCost),
+    party: String(party),
+    tripLength,
+    ...(vibes ? { vibes } : {}),
+    ...(departDate ? { depart: departDate, return: returnDate ?? "" } : {}),
+  });
+
   return (
     <Link
-      href={`/destination/${trip.id}?budget=${budget}&origin=JFK&nights=${trip.nights}&flight=${trip.flightCost}${departDate ? `&depart=${departDate}&return=${returnDate}` : ""}`}
+      href={`/destination/${trip.id}?${destParams.toString()}`}
       className="block bg-white border border-[#e7e7e7] rounded-2xl overflow-hidden card-shadow hover:border-[#00754A]/30 hover:shadow-lg transition-all group"
     >
       {/* Photo */}
@@ -153,7 +171,14 @@ export default function DestinationCard({ trip, budget, isLivePrice, departDate,
                 <span className="text-[10px] bg-[#d4e9e2] text-[#006241] font-mono font-semibold px-1.5 py-0.5 rounded">LIVE</span>
               )}
             </div>
-            <div className="text-xs text-[rgba(0,0,0,0.58)]">{trip.nights} nights all-in</div>
+            <div className="text-xs text-[rgba(0,0,0,0.58)]">
+              {trip.nights} nights · per person
+              {party > 1 && (
+                <span className="ml-1 text-[#006241] font-medium">
+                  · ${(trip.totalCost * party).toLocaleString()} total
+                </span>
+              )}
+            </div>
           </div>
 
           <div className="text-right">

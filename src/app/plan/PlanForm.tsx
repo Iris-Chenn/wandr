@@ -43,6 +43,14 @@ const MONTHS = [
 // Map tripIdx → tripLength param format for /results
 const TRIP_LENGTH_PARAMS = ['3-4', '5-7', '8-10', '11-14'];
 
+const PARTY_OPTIONS = [
+  { label: 'Solo', value: 1 },
+  { label: 'Couple', value: 2 },
+  { label: '3', value: 3 },
+  { label: '4', value: 4 },
+  { label: '5+', value: 5 },
+];
+
 function fmt(n: number) {
   return '$' + Math.round(n).toLocaleString();
 }
@@ -54,13 +62,28 @@ export default function PlanForm() {
   const [vibes, setVibes] = useState<Set<number>>(new Set([1, 4])); // Beach, Culture
   const [airportCode, setAirportCode] = useState('JFK');
   const [month, setMonth] = useState('flexible');
+  const [party, setParty] = useState(2); // default: couple
 
   const trip = TRIP_LENGTHS[tripIdx];
+
+  // Flights: per person (doesn't change with party)
   const flights = Math.round(budget * 0.42);
-  const hotel = Math.round(budget * 0.28);
-  const food = Math.round(budget * 0.18);
-  const activities = budget - flights - hotel - food;
+
+  // Hotel: shared rooms — 2 people per room
+  const rooms = Math.ceil(party / 2);
+  const hotelSolo = Math.round(budget * 0.28); // what 1 person pays solo
+  const hotel = party === 1
+    ? hotelSolo
+    : Math.round(hotelSolo * rooms / party);
+
+  // Food + activities: redistribute hotel savings
+  const remaining = budget - flights - hotel;
+  const food = Math.round(remaining * 0.60);  // ~60% of non-flight/hotel
+  const activities = remaining - food;
   const foodPerDay = Math.round(food / trip.days);
+
+  // Group totals
+  const totalTrip = budget * party;
 
   const toggleVibe = useCallback((i: number) => {
     setVibes(prev => {
@@ -81,6 +104,7 @@ export default function PlanForm() {
       tripLength: TRIP_LENGTH_PARAMS[tripIdx],
       month,
       vibes: [...vibes].map(i => VIBES[i].label).join(','),
+      party: String(party),
     });
     router.push(`/results?${params.toString()}`);
   };
@@ -129,6 +153,25 @@ export default function PlanForm() {
               >
                 {AIRPORTS.map(a => <option key={a.code} value={a.code}>{a.label}</option>)}
               </select>
+            </div>
+
+            {/* Party size */}
+            <div className="plan-field">
+              <div className="plan-label">
+                <span>Who&apos;s going?</span>
+                <span style={{ color: 'var(--w-ink-lightest)' }}>travelers</span>
+              </div>
+              <div className="plan-chips">
+                {PARTY_OPTIONS.map(p => (
+                  <button
+                    key={p.value}
+                    className={`plan-chip${party === p.value ? ' on' : ''}`}
+                    onClick={() => setParty(p.value)}
+                  >
+                    {p.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Trip length chips */}
@@ -195,23 +238,32 @@ export default function PlanForm() {
           <div className="planside">
             <h3>How Wandr splits your budget</h3>
             <p>
-              We reverse-engineer a realistic trip from your budget. Flights are live (Duffel).
-              Hotel, food, and activities use our median-spend data from 60+ cities.
+              {party === 1
+                ? 'Solo trip breakdown — all per-person. Flights are live (Duffel). Hotel, food, and activities use our median-spend data from 60+ cities.'
+                : `Breakdown for ${party} travelers. Hotel costs split across shared rooms. Flights are live (Duffel).`
+              }
             </p>
             <div className="breakdown">
-              {/* Stacked bar */}
+              {/* Stacked bar — widths proportional to per-person spend */}
               <div className="bar-break">
-                <span style={{ width: '42%', background: 'var(--w-accent)' }} />
-                <span style={{ width: '28%', background: 'var(--w-amber)' }} />
-                <span style={{ width: '18%', background: 'var(--w-rose)' }} />
-                <span style={{ width: '12%', background: '#8A8A8A' }} />
+                <span style={{ width: `${Math.round(flights / budget * 100)}%`, background: 'var(--w-accent)' }} />
+                <span style={{ width: `${Math.round(hotel / budget * 100)}%`, background: 'var(--w-amber)' }} />
+                <span style={{ width: `${Math.round(food / budget * 100)}%`, background: 'var(--w-rose)' }} />
+                <span style={{ width: `${Math.round(activities / budget * 100)}%`, background: '#8A8A8A' }} />
               </div>
               <div className="row flights">
                 <span className="c">Flights · round trip</span>
                 <span className="v">{fmt(flights)}</span>
               </div>
               <div className="row hotel">
-                <span className="c">Hotel · {trip.nights} nights</span>
+                <span className="c">
+                  Hotel · {trip.nights} nights
+                  {party > 1 && (
+                    <span style={{ fontSize: 11, color: 'var(--w-ink-lightest)', marginLeft: 6 }}>
+                      ({rooms} {rooms === 1 ? 'room' : 'rooms'}, shared)
+                    </span>
+                  )}
+                </span>
                 <span className="v">{fmt(hotel)}</span>
               </div>
               <div className="row food">
@@ -222,10 +274,16 @@ export default function PlanForm() {
                 <span className="c">Activities &amp; transit</span>
                 <span className="v">{fmt(activities)}</span>
               </div>
-              <div className="row">
-                <span>Total</span>
-                <span className="v" style={{ color: 'var(--w-accent)' }}>{fmt(budget)}</span>
+              <div className="row" style={{ borderTop: '1px solid var(--w-border-warm)', paddingTop: 10, marginTop: 4 }}>
+                <span style={{ color: 'var(--w-ink-muted)' }}>Per person</span>
+                <span className="v">{fmt(budget)}</span>
               </div>
+              {party > 1 && (
+                <div className="row" style={{ marginTop: 2 }}>
+                  <span style={{ fontWeight: 600 }}>Total for {party} travelers</span>
+                  <span className="v" style={{ color: 'var(--w-accent)', fontWeight: 700 }}>{fmt(totalTrip)}</span>
+                </div>
+              )}
             </div>
 
             <div style={{

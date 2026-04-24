@@ -14,6 +14,7 @@ type Props = {
     tripLength?: string;
     month?: string;
     vibes?: string;
+    party?: string;
   }>;
 };
 
@@ -34,6 +35,7 @@ export default async function ResultsPage({ searchParams }: Props) {
   const tripLength = params.tripLength || "5-7";
   const month = params.month || "flexible";
   const vibes = params.vibes || "";
+  const party = Number(params.party) || 1;
 
   const { departDate, returnDate } = getDepartureDates(tripLength, month);
 
@@ -75,9 +77,12 @@ export default async function ResultsPage({ searchParams }: Props) {
           departDate={departDate}
           returnDate={returnDate}
           origin={ORIGIN_LABELS[origin] ?? origin}
+          originCode={origin}
           tripLengthLabel={TRIP_LENGTH_LABELS[tripLength]}
+          tripLength={tripLength}
           month={month}
           vibes={vibes}
+          party={party}
         />
       </main>
       <WandrFooter />

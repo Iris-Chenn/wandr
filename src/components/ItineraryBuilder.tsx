@@ -14,6 +14,7 @@ type Props = {
   activitiesCost: number;
   origin: string;
   vibes?: string;
+  party?: number;
 };
 
 // Very lightweight markdown → HTML (headings, bold, bullets, hr, paragraphs)
@@ -43,6 +44,7 @@ export default function ItineraryBuilder({
   activitiesCost,
   origin,
   vibes,
+  party = 1,
 }: Props) {
   const [status, setStatus] = useState<"idle" | "loading" | "streaming" | "done" | "error">("idle");
   const [itinerary, setItinerary] = useState("");
@@ -73,6 +75,7 @@ export default function ItineraryBuilder({
           activitiesCost,
           origin,
           vibes,
+          party,
         }),
       });
 
@@ -118,7 +121,7 @@ export default function ItineraryBuilder({
             {nights + 1} days in {city} {flag}
           </h3>
           <p className="itn-desc">
-            A day-by-day plan built around your ${budget.toLocaleString()} budget — real places, real prices.
+            A day-by-day plan for {party === 1 ? "solo travel" : party === 2 ? "2 travelers" : `${party} travelers`} — built around your ${budget.toLocaleString()} budget per person.
           </p>
         </div>
 

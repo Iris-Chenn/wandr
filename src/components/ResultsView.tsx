@@ -39,9 +39,12 @@ type Props = {
   departDate: string;
   returnDate: string;
   origin: string;
+  originCode?: string;
   tripLengthLabel: string;
+  tripLength?: string;
   month: string;
   vibes?: string;
+  party?: number;
 };
 
 export default function ResultsView({
@@ -51,9 +54,12 @@ export default function ResultsView({
   departDate,
   returnDate,
   origin,
+  originCode = "JFK",
   tripLengthLabel,
+  tripLength = "5-7",
   month,
-  vibes: _vibes,
+  vibes = "",
+  party = 1,
 }: Props) {
   const [view, setView] = useState<"list" | "map">("list");
   const [activeRegion, setActiveRegion] = useState("All");
@@ -132,11 +138,20 @@ export default function ResultsView({
           <div>
             <div className="font-mono text-xs text-[rgba(0,0,0,0.38)] uppercase tracking-widest mb-1">
               {origin} · {tripLengthLabel}{month !== "flexible" && ` · ${month}`} · Departing {departDisplay}
+              {party > 1 && ` · ${party} travelers`}
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold text-[rgba(0,0,0,0.87)]">
               {filteredTrips.length} trips for{" "}
               <span className="text-[#006241]">${budget.toLocaleString()}</span>
+              <span className="text-xl font-normal text-[rgba(0,0,0,0.38)]"> /person</span>
             </h1>
+            {party > 1 && (
+              <div className="text-sm text-[rgba(0,0,0,0.58)] mt-1">
+                Total trip budget:{" "}
+                <span className="font-semibold text-[#006241]">${(budget * party).toLocaleString()}</span>
+                {" "}for {party} travelers
+              </div>
+            )}
           </div>
           <div className="flex flex-wrap gap-2 pt-1">
             {hasDuffelPrices && (
@@ -267,6 +282,10 @@ export default function ResultsView({
                 isLivePrice={hasDuffelPrices}
                 departDate={departDate}
                 returnDate={returnDate}
+                party={party}
+                originCode={originCode}
+                tripLength={tripLength}
+                vibes={vibes}
               />
             </div>
           )}
@@ -302,6 +321,10 @@ export default function ResultsView({
                   isLivePrice={hasDuffelPrices}
                   departDate={departDate}
                   returnDate={returnDate}
+                  party={party}
+                  originCode={originCode}
+                  tripLength={tripLength}
+                  vibes={vibes}
                 />
               ))}
             </div>

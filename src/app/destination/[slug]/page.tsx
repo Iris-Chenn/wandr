@@ -12,7 +12,7 @@ import type { Destination } from "@/lib/ranking";
 
 type Props = {
   params: Promise<{ slug: string }>;
-  searchParams: Promise<{ budget?: string; origin?: string; nights?: string; depart?: string; return?: string; flight?: string; vibes?: string; tripLength?: string }>;
+  searchParams: Promise<{ budget?: string; origin?: string; nights?: string; depart?: string; return?: string; flight?: string; vibes?: string; tripLength?: string; party?: string }>;
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -113,6 +113,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
   const ret = sp.return || "";
   const vibes = sp.vibes || "";
   const tripLength = sp.tripLength || "5-7";
+  const party = Number(sp.party) || 1;
 
   const isLiveFlight = !!sp.flight;
   const flightCost = sp.flight ? Number(sp.flight) : Math.round(destination.avgFlightCostFromJFK);
@@ -200,7 +201,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
 
         <div className="absolute top-4 left-4">
           <Link
-            href={`/results?budget=${budget}&origin=${origin}&tripLength=${tripLength}`}
+            href={`/results?budget=${budget}&origin=${origin}&tripLength=${tripLength}&party=${party}${vibes ? `&vibes=${encodeURIComponent(vibes)}` : ""}`}
             className="text-white/80 hover:text-white text-sm bg-black/30 backdrop-blur-sm px-3 py-1.5 rounded-full transition-colors"
           >
             ← Back to results
@@ -237,8 +238,16 @@ export default async function DestinationPage({ params, searchParams }: Props) {
               {/* Cost breakdown */}
               <div className="bg-white border border-[#e7e7e7] rounded-2xl p-6 card-shadow">
                 <div className="flex items-baseline justify-between mb-5">
-                  <h2 className="font-semibold text-[rgba(0,0,0,0.87)] text-lg">Your {nights}-night budget</h2>
-                  <div className="font-mono font-bold text-2xl text-[#006241]">${totalCost.toLocaleString()}</div>
+                  <h2 className="font-semibold text-[rgba(0,0,0,0.87)] text-lg">
+                    Your {nights}-night budget
+                    {party > 1 && <span className="text-sm font-normal text-[rgba(0,0,0,0.38)] ml-2">· {party} travelers</span>}
+                  </h2>
+                  <div>
+                    <div className="font-mono font-bold text-2xl text-[#006241]">${totalCost.toLocaleString()}</div>
+                    {party > 1 && (
+                      <div className="text-xs text-[rgba(0,0,0,0.38)] text-right">per person · ${(totalCost * party).toLocaleString()} total</div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="flex h-3 rounded-full overflow-hidden gap-0.5 mb-4">
@@ -275,8 +284,8 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                 <div className={`mt-4 rounded-xl p-4 ${savings >= 0 ? "bg-[#d4e9e2] border border-[#006241]/20" : "bg-[#fee2e2] border border-red-300/20"}`}>
                   <div className={`text-sm font-semibold ${savings >= 0 ? "text-[#006241]" : "text-red-700"}`}>
                     {savings >= 0
-                      ? `✓ $${savings.toLocaleString()} under your $${budget.toLocaleString()} budget`
-                      : `$${Math.abs(savings).toLocaleString()} over your $${budget.toLocaleString()} budget`}
+                      ? `✓ $${savings.toLocaleString()} under your $${budget.toLocaleString()} budget per person${party > 1 ? ` · $${(savings * party).toLocaleString()} group savings` : ""}`
+                      : `$${Math.abs(savings).toLocaleString()} over your $${budget.toLocaleString()} budget per person`}
                   </div>
                   <div className="text-xs text-[rgba(0,0,0,0.58)] mt-1">
                     {savings >= 0
@@ -312,6 +321,7 @@ export default async function DestinationPage({ params, searchParams }: Props) {
                 activitiesCost={activitiesCost}
                 origin={origin}
                 vibes={vibes}
+                party={party}
               />
 
               {/* Flights */}
