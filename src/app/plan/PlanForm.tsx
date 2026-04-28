@@ -204,6 +204,11 @@ export default function PlanForm() {
     const hotelShareFactor = party === 1 ? 1 : rooms / party;
     const vibeKeys = new Set([...vibes].map(k => k.toLowerCase()));
 
+    // Per-category budget caps derived from the allocation bar
+    const flightBudget   = budget * split.flights;
+    const hotelBudget    = budget * split.hotel;
+    const onGroundBudget = budget * (split.food + split.activities);
+
     return (destinationsRaw as Destination[])
       .map(dest => {
         // Use live Duffel price when available; fall back to static estimate
@@ -221,12 +226,31 @@ export default function PlanForm() {
 
         const vibeMatch = dest.tags.filter(t => vibeKeys.has(t.toLowerCase())).length;
         const tierRank  = tier === "perfect" ? 0 : tier === "great" ? 1 : tier === "stretch" ? 2 : 3;
-        const score     = tierRank * 1000 - vibeMatch * 50 - dest.popularityScore * 0.3;
+
+        // ── Soft allocation penalty (Option A) ──────────────────────────────
+        // Each category that overshoots its allocated slice of the budget
+        // adds a proportional score penalty. Destinations that fit the user's
+        // preferred split rank higher; no destination is hard-excluded.
+        const flightOvershoot   = Math.max(0, (flightCost - flightBudget)   / flightBudget);
+        const hotelOvershoot    = Math.max(0, (hotelCost  - hotelBudget)    / hotelBudget);
+        const onGroundOvershoot = Math.max(0, (onGround   - onGroundBudget) / onGroundBudget);
+        // Weight by fraction of budget each category represents so larger
+        // categories have proportionally larger influence
+        const allocationPenalty =
+          flightOvershoot   * split.flights              * 600 +
+          hotelOvershoot    * split.hotel                * 600 +
+          onGroundOvershoot * (split.food + split.activities) * 600;
+
+        const score =
+          tierRank * 1000
+          - vibeMatch * 50
+          - dest.popularityScore * 0.3
+          + allocationPenalty;   // ← nudges over-allocation destinations down
 
         return { ...dest, total, ratio, tier, score, flightCost };
       })
       .sort((a, b) => a.score - b.score);
-  }, [budget, trip, origin, party, vibes, realPrices]);
+  }, [budget, trip, origin, party, vibes, realPrices, split]);
 
   const counts = useMemo(() => ({
     perfect: results.filter(r => r.tier === "perfect").length,
