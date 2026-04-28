@@ -323,10 +323,35 @@ export default function ResultsView({
 
       {/* ── List view ── */}
       {view === "list" && (() => {
-        const withinBudget = applySort(filteredTrips.filter(t => t.totalCost <= budget));
-        const overBudget   = applySort(filteredTrips.filter(t => t.totalCost > budget));
+        // Mirror the three map categories exactly
+        const sections = [
+          {
+            key: "great",
+            color: "#005c38",
+            bg: "#c3e6d5",
+            label: "Great value",
+            sub: "≥20% under budget",
+            trips: applySort(filteredTrips.filter(t => t.budgetMatch === "great")),
+          },
+          {
+            key: "perfect",
+            color: "#006241",
+            bg: "#d4e9e2",
+            label: "Within budget",
+            sub: "within your budget",
+            trips: applySort(filteredTrips.filter(t => t.budgetMatch === "perfect")),
+          },
+          {
+            key: "stretch",
+            color: "#7a5c00",
+            bg: "#f6ebd4",
+            label: "Slight stretch",
+            sub: "up to 20% over budget",
+            trips: applySort(filteredTrips.filter(t => t.budgetMatch === "stretch")),
+          },
+        ].filter(s => s.trips.length > 0);
 
-        if (filteredTrips.length === 0) {
+        if (sections.length === 0) {
           return (
             <div className="text-center py-16 bg-white rounded-2xl border border-[#e7e7e7]">
               <div className="text-4xl mb-3">🔍</div>
@@ -346,30 +371,34 @@ export default function ResultsView({
 
         return (
           <>
-            {/* Within-budget trips */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-              {withinBudget.map(trip => (
-                <DestinationCard key={trip.id} trip={trip} {...cardProps} />
-              ))}
-            </div>
-
-            {/* Over-budget trips — with divider */}
-            {overBudget.length > 0 && (
-              <>
-                <div className="flex items-center gap-3 mt-10 mb-5">
-                  <div className="flex-1 border-t border-dashed border-[#dedad4]" />
-                  <span className="text-xs font-mono text-[rgba(0,0,0,0.35)] uppercase tracking-widest whitespace-nowrap px-2">
-                    Slight stretch · up to 20% over your budget
+            {sections.map((section, idx) => (
+              <div key={section.key} className={idx > 0 ? "mt-12" : ""}>
+                {/* Section header — matches map legend */}
+                <div className="flex items-center gap-2.5 mb-5">
+                  <div
+                    className="w-3 h-3 rounded-full flex-shrink-0 ring-2 ring-white"
+                    style={{ backgroundColor: section.color }}
+                  />
+                  <span
+                    className="text-xs font-semibold px-2.5 py-0.5 rounded-full"
+                    style={{ color: section.color, backgroundColor: section.bg }}
+                  >
+                    {section.label}
                   </span>
-                  <div className="flex-1 border-t border-dashed border-[#dedad4]" />
+                  <span className="text-xs text-[rgba(0,0,0,0.35)]">
+                    {section.sub} · {section.trips.length} destination{section.trips.length !== 1 ? "s" : ""}
+                  </span>
+                  <div className="flex-1 border-t border-[#ebe9e3]" />
                 </div>
+
+                {/* Cards grid */}
                 <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                  {overBudget.map(trip => (
+                  {section.trips.map(trip => (
                     <DestinationCard key={trip.id} trip={trip} {...cardProps} />
                   ))}
                 </div>
-              </>
-            )}
+              </div>
+            ))}
           </>
         );
       })()}
