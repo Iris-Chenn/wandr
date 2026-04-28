@@ -128,10 +128,10 @@ export default function ResultsView({
   const regionCount = (r: string) =>
     r === "All" ? rankedTrips.length : rankedTrips.filter(t => t.region === r).length;
 
-  const greatValueCount   = filteredTrips.filter(t => t.budgetMatch === "great").length;
-  const withinBudgetCount = filteredTrips.filter(t => t.budgetMatch === "perfect").length;
-  const stretchCount      = filteredTrips.filter(t => t.budgetMatch === "stretch").length;
-  const totalShown        = filteredTrips.length;
+  const topCount     = filteredTrips.filter(t => t.matchTier === "top").length;
+  const goodCount    = filteredTrips.filter(t => t.matchTier === "good").length;
+  const exploreCount = filteredTrips.filter(t => t.matchTier === "explore").length;
+  const totalShown   = filteredTrips.length;
 
   const cardProps = {
     budget, isLivePrice: hasDuffelPrices, departDate, returnDate,
@@ -155,27 +155,27 @@ export default function ResultsView({
           <span className="text-[#006241]">${budget.toLocaleString()}</span>
         </h1>
 
-        {/* Budget breakdown — matches the three map / list categories */}
+        {/* Match breakdown — mirrors list sections and map dots */}
         <div className="flex flex-wrap gap-3 mb-3 mt-2">
-          {greatValueCount > 0 && (
+          {topCount > 0 && (
             <span className="inline-flex items-center gap-1.5 text-xs">
-              <span className="w-2 h-2 rounded-full bg-[#005c38] inline-block" />
-              <strong className="text-[rgba(0,0,0,0.75)]">{greatValueCount}</strong>
-              <span className="text-[rgba(0,0,0,0.45)]">great value</span>
+              <span className="w-2 h-2 rounded-full bg-[#D4612A] inline-block" />
+              <strong className="text-[rgba(0,0,0,0.75)]">{topCount}</strong>
+              <span className="text-[rgba(0,0,0,0.45)]">top picks</span>
             </span>
           )}
-          {withinBudgetCount > 0 && (
+          {goodCount > 0 && (
             <span className="inline-flex items-center gap-1.5 text-xs">
-              <span className="w-2 h-2 rounded-full bg-[#4a9e7f] inline-block" />
-              <strong className="text-[rgba(0,0,0,0.75)]">{withinBudgetCount}</strong>
-              <span className="text-[rgba(0,0,0,0.45)]">within budget</span>
+              <span className="w-2 h-2 rounded-full bg-[#1A7A6D] inline-block" />
+              <strong className="text-[rgba(0,0,0,0.75)]">{goodCount}</strong>
+              <span className="text-[rgba(0,0,0,0.45)]">good fit</span>
             </span>
           )}
-          {stretchCount > 0 && (
+          {exploreCount > 0 && (
             <span className="inline-flex items-center gap-1.5 text-xs">
-              <span className="w-2 h-2 rounded-full bg-[#b59a4a] inline-block" />
-              <strong className="text-[rgba(0,0,0,0.75)]">{stretchCount}</strong>
-              <span className="text-[rgba(0,0,0,0.45)]">slight stretch</span>
+              <span className="w-2 h-2 rounded-full bg-[#6B4FA0] inline-block" />
+              <strong className="text-[rgba(0,0,0,0.75)]">{exploreCount}</strong>
+              <span className="text-[rgba(0,0,0,0.45)]">explore</span>
             </span>
           )}
         </div>
@@ -311,9 +311,9 @@ export default function ResultsView({
         <div className="mb-6">
           <div className="flex flex-wrap gap-4 mb-3 text-xs text-[rgba(0,0,0,0.52)]">
             {[
-              { color: "#005c38", label: "Great value" },
-              { color: "#4a9e7f", label: "Within budget" },
-              { color: "#b59a4a", label: "Slight stretch" },
+              { color: "#D4612A", label: "Top pick" },
+              { color: "#1A7A6D", label: "Good fit" },
+              { color: "#6B4FA0", label: "Explore" },
             ].map(({ color, label }) => (
               <div key={label} className="flex items-center gap-1.5">
                 <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: color }} />
@@ -345,31 +345,35 @@ export default function ResultsView({
 
       {/* ── List view ── */}
       {view === "list" && (() => {
-        // Mirror the three map categories exactly
+        // Group by holistic match quality (price + hotel fit + vibe alignment)
         const sections = [
           {
-            key: "great",
-            color: "#005c38",
-            bg: "#c3e6d5",
-            label: "Great value",
-            sub: "≥20% under budget",
-            trips: applySort(filteredTrips.filter(t => t.budgetMatch === "great")),
+            key: "top",
+            color: "#D4612A",
+            bg: "#fde8db",
+            label: "Top picks",
+            sub: vibeSet.size > 0
+              ? "strong price fit + matches your vibes"
+              : "strong price fit and hotel quality",
+            trips: applySort(filteredTrips.filter(t => t.matchTier === "top")),
           },
           {
-            key: "perfect",
-            color: "#006241",
-            bg: "#d4e9e2",
-            label: "Within budget",
-            sub: "within your budget",
-            trips: applySort(filteredTrips.filter(t => t.budgetMatch === "perfect")),
+            key: "good",
+            color: "#1A7A6D",
+            bg: "#d3ecea",
+            label: "Good fit",
+            sub: vibeSet.size > 0
+              ? "solid overall match — partial vibe or price alignment"
+              : "solid overall fit",
+            trips: applySort(filteredTrips.filter(t => t.matchTier === "good")),
           },
           {
-            key: "stretch",
-            color: "#7a5c00",
-            bg: "#f6ebd4",
-            label: "Slight stretch",
-            sub: "up to 20% over budget",
-            trips: applySort(filteredTrips.filter(t => t.budgetMatch === "stretch")),
+            key: "explore",
+            color: "#6B4FA0",
+            bg: "#ece8f5",
+            label: "Explore",
+            sub: "less aligned with your search — shown for completeness",
+            trips: applySort(filteredTrips.filter(t => t.matchTier === "explore")),
           },
         ].filter(s => s.trips.length > 0);
 

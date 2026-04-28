@@ -12,9 +12,9 @@ type Props = {
 
 // Match the legend shown in ResultsView exactly
 const DOT_COLORS: Record<string, string> = {
-  great:   "#005c38",   // dark green  — ≥20% under budget
-  perfect: "#4a9e7f",   // mid green   — within budget
-  stretch: "#b59a4a",   // amber       — up to 20% over budget
+  top:     "#D4612A",   // orange — top pick
+  good:    "#1A7A6D",   // teal   — good fit
+  explore: "#6B4FA0",   // purple — explore
 };
 
 export default function WorldMap({ trips, budget, onSelect, selectedId }: Props) {
@@ -56,7 +56,7 @@ export default function WorldMap({ trips, budget, onSelect, selectedId }: Props)
       // Add dots
       trips.forEach((trip) => {
         if (!trip.lat || !trip.lng) return;
-        const color = DOT_COLORS[trip.budgetMatch];
+        const color = DOT_COLORS[trip.matchTier];
         const isSelected = trip.id === selectedId;
 
         const marker = L.circleMarker([trip.lat, trip.lng], {

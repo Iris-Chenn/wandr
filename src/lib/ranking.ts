@@ -85,7 +85,10 @@ export type TripEstimate = Destination & {
   // Budget position
   ratio: number;                                         // totalCost / budget
   tier: "perfect" | "great" | "stretch" | "over";       // for map colouring + counts
-  budgetMatch: "great" | "perfect" | "stretch";          // for card label
+  budgetMatch: "great" | "perfect" | "stretch";          // kept for internal use
+
+  // Overall match quality — price + hotel fit + vibe alignment combined
+  matchTier: "top" | "good" | "explore";
 
   // Unified score
   totalScore: number;       // 0–100 — sort descending
@@ -223,6 +226,29 @@ function toBudgetMatch(ratio: number): TripEstimate["budgetMatch"] {
   return "stretch";
 }
 
+/**
+ * Holistic match tier — combines price fit, hotel quality, AND vibe alignment.
+ *
+ *  "top"     — strong all-round fit; if vibes were selected, at least some match.
+ *              A destination with zero vibe match is capped at "good" when the user
+ *              explicitly chose vibes.
+ *  "good"    — decent fit on most dimensions
+ *  "explore" — weaker fit; shown for completeness but not a primary recommendation
+ */
+function toMatchTier(
+  score: number,
+  vibeScore: number,
+  vibesRequested: boolean,
+): TripEstimate["matchTier"] {
+  // Zero vibe match when user picked vibes → can never be a "top pick"
+  if (vibesRequested && vibeScore === 0) {
+    return score >= 58 ? "good" : "explore";
+  }
+  if (score >= 70) return "top";
+  if (score >= 48) return "good";
+  return "explore";
+}
+
 // ─── Main functions ───────────────────────────────────────────────────────────
 
 /**
@@ -301,6 +327,7 @@ export function computeTripEstimates(
       ratio,
       tier:        toTier(ratio),
       budgetMatch: toBudgetMatch(ratio),
+      matchTier:   toMatchTier(totalScore, sVibe, vibeSet.size > 0),
       totalScore,
       scoreBudgetFit:   sBudget,
       scoreHotelFit:    sHotel,

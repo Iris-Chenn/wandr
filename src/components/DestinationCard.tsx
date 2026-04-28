@@ -74,10 +74,10 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
   "kathmandu":           "1571085406820-b3c24f8c7a8a",
 };
 
-const BUDGET_MATCH_STYLES = {
-  great:   { label: "Great value",    color: "#005c38", bg: "#c3e6d5" }, // ≥20% under — best
-  perfect: { label: "Within budget",  color: "#006241", bg: "#d4e9e2" }, // within budget
-  stretch: { label: "Slight stretch", color: "#7a5c00", bg: "#f6ebd4" }, // up to 20% over
+const MATCH_TIER_STYLES = {
+  top:     { label: "Top pick",  color: "#a33d10", bg: "#fde8db" }, // orange
+  good:    { label: "Good fit",  color: "#0d4f47", bg: "#d3ecea" }, // teal
+  explore: { label: "Explore",   color: "#3d2870", bg: "#ece8f5" }, // purple
 };
 
 type Props = {
@@ -97,7 +97,7 @@ export default function DestinationCard({
   party = 1, originCode = "JFK", tripLength = "5-7", vibes = "",
 }: Props) {
   const [imgError, setImgError] = useState(false);
-  const match = BUDGET_MATCH_STYLES[trip.budgetMatch];
+  const match = MATCH_TIER_STYLES[trip.matchTier];
   const savings = budget - trip.totalCost;
   const photoId = UNSPLASH_PHOTOS[trip.id];
   const photoUrl = photoId && !imgError
