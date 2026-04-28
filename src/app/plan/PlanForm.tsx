@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useMemo, useCallback, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import destinationsRaw from "@/data/destinations.json";
-import type { Destination } from "@/lib/ranking";
+import { computeTripEstimates } from "@/lib/ranking";
+import type { Split, LiveCosts } from "@/lib/ranking";
 import PlanWorldMap, { type MapDestination } from "./PlanWorldMap";
 import "./plan-page.css";
 
@@ -40,19 +40,13 @@ const VIBES = [
   { k: "nature",    label: "Nature",    icon: "▲"  },
   { k: "food",      label: "Food",      icon: "◍"  },
   { k: "culture",   label: "Culture",   icon: "❋"  },
+  { k: "history",   label: "History",   icon: "🏛"  },
   { k: "adventure", label: "Adventure", icon: "✕"  },
   { k: "chill",     label: "Chill",     icon: "◐"  },
   { k: "nightlife", label: "Nightlife", icon: "✦"  },
 ];
 
-const ORIGIN_MULTIPLIERS: Record<string, number> = {
-  JFK: 1.0, LAX: 1.05, ORD: 1.02, YYZ: 0.98,
-  LHR: 0.80, SFO: 1.05, SIN: 1.0,
-};
-
 const BUDGET_TICKS = [300, 1000, 2000, 3000, 4000, 5000];
-
-type Split = { flights: number; hotel: number; food: number; activities: number };
 
 const DEFAULT_SPLIT: Split = { flights: 0.42, hotel: 0.28, food: 0.18, activities: 0.12 };
 
@@ -151,16 +145,17 @@ export default function PlanForm() {
   const [vibes, setVibes] = useState<Set<string>>(new Set(["culture", "food"]));
   const [split, setSplit] = useState<Split>(DEFAULT_SPLIT);
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [realPrices, setRealPrices] = useState<Record<string, number>>({});
+  const [liveCosts, setLiveCosts] = useState<LiveCosts>({});
   const [pricesLoading, setpricesLoading] = useState(false);
   const [, startTransition] = useTransition();
   const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // ── Fetch live Duffel prices whenever origin / trip length / month changes ──
+  // ── Fetch live costs (flights + seasonal hotel/food/activities) ──────────
+  // Debounced 400 ms so rapid filter changes don't fire many requests.
+  // Falls back to static estimates when the API is slow or unavailable.
   useEffect(() => {
     if (fetchTimer.current) clearTimeout(fetchTimer.current);
 
-    // Debounce 400 ms so rapid clicks don't fire many requests
     fetchTimer.current = setTimeout(async () => {
       setpricesLoading(true);
       try {
@@ -169,13 +164,18 @@ export default function PlanForm() {
           tripLength: trip.label,
           month: MONTH_PARAMS[month] ?? "flexible",
         });
-        const res = await fetch(`/api/plan-prices?${params.toString()}`);
+        const res = await fetch(`/api/plan-costs?${params.toString()}`);
         if (res.ok) {
-          const data = await res.json() as { prices: Record<string, number> };
-          startTransition(() => setRealPrices(data.prices));
+          const data = await res.json() as {
+            flights: Record<string, number>;
+            hotels: Record<string, number>;
+            foodPerDay: Record<string, number>;
+            activitiesPerDay: Record<string, number>;
+          };
+          startTransition(() => setLiveCosts(data));
         }
       } catch {
-        // Silently fall back to estimates — no disruption to UX
+        // Silently fall back to static estimates — no disruption to UX
       } finally {
         setpricesLoading(false);
       }
@@ -196,61 +196,18 @@ export default function PlanForm() {
 
   const trip = TRIP_LENGTHS[tripIdx];
 
-  // Compute ranked destinations for the map + results list
-  const results = useMemo(() => {
-    const { nights } = trip;
-    const multiplier = ORIGIN_MULTIPLIERS[origin] ?? 1.0;
-    const rooms = Math.ceil(party / 2);
-    const hotelShareFactor = party === 1 ? 1 : rooms / party;
-    const vibeKeys = new Set([...vibes].map(k => k.toLowerCase()));
+  // All destinations scored — same unified algorithm as the Results page.
+  // Unsorted and unfiltered so the map can show every destination with its tier.
+  const results = useMemo(() =>
+    computeTripEstimates(budget, origin, trip.label, liveCosts, [...vibes].join(","), party, split),
+  [budget, trip, origin, party, vibes, liveCosts, split]);
 
-    // Per-category budget caps derived from the allocation bar
-    const flightBudget   = budget * split.flights;
-    const hotelBudget    = budget * split.hotel;
-    const onGroundBudget = budget * (split.food + split.activities);
-
-    return (destinationsRaw as Destination[])
-      .map(dest => {
-        // Use live Duffel price when available; fall back to static estimate
-        const flightCost = realPrices[dest.id]
-          ?? Math.round(dest.avgFlightCostFromJFK * multiplier);
-        const hotelCost  = Math.round(dest.avgHotelNightly * nights * hotelShareFactor);
-        const onGround   = Math.round(dest.avgDailyCost * 0.80 * nights);
-        const total      = flightCost + hotelCost + onGround;
-        const ratio      = total / budget;
-
-        const tier: MapDestination["tier"] =
-          ratio <= 0.85 ? "perfect" :
-          ratio <= 1.0  ? "great"   :
-          ratio <= 1.15 ? "stretch" : "over";
-
-        const vibeMatch = dest.tags.filter(t => vibeKeys.has(t.toLowerCase())).length;
-        const tierRank  = tier === "perfect" ? 0 : tier === "great" ? 1 : tier === "stretch" ? 2 : 3;
-
-        // ── Soft allocation penalty (Option A) ──────────────────────────────
-        // Each category that overshoots its allocated slice of the budget
-        // adds a proportional score penalty. Destinations that fit the user's
-        // preferred split rank higher; no destination is hard-excluded.
-        const flightOvershoot   = Math.max(0, (flightCost - flightBudget)   / flightBudget);
-        const hotelOvershoot    = Math.max(0, (hotelCost  - hotelBudget)    / hotelBudget);
-        const onGroundOvershoot = Math.max(0, (onGround   - onGroundBudget) / onGroundBudget);
-        // Weight by fraction of budget each category represents so larger
-        // categories have proportionally larger influence
-        const allocationPenalty =
-          flightOvershoot   * split.flights              * 600 +
-          hotelOvershoot    * split.hotel                * 600 +
-          onGroundOvershoot * (split.food + split.activities) * 600;
-
-        const score =
-          tierRank * 1000
-          - vibeMatch * 50
-          - dest.popularityScore * 0.3
-          + allocationPenalty;   // ← nudges over-allocation destinations down
-
-        return { ...dest, total, ratio, tier, score, flightCost };
-      })
-      .sort((a, b) => a.score - b.score);
-  }, [budget, trip, origin, party, vibes, realPrices, split]);
+  // Preview list: within-budget destinations sorted best-fit first
+  const ranked = useMemo(() =>
+    [...results]
+      .filter(d => d.tier !== "over")
+      .sort((a, b) => b.totalScore - a.totalScore),
+  [results]);
 
   const counts = useMemo(() => ({
     perfect: results.filter(r => r.tier === "perfect").length,
@@ -259,12 +216,12 @@ export default function PlanForm() {
     over:    results.filter(r => r.tier === "over").length,
   }), [results]);
 
-  const topMatch = results[0];
+  const topMatch = ranked[0];
 
   // Map data: pass lat/lng + tier to the map
   const mapDests: MapDestination[] = useMemo(() => results.map(d => ({
     id: d.id, city: d.city, lat: d.lat, lng: d.lng,
-    total: d.total, tier: d.tier, popularityScore: d.popularityScore,
+    total: d.totalCost, tier: d.tier, popularityScore: d.popularityScore,
   })), [results]);
 
   const handleSubmit = () => {
@@ -276,6 +233,11 @@ export default function PlanForm() {
       month: MONTH_PARAMS[month] ?? "flexible",
       vibes: vibesParam,
       party: String(party),
+      // Encode split as integers (percentages) to keep URLs clean
+      sFlights:    String(Math.round(split.flights    * 100)),
+      sHotel:      String(Math.round(split.hotel      * 100)),
+      sFood:       String(Math.round(split.food       * 100)),
+      sActivities: String(Math.round(split.activities * 100)),
     });
     router.push(`/results?${params.toString()}`);
   };
@@ -295,9 +257,9 @@ export default function PlanForm() {
             <span className="ps-dot" style={{ opacity: pricesLoading ? 0.35 : 1 }} />
             {pricesLoading
               ? "Fetching live prices…"
-              : Object.keys(realPrices).length > 0
-              ? `Live prices · ${Object.keys(realPrices).length} routes`
-              : "Live flight prices · Duffel"}
+              : Object.keys(liveCosts.flights ?? {}).length > 0
+              ? `Live · ${Object.keys(liveCosts.flights ?? {}).length} flights · seasonal hotel & ground`
+              : "Live prices · flights + seasonal estimates"}
           </span>
           <span className="ps-sep">·</span>
           <span style={{ fontFamily: "var(--w-font-mono)", fontSize: 11, color: "var(--w-ink-lightest)" }}>
@@ -449,7 +411,7 @@ export default function PlanForm() {
 
           {/* CTA */}
           <button className="ps-cta" onClick={handleSubmit}>
-            <span>Show me all {counts.perfect + counts.great} matches</span>
+            <span>Show me all {counts.perfect + counts.great + counts.stretch} matches</span>
             <span className="ps-cta-arrow">→</span>
           </button>
           <div className="ps-cta-note">
@@ -484,7 +446,7 @@ export default function PlanForm() {
                 <span className="ps-top-pick-flag">{topMatch.flag}</span>
                 <span className="ps-top-pick-city">{topMatch.city}</span>
                 <span className="ps-top-pick-price" style={{ fontFamily: "var(--w-font-mono)" }}>
-                  {fmt(topMatch.total)}
+                  {fmt(topMatch.totalCost)}
                 </span>
               </div>
             )}
@@ -532,7 +494,7 @@ export default function PlanForm() {
               </span>
             </div>
             <div className="reslist">
-              {results.slice(0, 6).map((d, i) => (
+              {ranked.slice(0, 6).map((d, i) => (
                 <div
                   key={d.id}
                   className={`resrow${d.id === activeId ? " active" : ""} tier-${d.tier}`}
@@ -551,7 +513,7 @@ export default function PlanForm() {
                     <div className="resrow-tags">{d.tags.slice(0, 3).join(" · ")}</div>
                   </div>
                   <div className="resrow-price">
-                    <div className="resrow-total">{fmt(d.total)}</div>
+                    <div className="resrow-total">{fmt(d.totalCost)}</div>
                     <div className={`resrow-tier tier-${d.tier}`}>
                       {d.tier === "perfect"
                         ? `↓ ${Math.round((1 - d.ratio) * 100)}% under`

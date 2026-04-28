@@ -1,5 +1,8 @@
 import { rankDestinations } from "@/lib/ranking";
+import type { LiveCosts, Split } from "@/lib/ranking";
+import { DEFAULT_SPLIT } from "@/lib/ranking";
 import { getCheapestFlight, getDepartureDates } from "@/lib/duffel";
+import { computeGroundCosts } from "@/lib/cost-engine";
 import ResultsView from "@/components/ResultsView";
 import WandrNavbar from "@/components/WandrNavbar";
 import WandrFooter from "@/components/WandrFooter";
@@ -15,6 +18,11 @@ type Props = {
     month?: string;
     vibes?: string;
     party?: string;
+    // Budget split encoded as integers (percentages) from PlanForm
+    sFlights?: string;
+    sHotel?: string;
+    sFood?: string;
+    sActivities?: string;
   }>;
 };
 
@@ -37,25 +45,47 @@ export default async function ResultsPage({ searchParams }: Props) {
   const vibes = params.vibes || "";
   const party = Number(params.party) || 1;
 
+  // Reconstruct the budget split the user set on the Plan page.
+  // Params are integers (percentages); we normalise so they always sum to 1.
+  const rawFlights    = Number(params.sFlights)    || Math.round(DEFAULT_SPLIT.flights    * 100);
+  const rawHotel      = Number(params.sHotel)      || Math.round(DEFAULT_SPLIT.hotel      * 100);
+  const rawFood       = Number(params.sFood)        || Math.round(DEFAULT_SPLIT.food       * 100);
+  const rawActivities = Number(params.sActivities)  || Math.round(DEFAULT_SPLIT.activities * 100);
+  const rawTotal = rawFlights + rawHotel + rawFood + rawActivities;
+  const split: Split = {
+    flights:    rawFlights    / rawTotal,
+    hotel:      rawHotel      / rawTotal,
+    food:       rawFood       / rawTotal,
+    activities: rawActivities / rawTotal,
+  };
+
   const { departDate, returnDate } = getDepartureDates(tripLength, month);
 
-  // Fetch real prices in parallel for all destinations
   const destinations = destinationsRaw as Destination[];
-  const priceResults = await Promise.allSettled(
+
+  // ── Flights: live from Duffel in parallel ──────────────────────────────
+  const flightResults = await Promise.allSettled(
     destinations.map((dest) =>
       getCheapestFlight(origin, dest.iataCode, departDate, returnDate)
     )
   );
 
-  const realPrices: Record<string, number> = {};
-  priceResults.forEach((result, i) => {
+  const flights: Record<string, number> = {};
+  flightResults.forEach((result, i) => {
     if (result.status === "fulfilled" && result.value !== null) {
-      realPrices[destinations[i].id] = result.value;
+      flights[destinations[i].id] = result.value;
     }
   });
 
-  const hasDuffelPrices = Object.keys(realPrices).length > 0;
-  const results = rankDestinations(budget, origin, tripLength, undefined, realPrices, vibes, party);
+  // ── Hotel / food / activities: seasonal algorithm (fast, no I/O) ───────
+  const { hotels, foodPerDay, activitiesPerDay } = computeGroundCosts(
+    destinations,
+    month
+  );
+
+  const liveCosts: LiveCosts = { flights, hotels, foodPerDay, activitiesPerDay };
+  const hasDuffelPrices = Object.keys(flights).length > 0;
+  const results = rankDestinations(budget, origin, tripLength, undefined, liveCosts, vibes, party, split);
 
   return (
     <>

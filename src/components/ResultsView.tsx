@@ -8,14 +8,14 @@ import type { Preferences } from "./PreferenceQuiz";
 const WorldMap = lazy(() => import("./WorldMap"));
 
 const REGIONS = ["All", "Americas", "Europe", "Asia", "Africa"];
-const ALL_TAGS = ["All", "Beach", "City", "Nature", "Culture", "Adventure", "Food"];
+const ALL_TAGS = ["All", "City", "Beach", "Nature", "Food", "Culture", "History", "Adventure", "Nightlife", "Chill"];
 
 type SortOption = "value" | "price-asc" | "price-desc";
 
 function applyPreferences(trips: TripEstimate[], prefs: Preferences): TripEstimate[] {
   return [...trips].sort((a, b) => {
-    let scoreA = a.valueScore;
-    let scoreB = b.valueScore;
+    let scoreA = a.totalScore;
+    let scoreB = b.totalScore;
 
     const style = prefs.travelStyle.toLowerCase();
     if (a.tags.includes(style)) scoreA *= 1.3;
