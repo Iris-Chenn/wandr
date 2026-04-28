@@ -10,10 +10,11 @@ type Props = {
   selectedId?: string;
 };
 
-const DOT_COLORS = {
-  perfect: "#1A7A6D",   // teal — within budget
-  great:   "#D4612A",   // accent orange — great value / slight stretch
-  stretch: "#6B4FA0",   // purple — stretch
+// Match the legend shown in ResultsView exactly
+const DOT_COLORS: Record<string, string> = {
+  great:   "#005c38",   // dark green  — ≥20% under budget
+  perfect: "#4a9e7f",   // mid green   — within budget
+  stretch: "#b59a4a",   // amber       — up to 20% over budget
 };
 
 export default function WorldMap({ trips, budget, onSelect, selectedId }: Props) {

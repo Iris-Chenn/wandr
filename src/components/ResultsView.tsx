@@ -128,8 +128,10 @@ export default function ResultsView({
   const regionCount = (r: string) =>
     r === "All" ? rankedTrips.length : rankedTrips.filter(t => t.region === r).length;
 
-  const withinBudgetCount = filteredTrips.filter(t => t.totalCost <= budget).length;
-  const overBudgetCount   = filteredTrips.filter(t => t.totalCost > budget).length;
+  const greatValueCount   = filteredTrips.filter(t => t.budgetMatch === "great").length;
+  const withinBudgetCount = filteredTrips.filter(t => t.budgetMatch === "perfect").length;
+  const stretchCount      = filteredTrips.filter(t => t.budgetMatch === "stretch").length;
+  const totalShown        = filteredTrips.length;
 
   const cardProps = {
     budget, isLivePrice: hasDuffelPrices, departDate, returnDate,
@@ -149,20 +151,40 @@ export default function ResultsView({
 
         {/* Headline */}
         <h1 className="text-3xl sm:text-4xl font-bold text-[rgba(0,0,0,0.87)] leading-tight mb-1">
-          {withinBudgetCount} trips within{" "}
+          {totalShown} destinations found for{" "}
           <span className="text-[#006241]">${budget.toLocaleString()}</span>
         </h1>
+
+        {/* Budget breakdown — matches the three map / list categories */}
+        <div className="flex flex-wrap gap-3 mb-3 mt-2">
+          {greatValueCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-xs">
+              <span className="w-2 h-2 rounded-full bg-[#005c38] inline-block" />
+              <strong className="text-[rgba(0,0,0,0.75)]">{greatValueCount}</strong>
+              <span className="text-[rgba(0,0,0,0.45)]">great value</span>
+            </span>
+          )}
+          {withinBudgetCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-xs">
+              <span className="w-2 h-2 rounded-full bg-[#4a9e7f] inline-block" />
+              <strong className="text-[rgba(0,0,0,0.75)]">{withinBudgetCount}</strong>
+              <span className="text-[rgba(0,0,0,0.45)]">within budget</span>
+            </span>
+          )}
+          {stretchCount > 0 && (
+            <span className="inline-flex items-center gap-1.5 text-xs">
+              <span className="w-2 h-2 rounded-full bg-[#b59a4a] inline-block" />
+              <strong className="text-[rgba(0,0,0,0.75)]">{stretchCount}</strong>
+              <span className="text-[rgba(0,0,0,0.45)]">slight stretch</span>
+            </span>
+          )}
+        </div>
 
         {/* Sub-line */}
         <p className="text-sm text-[rgba(0,0,0,0.52)] mb-3">
           {party === 1
             ? "Per person · all-in (flights + hotel + food + activities)"
             : `$${budget.toLocaleString()}/person · $${(budget * party).toLocaleString()} total for ${party} travelers · hotel shared`}
-          {overBudgetCount > 0 && (
-            <span className="ml-1.5 text-[rgba(0,0,0,0.35)]">
-              · +{overBudgetCount} slightly over budget also shown
-            </span>
-          )}
         </p>
 
         {/* Badge row — live price · personalized · selected vibes */}
@@ -290,7 +312,7 @@ export default function ResultsView({
           <div className="flex flex-wrap gap-4 mb-3 text-xs text-[rgba(0,0,0,0.52)]">
             {[
               { color: "#005c38", label: "Great value" },
-              { color: "#006241", label: "Within budget" },
+              { color: "#4a9e7f", label: "Within budget" },
               { color: "#b59a4a", label: "Slight stretch" },
             ].map(({ color, label }) => (
               <div key={label} className="flex items-center gap-1.5">
