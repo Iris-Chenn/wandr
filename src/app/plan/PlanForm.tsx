@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo, useCallback } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import destinationsRaw from "@/data/destinations.json";
@@ -151,6 +151,39 @@ export default function PlanForm() {
   const [vibes, setVibes] = useState<Set<string>>(new Set(["culture", "food"]));
   const [split, setSplit] = useState<Split>(DEFAULT_SPLIT);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [realPrices, setRealPrices] = useState<Record<string, number>>({});
+  const [pricesLoading, setpricesLoading] = useState(false);
+  const [, startTransition] = useTransition();
+  const fetchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // ── Fetch live Duffel prices whenever origin / trip length / month changes ──
+  useEffect(() => {
+    if (fetchTimer.current) clearTimeout(fetchTimer.current);
+
+    // Debounce 400 ms so rapid clicks don't fire many requests
+    fetchTimer.current = setTimeout(async () => {
+      setpricesLoading(true);
+      try {
+        const params = new URLSearchParams({
+          origin,
+          tripLength: trip.label,
+          month: MONTH_PARAMS[month] ?? "flexible",
+        });
+        const res = await fetch(`/api/plan-prices?${params.toString()}`);
+        if (res.ok) {
+          const data = await res.json() as { prices: Record<string, number> };
+          startTransition(() => setRealPrices(data.prices));
+        }
+      } catch {
+        // Silently fall back to estimates — no disruption to UX
+      } finally {
+        setpricesLoading(false);
+      }
+    }, 400);
+
+    return () => { if (fetchTimer.current) clearTimeout(fetchTimer.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [origin, tripIdx, month]);
 
   const toggleVibe = useCallback((k: string) => {
     setVibes(prev => {
@@ -173,7 +206,9 @@ export default function PlanForm() {
 
     return (destinationsRaw as Destination[])
       .map(dest => {
-        const flightCost = Math.round(dest.avgFlightCostFromJFK * multiplier);
+        // Use live Duffel price when available; fall back to static estimate
+        const flightCost = realPrices[dest.id]
+          ?? Math.round(dest.avgFlightCostFromJFK * multiplier);
         const hotelCost  = Math.round(dest.avgHotelNightly * nights * hotelShareFactor);
         const onGround   = Math.round(dest.avgDailyCost * 0.80 * nights);
         const total      = flightCost + hotelCost + onGround;
@@ -191,7 +226,7 @@ export default function PlanForm() {
         return { ...dest, total, ratio, tier, score, flightCost };
       })
       .sort((a, b) => a.score - b.score);
-  }, [budget, trip, origin, party, vibes]);
+  }, [budget, trip, origin, party, vibes, realPrices]);
 
   const counts = useMemo(() => ({
     perfect: results.filter(r => r.tier === "perfect").length,
@@ -233,7 +268,12 @@ export default function PlanForm() {
         </div>
         <div className="ps-top-meta">
           <span className="ps-live">
-            <span className="ps-dot" /> Live flight prices · Duffel
+            <span className="ps-dot" style={{ opacity: pricesLoading ? 0.35 : 1 }} />
+            {pricesLoading
+              ? "Fetching live prices…"
+              : Object.keys(realPrices).length > 0
+              ? `Live prices · ${Object.keys(realPrices).length} routes`
+              : "Live flight prices · Duffel"}
           </span>
           <span className="ps-sep">·</span>
           <span style={{ fontFamily: "var(--w-font-mono)", fontSize: 11, color: "var(--w-ink-lightest)" }}>
