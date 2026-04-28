@@ -18,7 +18,9 @@ export async function getCheapestFlight(
   }
 
   try {
-    const res = await fetch(`${DUFFEL_API}/air/offer_requests`, {
+    // ?return_offers=true tells Duffel to embed offers in the response
+    // (without it the response is just an offer_request ID and offers must be fetched separately)
+    const res = await fetch(`${DUFFEL_API}/air/offer_requests?return_offers=true`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.DUFFEL_API_KEY}`,
@@ -33,7 +35,6 @@ export async function getCheapestFlight(
           ],
           passengers: [{ type: "adult" }],
           cabin_class: "economy",
-          return_offers: true,
         },
       }),
       next: { revalidate: 7200 }, // Next.js cache 2h

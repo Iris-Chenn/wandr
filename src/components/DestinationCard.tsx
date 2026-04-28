@@ -108,9 +108,11 @@ export default function DestinationCard({
     budget: String(budget),
     origin: originCode,
     nights: String(trip.nights),
-    flight: String(trip.flightCost),
     party: String(party),
     tripLength,
+    // Only pass the flight cost as a URL param when it's a confirmed live Duffel price.
+    // The destination page uses !!sp.flight to decide whether to show "Live price" badge.
+    ...(isLivePrice ? { flight: String(trip.flightCost) } : {}),
     ...(vibes ? { vibes } : {}),
     ...(departDate ? { depart: departDate, return: returnDate ?? "" } : {}),
   });

@@ -79,8 +79,19 @@ export default function ExploreClient() {
 
         {/* Destination grid */}
         <div className="dgrid">
-          {filtered.map((t) => (
-            <Link key={t.c} href={`/destination/${t.c.toLowerCase().replace(/ /g, '-')}`} className="dcard">
+          {filtered.map((t) => {
+            const slug = t.c.toLowerCase().replace(/ /g, '-');
+            // Map display nights to the nearest tripLength key
+            const tripLength = t.n <= 4 ? '3-4' : t.n <= 7 ? '5-7' : t.n <= 10 ? '8-10' : '11-14';
+            const exploreParams = new URLSearchParams({
+              budget: '700',
+              origin: 'JFK',
+              nights: String(t.n),
+              tripLength,
+              party: '1',
+            });
+            return (
+            <Link key={t.c} href={`/destination/${slug}?${exploreParams.toString()}`} className="dcard">
               <div className="ph">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -116,7 +127,8 @@ export default function ExploreClient() {
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>
