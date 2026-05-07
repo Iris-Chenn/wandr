@@ -5,11 +5,9 @@ import Link from "next/link";
 import Image from "next/image";
 import type { TripEstimate } from "@/lib/ranking";
 
-// Photo IDs from Unsplash. Numeric IDs (starting with a digit) are fetched as
-// `photo-{id}`; short slug IDs are fetched as `{id}` without the prefix.
-// A secondary URL format is tried automatically on error — see buildPhotoUrls().
+// Unsplash photo IDs — numeric IDs use `photo-{id}`, slugs are tried both ways.
 const UNSPLASH_PHOTOS: Record<string, string> = {
-  // ── Europe ─────────────────────────────────────────────────────────────────
+  // ── Europe ──────────────────────────────────────────────────────────────────
   "lisbon":              "1555881400-74d7acaacd47",
   "paris":               "1499856845952-5870d4ab4cf7",
   "rome":                "1552832230-c0197dd311b5",
@@ -23,7 +21,7 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
   "athens":              "1555993539-1732b0258235",
   "istanbul":            "1524231757912-21f4fe3a7200",
   "reykjavik":           "1531168087216-80de62b8b4e7",
-  "porto":               "1555993539-1732b0258236",   // fallback to slug below
+  "porto":               "1555993539-1732b0258236",
   "seville":             "1558618666-fcd25c85cd64",
   "valencia":            "1583153380367-75e285a06f06",
   "krakow":              "1584346401-33e16cfa5cfa",
@@ -42,8 +40,7 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
   "edinburgh":           "1558618047-2df7e76e2697",
   "valletta":            "1535040534350-4f68dc3aea3e",
   "tbilisi":             "1565008576344-b6a91cd7c4d1",
-
-  // ── Americas ───────────────────────────────────────────────────────────────
+  // ── Americas ────────────────────────────────────────────────────────────────
   "mexico-city":         "1518638150340-f706e86654de",
   "cancun":              "1510097467424-192d713fd8b2",
   "tulum":               "1518500335-7e822c9b4f3b",
@@ -66,28 +63,94 @@ const UNSPLASH_PHOTOS: Record<string, string> = {
   "montevideo":          "1592861777091-f9d2dd0e6ff6",
   "quito":               "1531572753322-ad063cecc140",
   "nassau":              "1548504769-b93f8db14534",
-
-  // ── Africa ─────────────────────────────────────────────────────────────────
+  // ── Africa ──────────────────────────────────────────────────────────────────
   "marrakech":           "1597212720753-4d00e55eab4d",
   "cape-town":           "1580060839134-75a5edca2e99",
   "nairobi":             "1553697384-bce7b6e7484f",
-
-  // ── Asia ───────────────────────────────────────────────────────────────────
+  // ── Asia ────────────────────────────────────────────────────────────────────
   "bangkok":             "1508009603885-50cf7c579365",
   "bali":                "1537996194471-e657df975ab4",
   "tokyo":               "1540959733332-eab4deabeeaf",
   "chiang-mai":          "1528360983277-13d401cdc186",
   "ho-chi-minh":         "1583417319070-4a69db38a482",
-  "hanoi":               "1509391366636-9f70e20b6e56",   // distinct from Ho Chi Minh
+  "hanoi":               "1509391366636-9f70e20b6e56",
   "taipei":              "1570077788046-2a8e7b2f69c5",
   "singapore":           "1525625293386-2d66c8bc27b4",
   "kathmandu":           "1571085406820-b3c24f8c7a8a",
 };
 
-const MATCH_TIER_STYLES = {
-  top:     { label: "Top pick",  color: "#a33d10", bg: "#fde8db" }, // orange
-  good:    { label: "Good fit",  color: "#0d4f47", bg: "#d3ecea" }, // teal
-  explore: { label: "Explore",   color: "#3d2870", bg: "#ece8f5" }, // purple
+// Editorial tags (regional label) and whispers (one-liner) per destination.
+const EDITORIAL_META: Record<string, { tag: string; whisper: string }> = {
+  // Europe
+  lisbon:              { tag: "Iberia",          whisper: "pastel de nata · sunset trams" },
+  paris:               { tag: "France",          whisper: "cafés · couture · golden light" },
+  rome:                { tag: "Italy",           whisper: "pasta · ruins · espresso" },
+  madrid:              { tag: "Iberia",          whisper: "tapas after midnight" },
+  barcelona:           { tag: "Catalonia",       whisper: "Gaudí + sea" },
+  vienna:              { tag: "Austria",         whisper: "opera · coffee · art" },
+  berlin:              { tag: "Germany",         whisper: "art · late nights · history" },
+  amsterdam:           { tag: "Netherlands",     whisper: "canals · bikes · tulips" },
+  prague:              { tag: "Bohemia",         whisper: "cobblestones · castle views" },
+  budapest:            { tag: "Hungary",         whisper: "thermal baths · ruin bars" },
+  athens:              { tag: "Greece",          whisper: "ruins · feta · the Aegean" },
+  istanbul:            { tag: "Bosphorus",       whisper: "spices · minarets · çay" },
+  reykjavik:           { tag: "North Atlantic",  whisper: "aurora season" },
+  porto:               { tag: "Portugal",        whisper: "port wine · river views" },
+  seville:             { tag: "Andalusia",       whisper: "flamenco · orange trees" },
+  valencia:            { tag: "Spain",           whisper: "paella · beach · art city" },
+  krakow:              { tag: "Poland",          whisper: "medieval charm · pierogies" },
+  warsaw:              { tag: "Poland",          whisper: "rebuilt city · nightlife" },
+  florence:            { tag: "Tuscany",         whisper: "renaissance art · gelato" },
+  naples:              { tag: "Campania",        whisper: "pizza birthplace · beautiful chaos" },
+  dubrovnik:           { tag: "Adriatic",        whisper: "old walls · Game of Thrones" },
+  split:               { tag: "Dalmatia",        whisper: "Diocletian palace · sailboats" },
+  kotor:               { tag: "Montenegro",      whisper: "bay · old town · hike up" },
+  belgrade:            { tag: "Serbia",          whisper: "nightlife · history · šljivovica" },
+  bucharest:           { tag: "Romania",         whisper: "art nouveau · cheap drinks" },
+  sofia:               { tag: "Bulgaria",        whisper: "mountains · monasteries" },
+  vilnius:             { tag: "Baltics",         whisper: "baroque · cosy · budget-kind" },
+  tallinn:             { tag: "Estonia",         whisper: "medieval old town · digital city" },
+  dublin:              { tag: "Ireland",         whisper: "pubs · craic · wild coast" },
+  edinburgh:           { tag: "Scotland",        whisper: "castle · whisky · moors" },
+  valletta:            { tag: "Malta",           whisper: "fortress city · harbour" },
+  tbilisi:             { tag: "Caucasus",        whisper: "wine · baths · old town" },
+  // Americas
+  "mexico-city":       { tag: "Capital",         whisper: "Roma Norte vibes" },
+  cancun:              { tag: "Caribbean",        whisper: "beach + tacos + budget" },
+  tulum:               { tag: "Riviera Maya",     whisper: "cenotes · eco-chic" },
+  oaxaca:              { tag: "Mexico",           whisper: "mezcal · mole · markets" },
+  "puerto-vallarta":   { tag: "Pacific Coast",    whisper: "sunset cocktails" },
+  "san-juan":          { tag: "Puerto Rico",      whisper: "Old City · plantains" },
+  "punta-cana":        { tag: "Dominican Rep.",   whisper: "all-inclusive paradise" },
+  havana:              { tag: "Cuba",             whisper: "vintage cars · salsa" },
+  "antigua-guatemala": { tag: "Guatemala",        whisper: "volcanoes · cobblestones" },
+  "san-jose-costa-rica": { tag: "Costa Rica",    whisper: "pura vida · biodiversity" },
+  "panama-city":       { tag: "Panama",           whisper: "canal · skyscrapers · heat" },
+  "colombia-medellin": { tag: "Colombia",         whisper: "eternal spring · street art" },
+  cartagena:           { tag: "Caribbean Coast",  whisper: "walled city · heat" },
+  bogota:              { tag: "Colombia",         whisper: "street art · altitude" },
+  lima:                { tag: "Andes Coast",      whisper: "ceviche capital" },
+  cusco:               { tag: "Peru",             whisper: "Machu Picchu gateway" },
+  "buenos-aires":      { tag: "Argentina",        whisper: "steak · tango · Europe vibes" },
+  santiago:            { tag: "Chile",            whisper: "Andes backdrop · wine country" },
+  "rio-de-janeiro":    { tag: "Brazil",           whisper: "beaches · carnival · views" },
+  montevideo:          { tag: "Uruguay",          whisper: "chill · steak · waterfront" },
+  quito:               { tag: "Ecuador",          whisper: "equator · colonial old town" },
+  nassau:              { tag: "Bahamas",          whisper: "turquoise · conch · reef" },
+  // Africa
+  marrakech:           { tag: "Morocco",          whisper: "souks · spice · riads" },
+  "cape-town":         { tag: "South Africa",     whisper: "mountain · wine · coast" },
+  nairobi:             { tag: "East Africa",      whisper: "safari gateway · tech hub" },
+  // Asia
+  bangkok:             { tag: "Thailand",         whisper: "temples · street food · chaos" },
+  bali:                { tag: "Indonesia",        whisper: "rice fields · surf · spirit" },
+  tokyo:               { tag: "Far East",         whisper: "neon + ramen" },
+  "chiang-mai":        { tag: "N. Thailand",      whisper: "elephants · temples · chill" },
+  "ho-chi-minh":       { tag: "Vietnam",          whisper: "pho · motorbikes · heat" },
+  hanoi:               { tag: "Vietnam",          whisper: "Old Quarter · egg coffee" },
+  taipei:              { tag: "Taiwan",           whisper: "night markets · tech · tea" },
+  singapore:           { tag: "Southeast Asia",   whisper: "hawker centres · spotless" },
+  kathmandu:           { tag: "Nepal",            whisper: "Himalayas gateway · chaos" },
 };
 
 type Props = {
@@ -100,31 +163,31 @@ type Props = {
   originCode?: string;
   tripLength?: string;
   vibes?: string;
+  big?: boolean;
 };
 
 export default function DestinationCard({
   trip, budget, isLivePrice, departDate, returnDate,
   party = 1, originCode = "JFK", tripLength = "5-7", vibes = "",
+  big = false,
 }: Props) {
-  // Track how many URL formats we've tried (0 = none, 1 = tried primary, 2 = tried both)
   const [urlAttempt, setUrlAttempt] = useState(0);
-  const match = MATCH_TIER_STYLES[trip.matchTier];
   const savings = budget - trip.totalCost;
   const photoId = UNSPLASH_PHOTOS[trip.id];
+  const meta = EDITORIAL_META[trip.id] ?? {
+    tag: trip.region,
+    whisper: trip.tags.slice(0, 2).join(" · "),
+  };
 
-  // Unsplash has two CDN formats:
-  //   numeric IDs  → https://images.unsplash.com/photo-1555881400-74d7acaacd47
-  //   slug IDs     → https://images.unsplash.com/photo-Jc4LH4jZsjM  (also works with prefix)
-  // If the primary URL fails (deleted / restricted photo) we try the alternate format.
-  const Q = "?auto=format&fit=crop&w=600&q=75";
+  const Q = "?auto=format&fit=crop&w=800&q=75";
   const photoUrls = photoId ? [
-    `https://images.unsplash.com/photo-${photoId}${Q}`,   // primary — works for most IDs
-    `https://images.unsplash.com/${photoId}${Q}`,          // fallback — slug-only format
+    `https://images.unsplash.com/photo-${photoId}${Q}`,
+    `https://images.unsplash.com/${photoId}${Q}`,
   ] : [];
   const photoUrl = photoUrls[urlAttempt] ?? null;
 
   const handleImgError = useCallback(() => {
-    setUrlAttempt(prev => prev + 1);   // try next format; if exhausted, photoUrl → null
+    setUrlAttempt(prev => prev + 1);
   }, []);
 
   const destParams = new URLSearchParams({
@@ -133,106 +196,108 @@ export default function DestinationCard({
     nights: String(trip.nights),
     party: String(party),
     tripLength,
-    // Only pass the flight cost as a URL param when it's a confirmed live Duffel price.
-    // The destination page uses !!sp.flight to decide whether to show "Live price" badge.
     ...(isLivePrice ? { flight: String(trip.flightCost) } : {}),
     ...(vibes ? { vibes } : {}),
     ...(departDate ? { depart: departDate, return: returnDate ?? "" } : {}),
   });
 
+  const isTopPick = trip.matchTier === "top";
+
   return (
     <Link
       href={`/destination/${trip.id}?${destParams.toString()}`}
-      className="block bg-white border border-[#e7e7e7] rounded-2xl overflow-hidden card-shadow hover:border-[#00754A]/30 hover:shadow-lg transition-all group"
+      className="block h-full rounded overflow-hidden border border-[#e0d8c8] shadow-[0_1px_0_rgba(14,26,20,0.04)] flex flex-col group bg-white"
     >
-      {/* Photo */}
-      <div className="relative h-44 bg-[#1A1A1A] overflow-hidden">
+      {/* Image */}
+      <div
+        className="relative flex-1"
+        style={{ minHeight: big ? 360 : 220 }}
+      >
         {photoUrl ? (
           <Image
             src={photoUrl}
             alt={trip.city}
             fill
-            className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-500"
+            className="object-cover group-hover:scale-105 transition-transform duration-500"
             unoptimized
             onError={handleImgError}
           />
         ) : (
-          // Graceful fallback — shows flag + city name on a branded gradient
           <div className="absolute inset-0 bg-gradient-to-br from-[#1E3932] via-[#22453c] to-[#1a3028] flex flex-col items-center justify-center gap-2">
             <span className="text-5xl drop-shadow-md">{trip.flag}</span>
-            <span className="text-white/80 text-sm font-semibold tracking-wide">{trip.city}</span>
+            <span className="text-white/70 text-sm font-semibold tracking-wide">{trip.city}</span>
           </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
 
-        <div className="absolute bottom-3 left-3 right-3 flex items-end justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{trip.flag}</span>
-            <div>
-              <div className="font-bold text-white text-base leading-tight">{trip.city}</div>
-              <div className="text-white/60 text-xs">{trip.country}</div>
-            </div>
-          </div>
-          <span
-            className="text-xs font-mono font-semibold px-2 py-0.5 rounded-full"
-            style={{ color: match.color, backgroundColor: match.bg }}
-          >
-            {match.label}
+        {/* Dark gradient overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/0 from-30% to-black/55 pointer-events-none" />
+
+        {/* Top row: editorial tag + pick pill */}
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
+          <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-white bg-black/55 backdrop-blur-sm px-2 py-1 rounded-sm">
+            {meta.tag}
           </span>
+          <span
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] tracking-[0.1em] uppercase font-semibold ${
+              isTopPick
+                ? "bg-[#F26B2D] text-white"
+                : "bg-white/90 text-[#0E3B2A] border border-[#0E3B2A] backdrop-blur-sm"
+            }`}
+          >
+            <span
+              className={`w-[5px] h-[5px] rounded-full flex-shrink-0 ${
+                isTopPick ? "bg-white" : "bg-[#1F8A5B]"
+              }`}
+            />
+            {isTopPick ? "Top pick" : "Good fit"}
+          </span>
+        </div>
+
+        {/* Bottom: city name + whisper */}
+        <div className="absolute bottom-4 left-[18px] right-[18px] text-white z-10">
+          <div
+            className={`font-serif italic leading-[0.95] tracking-[-0.02em] ${
+              big ? "text-[56px]" : "text-[36px]"
+            }`}
+          >
+            {trip.city}
+          </div>
+          <div className="font-mono text-[11px] tracking-[0.08em] opacity-85 mt-1.5">
+            {trip.flag} {trip.country.toUpperCase()} · {meta.whisper}
+          </div>
         </div>
       </div>
 
-      {/* Info */}
-      <div className="p-4">
-        {/* Tags */}
-        <div className="flex flex-wrap gap-1 mb-2.5">
-          {trip.tags.slice(0, 3).map((tag) => (
-            <span key={tag} className="text-xs text-[rgba(0,0,0,0.50)] bg-[#f2f0eb] px-2 py-0.5 rounded-full capitalize">
-              {tag}
-            </span>
-          ))}
+      {/* Footer */}
+      <div
+        className={`flex items-center justify-between bg-white border-t border-[#e0d8c8] gap-2.5 ${
+          big ? "px-[18px] py-4" : "px-3.5 py-3"
+        }`}
+      >
+        {/* Price */}
+        <div className="flex items-baseline gap-2">
+          <span className={`font-sans font-semibold text-ink ${big ? "text-2xl" : "text-xl"}`}>
+            ${trip.totalCost.toLocaleString()}
+          </span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.06em] text-ink-light">
+            / person
+          </span>
         </div>
 
-        {/* Flight cost hint */}
-        <div className="flex items-center gap-2 text-xs text-[rgba(0,0,0,0.38)] mb-2.5 font-mono">
-          <span>✈ ${trip.flightCost.toLocaleString()} flight</span>
-          <span>·</span>
-          <span>🏨 ${Math.round(trip.hotelCost / trip.nights).toLocaleString()}/night</span>
-        </div>
-
-        {/* Price + CTA */}
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="flex items-baseline gap-1.5">
-              <span className="font-mono font-bold text-[#006241] text-xl">${trip.totalCost.toLocaleString()}</span>
-              {isLivePrice && (
-                <span className="text-[10px] bg-[#d4e9e2] text-[#006241] font-mono font-semibold px-1.5 py-0.5 rounded">LIVE</span>
-              )}
-            </div>
-            <div className="text-xs text-[rgba(0,0,0,0.50)]">
-              {trip.nights} nights · per person
-              {party > 1 && (
-                <span className="ml-1 text-[#006241] font-medium">
-                  · ${(trip.totalCost * party).toLocaleString()} total
-                </span>
-              )}
-            </div>
-          </div>
-
-          <div className="text-right pb-0.5">
-            {savings > 0 ? (
-              <div className="text-[11px] text-[#005c38] font-medium mb-1">
-                ${savings.toLocaleString()} under
-              </div>
-            ) : (
-              <div className="text-[11px] text-[#7a5c00] font-medium mb-1">
-                ${Math.abs(savings).toLocaleString()} over
-              </div>
-            )}
-            <span className="text-[#00754A] text-sm font-semibold group-hover:translate-x-0.5 transition-transform inline-block">
-              View →
-            </span>
-          </div>
+        {/* Savings delta + breakdown */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span
+            className={`font-mono text-[11px] font-semibold px-2 py-1 rounded-sm ${
+              savings > 0
+                ? "text-[#2F6B5E] bg-[#2F6B5E]/10"
+                : "text-[#8B3A3A] bg-[#8B3A3A]/10"
+            }`}
+          >
+            {savings > 0 ? "−" : "+"}${Math.abs(savings).toLocaleString()}
+          </span>
+          <span className="font-mono text-[10px] text-ink-light hidden sm:block">
+            ✈${trip.flightCost.toLocaleString()} · ${Math.round(trip.hotelCost / trip.nights)}/n
+          </span>
         </div>
       </div>
     </Link>

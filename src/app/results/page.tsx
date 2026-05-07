@@ -6,7 +6,6 @@ import { computeGroundCosts } from "@/lib/cost-engine";
 import ResultsView from "@/components/ResultsView";
 import WandrNavbar from "@/components/WandrNavbar";
 import WandrFooter from "@/components/WandrFooter";
-import Link from "next/link";
 import destinationsRaw from "@/data/destinations.json";
 import type { Destination } from "@/lib/ranking";
 
@@ -90,17 +89,8 @@ export default async function ResultsPage({ searchParams }: Props) {
   return (
     <>
       <WandrNavbar />
-      <main>
-        <div className="wrap" style={{ paddingBottom: 80 }}>
-          <div style={{ paddingTop: 24, paddingBottom: 12 }}>
-            <Link
-              href="/plan"
-              className="wd-mono"
-              style={{ fontSize: 13, color: 'var(--w-accent)', textDecoration: 'none' }}
-            >
-              ← Change search
-            </Link>
-          </div>
+      <main className="bg-[#F5F0E8]">
+        <div className="wrap">
           <ResultsView
             trips={results}
             budget={budget}
