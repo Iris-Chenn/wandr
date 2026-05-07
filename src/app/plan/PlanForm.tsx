@@ -218,11 +218,13 @@ export default function PlanForm() {
 
   const topMatch = ranked[0];
 
-  // Map data: pass lat/lng + tier to the map
-  const mapDests: MapDestination[] = useMemo(() => results.map(d => ({
-    id: d.id, city: d.city, lat: d.lat, lng: d.lng,
-    total: d.totalCost, tier: d.tier, popularityScore: d.popularityScore,
-  })), [results]);
+  // Map data: only show destinations within budget (tier !== "over")
+  const mapDests: MapDestination[] = useMemo(() => results
+    .filter(d => d.tier !== "over")
+    .map(d => ({
+      id: d.id, city: d.city, lat: d.lat, lng: d.lng,
+      total: d.totalCost, tier: d.tier, popularityScore: d.popularityScore,
+    })), [results]);
 
   const handleSubmit = () => {
     const vibesParam = [...vibes].map(k => k.charAt(0).toUpperCase() + k.slice(1)).join(",");
@@ -470,9 +472,6 @@ export default function PlanForm() {
               </div>
               <div className="ps-legend-row">
                 <span className="ps-legend-dot" style={{ background: "#C48A3A" }} /> slight stretch
-              </div>
-              <div className="ps-legend-row">
-                <span className="ps-legend-dot" style={{ background: "#B97A7A", opacity: 0.5 }} /> over budget
               </div>
             </div>
             {/* Origin pill */}
