@@ -423,104 +423,69 @@ export default function Home() {
               </h2>
             </div>
             <div className="dgrid">
-              {[
-                {
-                  img: "https://images.unsplash.com/photo-1513735492246-483525079686?auto=format&fit=crop&w=700&q=75",
-                  alt: "Lisbon",
-                  flag: "🇵🇹",
-                  city: "Lisbon",
-                  country: "Portugal",
-                  match: "perfect",
-                  matchLabel: "Within budget",
-                  tags: ["city", "culture", "food"],
-                  price: "$612",
-                  under: "$88 under",
-                  nights: "5 nights all-in",
-                  live: true,
-                },
-                {
-                  img: "https://images.unsplash.com/photo-1518638150340-f706e86654de?auto=format&fit=crop&w=700&q=75",
-                  alt: "Mexico City",
-                  flag: "🇲🇽",
-                  city: "Mexico City",
-                  country: "Mexico",
-                  match: "great",
-                  matchLabel: "Great value",
-                  tags: ["city", "food", "culture"],
-                  price: "$490",
-                  under: "$210 under",
-                  nights: "5 nights all-in",
-                  live: false,
-                },
-                {
-                  img: "https://images.unsplash.com/photo-1508009603885-50cf7c579365?auto=format&fit=crop&w=700&q=75",
-                  alt: "Bangkok",
-                  flag: "🇹🇭",
-                  city: "Bangkok",
-                  country: "Thailand",
-                  match: "perfect",
-                  matchLabel: "Within budget",
-                  tags: ["city", "food", "culture"],
-                  price: "$680",
-                  under: "$20 under",
-                  nights: "7 nights all-in",
-                  live: true,
-                },
-              ].map((dest) => (
-                <Link key={dest.city} className="dcard" href="/explore">
-                  <div className="ph">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={dest.img} alt={dest.alt} />
-                    <div className="ovr" />
-                    <div className="tag">
-                      <div>
-                        <span className="flag">{dest.flag}</span>
-                        <div
-                          style={{
-                            display: "inline-block",
-                            verticalAlign: "middle",
-                            marginLeft: "6px",
-                          }}
-                        >
-                          <div className="city">{dest.city}</div>
-                          <div className="cc">{dest.country}</div>
+              {([
+                { ph: "1585208798174-6cedd86e019a", city: "Lisbon",      country: "Portugal", flag: "🇵🇹", tag: "Iberia",   whisper: "pastel de nata · sunset trams", match: "perfect", price: 612, savings: 88,  live: true  },
+                { ph: "1518638150340-f706e86654de", city: "Mexico City", country: "Mexico",   flag: "🇲🇽", tag: "Capital",  whisper: "Roma Norte vibes",              match: "great",   price: 490, savings: 210, live: false },
+                { ph: "1508009603885-50cf7c579365", city: "Bangkok",     country: "Thailand", flag: "🇹🇭", tag: "Thailand", whisper: "temples · street food · chaos", match: "perfect", price: 680, savings: 20,  live: true  },
+              ] as const).map((dest) => {
+                const isTop = dest.match === "perfect";
+                const pillCls = isTop
+                  ? "bg-[#F26B2D] text-white"
+                  : "bg-white/90 text-[#0E3B2A] border border-[#0E3B2A] backdrop-blur-sm";
+                const dotCls = isTop ? "bg-white" : "bg-[#1F8A5B]";
+                const pillLabel = isTop ? "Top pick" : "Good fit";
+                return (
+                  <Link
+                    key={dest.city}
+                    href="/explore"
+                    className="block rounded overflow-hidden border border-[#e0d8c8] shadow-[0_1px_0_rgba(14,26,20,0.04)] flex flex-col group bg-white"
+                    style={{ textDecoration: "none" }}
+                  >
+                    {/* Image */}
+                    <div className="relative" style={{ minHeight: 240 }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={`https://images.unsplash.com/photo-${dest.ph}?auto=format&fit=crop&w=700&q=75`}
+                        alt={dest.city}
+                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-black/0 from-30% to-black/55 pointer-events-none" />
+                      {/* top row */}
+                      <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
+                        <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-white bg-black/55 backdrop-blur-sm px-2 py-1 rounded-sm">
+                          {dest.tag}
+                        </span>
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] tracking-[0.1em] uppercase font-semibold ${pillCls}`}>
+                          <span className={`w-[5px] h-[5px] rounded-full flex-shrink-0 ${dotCls}`} />
+                          {pillLabel}
+                        </span>
+                      </div>
+                      {/* city + whisper */}
+                      <div className="absolute bottom-4 left-[18px] right-[18px] text-white z-10">
+                        <div className="font-serif italic leading-[0.95] tracking-[-0.02em] text-[36px]">{dest.city}</div>
+                        <div className="font-mono text-[11px] tracking-[0.08em] opacity-85 mt-1.5">
+                          {dest.flag} {dest.country.toUpperCase()} · {dest.whisper}
                         </div>
                       </div>
-                      <span className={`match ${dest.match}`}>
-                        {dest.matchLabel}
-                      </span>
                     </div>
-                  </div>
-                  <div className="body">
-                    {dest.tags.map((t) => (
-                      <span key={t} className="chip-pill">
-                        {t}
-                      </span>
-                    ))}
-                    <div className="foot">
-                      <div>
-                        <span className="price">{dest.price}</span>
+                    {/* Footer */}
+                    <div className="flex items-center justify-between bg-white border-t border-[#e0d8c8] gap-2.5 px-3.5 py-3">
+                      <div className="flex items-baseline gap-2">
+                        <span className="font-sans font-semibold text-xl" style={{ color: "#0A0A0A" }}>${dest.price}</span>
+                        <span className="font-mono text-[10px] uppercase tracking-[0.06em]" style={{ color: "#9A9A8A" }}>/ person</span>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="font-mono text-[11px] font-semibold px-2 py-1 rounded-sm text-[#2F6B5E] bg-[#2F6B5E]/10">
+                          −${dest.savings}
+                        </span>
                         {dest.live && (
-                          <span className="live-badge">LIVE</span>
+                          <span className="font-mono text-[10px] text-[#2F6B5E] bg-[#2F6B5E]/10 px-2 py-1 rounded-sm font-semibold">LIVE</span>
                         )}
-                        <div className="nights">{dest.nights}</div>
-                      </div>
-                      <div style={{ textAlign: "right" }}>
-                        <div
-                          style={{
-                            fontSize: "11px",
-                            color: "var(--w-accent)",
-                            fontWeight: 500,
-                          }}
-                        >
-                          {dest.under}
-                        </div>
-                        <span className="view">View →</span>
                       </div>
                     </div>
-                  </div>
-                </Link>
-              ))}
+                  </Link>
+                );
+              })}
             </div>
             <div style={{ textAlign: "center", marginTop: "40px" }}>
               <Link href="/explore" className="btn btn-ghost">
