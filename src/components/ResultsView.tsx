@@ -101,10 +101,12 @@ function TierBreak({ tier, count, avgCost }: { tier: EditorialTier; count: numbe
   );
 }
 
+type SharedCardProps = Omit<Parameters<typeof DestinationCard>[0], "trip" | "big">;
+
 function Mosaic({ items, tier, cardProps }: {
   items: TripEstimate[];
   tier: EditorialTier;
-  cardProps: object;
+  cardProps: SharedCardProps;
 }) {
   const layout = MOSAIC_LAYOUTS[tier];
   return (
@@ -120,7 +122,7 @@ function Mosaic({ items, tier, cardProps }: {
             key={trip.id}
             style={{ gridColumn: `span ${l.col}`, gridRow: `span ${l.row}` }}
           >
-            <DestinationCard trip={trip} big={big} {...(cardProps as Parameters<typeof DestinationCard>[0])} />
+            <DestinationCard trip={trip} big={big} {...cardProps} />
           </div>
         );
       })}
@@ -164,6 +166,7 @@ export default function ResultsView({
   const [sortBy, setSortBy] = useState<SortOption>("value");
   const [selectedTrip, setSelectedTrip] = useState<TripEstimate | null>(null);
   const [rankedTrips, setRankedTrips] = useState(trips);
+  const [personalized, setPersonalized] = useState(false);
 
   const vibeSet = new Set(
     vibes.split(",").map(v => v.trim().toLowerCase()).filter(Boolean)
@@ -174,6 +177,7 @@ export default function ResultsView({
     if (saved) {
       const prefs = JSON.parse(saved) as Preferences;
       setRankedTrips(applyPreferences(trips, prefs));
+      setPersonalized(true);
     }
   }, [trips]);
 
@@ -291,9 +295,18 @@ export default function ResultsView({
               <div className="text-sm mt-1.5 leading-snug">{vibesDisplay || "Any"}</div>
             </div>
           </div>
-          {hasDuffelPrices && (
-            <div className="font-mono text-[10px] text-[#2F6B5E] tracking-[0.06em] border-t border-[#e0d8c8] pt-3">
-              ✓ Live prices via Duffel
+          {(hasDuffelPrices || personalized) && (
+            <div className="flex flex-col gap-1.5 border-t border-[#e0d8c8] pt-3">
+              {hasDuffelPrices && (
+                <div className="font-mono text-[10px] text-[#2F6B5E] tracking-[0.06em]">
+                  ✓ Live prices via Duffel
+                </div>
+              )}
+              {personalized && (
+                <div className="font-mono text-[10px] text-[#C99A2E] tracking-[0.06em]">
+                  ✦ Personalized for you
+                </div>
+              )}
             </div>
           )}
         </aside>

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 const NAV_LINKS = [
@@ -18,11 +19,16 @@ export default function WandrNavbar() {
   return (
     <nav className="nav">
       <div className="nav-inner">
-        <Link className="nav-logo" href="/">
-          <span className="mark">W</span>
-          <span>
-            wandr<span style={{ color: "var(--w-accent)" }}>.</span>
-          </span>
+        <Link href="/" className="flex items-center">
+          <Image
+            src="/Wandr_logo.png"
+            alt="Wandr"
+            width={100}
+            height={41}
+            priority
+            className="h-8"
+            style={{ width: "auto" }}
+          />
         </Link>
 
         <div className="nav-links">

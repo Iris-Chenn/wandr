@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 
 export default function WandrFooter() {
   return (
@@ -6,11 +7,15 @@ export default function WandrFooter() {
       <div className="footer-inner">
         <div className="footer-top">
           <div>
-            <Link className="nav-logo" href="/" style={{ fontSize: "22px" }}>
-              <span className="mark">W</span>
-              <span>
-                wandr<span style={{ color: "var(--w-accent)" }}>.</span>
-              </span>
+            <Link href="/" className="inline-flex items-center mb-3">
+              <Image
+                src="/Wandr_logo.png"
+                alt="Wandr"
+                width={100}
+                height={41}
+                className="h-8"
+                style={{ width: "auto" }}
+              />
             </Link>
             <p>
               Budget-first travel, built on a native fintech engine. One number
