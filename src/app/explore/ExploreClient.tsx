@@ -18,15 +18,165 @@ const TRIPS = [
   { c: 'Porto',         cc: 'Portugal',      fl: '🇵🇹', p: 595,  n: 5, m: 'great',   live: false, tags: ['city','food','culture'],   ph: '1555881400-74d7acaacd8b',    s: 105,  region: 'europe',   vibes: ['city','food','culture'],     tag: 'Portugal',      whisper: 'port wine · river views' },
 ];
 
+type Trip = typeof TRIPS[number];
+type Tier = 'under' | 'at' | 'splurge';
+
+const MATCH_TO_TIER: Record<string, Tier> = {
+  perfect: 'under',
+  great: 'at',
+  stretch: 'splurge',
+};
+
+const TIER_META: Record<Tier, {
+  num: string; word: string; tagline: string;
+  accent: string; tint: string;
+}> = {
+  under:   { num: '01', word: 'Under',   tagline: 'Within budget. Surplus on the side.', accent: '#2F6B5E', tint: '#DCECE7' },
+  at:      { num: '02', word: 'At',      tagline: 'On the number. Best vibe match.',     accent: '#C99A2E', tint: '#F6EBD4' },
+  splurge: { num: '03', word: 'Splurge', tagline: 'Worth a stretch. Feature-grade.',     accent: '#8B3A3A', tint: '#F0DFDF' },
+};
+
+const MOSAIC_LAYOUTS: Record<Tier, Array<{ col: number; row: number }>> = {
+  under:   [{ col: 6, row: 3 }, { col: 3, row: 3 }, { col: 3, row: 3 }, { col: 12, row: 2 }],
+  at:      [{ col: 8, row: 3 }, { col: 4, row: 3 }, { col: 12, row: 2 }],
+  splurge: [{ col: 5, row: 3 }, { col: 7, row: 3 }],
+};
+
 const REGIONS = ['All', 'Europe', 'Asia', 'Americas', 'Africa', 'Oceania'];
 const VIBE_FILTERS = ['All', '🏙️ City', '🏖️ Beach', '🍜 Food', '🏔️ Nature', '🎭 Culture', '💃 Nightlife'];
-const SORTS = ['Best match', 'Cheapest', 'Most saved', 'New this week'];
+const SORTS = ['Best match', 'Cheapest', 'Most saved'];
 
-const MATCH_PILL: Record<string, { label: string; pill: string; dot: string }> = {
-  perfect: { label: 'Top pick',      pill: 'bg-[#F26B2D] text-white',                                            dot: 'bg-white' },
-  great:   { label: 'Good fit',      pill: 'bg-white/90 text-[#0E3B2A] border border-[#0E3B2A] backdrop-blur-sm', dot: 'bg-[#1F8A5B]' },
-  stretch: { label: 'Slight stretch', pill: 'bg-white/90 text-[#8B3A3A] border border-[#8B3A3A] backdrop-blur-sm', dot: 'bg-[#8B3A3A]' },
-};
+function avgPrice(items: Trip[]) {
+  if (!items.length) return 0;
+  return Math.round(items.reduce((s, t) => s + t.p, 0) / items.length);
+}
+
+function TierBreak({ tier, count, avgCost }: { tier: Tier; count: number; avgCost: number }) {
+  const m = TIER_META[tier];
+  return (
+    <div
+      className="rounded border-t-2 mb-[18px]"
+      style={{
+        borderTopColor: m.accent,
+        backgroundColor: m.tint,
+        display: 'grid',
+        gridTemplateColumns: 'auto 1fr auto',
+        gap: '32px',
+        alignItems: 'end',
+        padding: '28px 32px',
+      }}
+    >
+      <div className="font-mono text-sm font-semibold tracking-[0.1em] uppercase" style={{ color: m.accent }}>
+        TIER / {m.num}
+      </div>
+      <div>
+        <div
+          className="font-serif italic font-normal tracking-[-0.03em] leading-[0.95] text-ink"
+          style={{ fontSize: 'clamp(40px,5vw,64px)' }}
+        >
+          {m.word} <span className="not-italic">budget.</span>
+        </div>
+        <div className="text-sm text-ink-muted mt-1.5">{m.tagline}</div>
+      </div>
+      <div className="flex gap-6 items-end">
+        <div>
+          <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-ink-light">Destinations</div>
+          <div className="font-mono text-[22px] font-medium text-ink">{String(count).padStart(2, '0')}</div>
+        </div>
+        <div>
+          <div className="font-mono text-[10px] tracking-[0.08em] uppercase text-ink-light">Avg / person</div>
+          <div className="font-mono text-[22px] font-medium text-ink">${avgCost.toLocaleString()}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExploreCard({ t, big }: { t: Trip; big: boolean }) {
+  const slug = t.c.toLowerCase().replace(/ /g, '-');
+  const tripLength = t.n <= 4 ? '3-4' : t.n <= 7 ? '5-7' : t.n <= 10 ? '8-10' : '11-14';
+  const params = new URLSearchParams({ budget: '700', origin: 'JFK', nights: String(t.n), tripLength, party: '1' });
+  const savings = t.s;
+
+  return (
+    <Link
+      href={`/destination/${slug}?${params.toString()}`}
+      className="block rounded overflow-hidden border border-[#e0d8c8] shadow-[0_1px_0_rgba(14,26,20,0.04)] flex flex-col group bg-white h-full"
+      style={{ textDecoration: 'none' }}
+    >
+      {/* Image */}
+      <div className="relative flex-1">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={`https://images.unsplash.com/photo-${t.ph}?auto=format&fit=crop&w=${big ? 1000 : 600}&q=75`}
+          alt={t.c}
+          loading="lazy"
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+        />
+        {/* gradient */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/0 from-30% to-black/55 pointer-events-none" />
+
+        {/* top: editorial tag + live badge */}
+        <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
+          <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-white bg-black/55 backdrop-blur-sm px-2 py-1 rounded-sm">
+            {t.tag}
+          </span>
+          {t.live && (
+            <span className="font-mono text-[10px] text-[#2F6B5E] bg-white/90 backdrop-blur-sm px-2 py-1 rounded-sm font-semibold">
+              LIVE
+            </span>
+          )}
+        </div>
+
+        {/* bottom: city name + whisper */}
+        <div className={`absolute bottom-4 left-[18px] right-[18px] text-white z-10`}>
+          <div className={`font-serif italic leading-[0.95] tracking-[-0.02em] ${big ? 'text-[48px]' : 'text-[32px]'}`}>
+            {t.c}
+          </div>
+          <div className="font-mono text-[11px] tracking-[0.08em] opacity-85 mt-1.5">
+            {t.fl} {t.cc.toUpperCase()} · {t.whisper}
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="flex items-center justify-between bg-white border-t border-[#e0d8c8] gap-2.5 px-3.5 py-3 flex-shrink-0">
+        <div className="flex items-baseline gap-2">
+          <span className="font-sans font-semibold text-xl" style={{ color: '#0A0A0A' }}>${t.p}</span>
+          <span className="font-mono text-[10px] uppercase tracking-[0.06em]" style={{ color: '#9A9A8A' }}>/ person</span>
+        </div>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <span className={`font-mono text-[11px] font-semibold px-2 py-1 rounded-sm ${savings > 0 ? 'text-[#2F6B5E] bg-[#2F6B5E]/10' : 'text-[#8B3A3A] bg-[#8B3A3A]/10'}`}>
+            {savings > 0 ? '−' : '+'}${Math.abs(savings).toLocaleString()}
+          </span>
+        </div>
+      </div>
+    </Link>
+  );
+}
+
+function Mosaic({ items, tier }: { items: Trip[]; tier: Tier }) {
+  const layout = MOSAIC_LAYOUTS[tier];
+  return (
+    <div
+      className="grid gap-3.5 mb-9"
+      style={{ gridTemplateColumns: 'repeat(12, 1fr)', gridAutoRows: '200px' }}
+    >
+      {items.map((t, i) => {
+        const l = layout[i % layout.length];
+        const big = l.col >= 6;
+        return (
+          <div
+            key={t.c}
+            style={{ gridColumn: `span ${l.col}`, gridRow: `span ${l.row}` }}
+          >
+            <ExploreCard t={t} big={big} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function ExploreClient() {
   const [region, setRegion] = useState('All');
@@ -44,6 +194,14 @@ export default function ExploreClient() {
     if (sort === 'Most saved') return b.s - a.s;
     return 0;
   });
+
+  const tierGroups: Record<Tier, Trip[]> = {
+    under:   filtered.filter(t => MATCH_TO_TIER[t.m] === 'under'),
+    at:      filtered.filter(t => MATCH_TO_TIER[t.m] === 'at'),
+    splurge: filtered.filter(t => MATCH_TO_TIER[t.m] === 'splurge'),
+  };
+
+  const activeTiers = (['under', 'at', 'splurge'] as Tier[]).filter(t => tierGroups[t].length > 0);
 
   return (
     <section className="sec sec-sand" style={{ paddingTop: 48 }}>
@@ -74,84 +232,34 @@ export default function ExploreClient() {
         </div>
 
         {/* Vibe filter */}
-        <div className="filt-row" style={{ marginBottom: 28 }}>
+        <div className="filt-row" style={{ marginBottom: 32 }}>
           <span className="lbl">Vibe</span>
           {VIBE_FILTERS.map(v => (
             <button key={v} className={`fchip${vibe === v ? ' on' : ''}`} onClick={() => setVibe(v)}>{v}</button>
           ))}
         </div>
 
-        {/* Destination grid — editorial card style */}
-        <div className="dgrid">
-          {filtered.map((t) => {
-            const slug = t.c.toLowerCase().replace(/ /g, '-');
-            const tripLength = t.n <= 4 ? '3-4' : t.n <= 7 ? '5-7' : t.n <= 10 ? '8-10' : '11-14';
-            const params = new URLSearchParams({ budget: '700', origin: 'JFK', nights: String(t.n), tripLength, party: '1' });
-            const pill = MATCH_PILL[t.m];
-            const savings = t.s;
-
-            return (
-              <Link
-                key={t.c}
-                href={`/destination/${slug}?${params.toString()}`}
-                className="block rounded overflow-hidden border border-[#e0d8c8] shadow-[0_1px_0_rgba(14,26,20,0.04)] flex flex-col group bg-white"
-                style={{ textDecoration: 'none' }}
-              >
-                {/* Image */}
-                <div className="relative" style={{ minHeight: 240 }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={`https://images.unsplash.com/photo-${t.ph}?auto=format&fit=crop&w=700&q=75`}
-                    alt={t.c}
-                    loading="lazy"
-                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  />
-                  {/* gradient */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/0 from-30% to-black/55 pointer-events-none" />
-
-                  {/* top: editorial tag + match pill */}
-                  <div className="absolute top-3 left-3 right-3 flex justify-between items-start z-10">
-                    <span className="font-mono text-[10px] tracking-[0.14em] uppercase text-white bg-black/55 backdrop-blur-sm px-2 py-1 rounded-sm">
-                      {t.tag}
-                    </span>
-                    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full font-mono text-[10px] tracking-[0.1em] uppercase font-semibold ${pill.pill}`}>
-                      <span className={`w-[5px] h-[5px] rounded-full flex-shrink-0 ${pill.dot}`} />
-                      {pill.label}
-                    </span>
-                  </div>
-
-                  {/* bottom: city name + whisper */}
-                  <div className="absolute bottom-4 left-[18px] right-[18px] text-white z-10">
-                    <div className="font-serif italic leading-[0.95] tracking-[-0.02em] text-[36px]">
-                      {t.c}
-                    </div>
-                    <div className="font-mono text-[11px] tracking-[0.08em] opacity-85 mt-1.5">
-                      {t.fl} {t.cc.toUpperCase()} · {t.whisper}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Footer */}
-                <div className="flex items-center justify-between bg-white border-t border-[#e0d8c8] gap-2.5 px-3.5 py-3">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-sans font-semibold text-xl" style={{ color: '#0A0A0A' }}>${t.p}</span>
-                    <span className="font-mono text-[10px] uppercase tracking-[0.06em]" style={{ color: '#9A9A8A' }}>/ person</span>
-                  </div>
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <span className={`font-mono text-[11px] font-semibold px-2 py-1 rounded-sm ${savings > 0 ? 'text-[#2F6B5E] bg-[#2F6B5E]/10' : 'text-[#8B3A3A] bg-[#8B3A3A]/10'}`}>
-                      {savings > 0 ? '−' : '+'}${Math.abs(savings).toLocaleString()}
-                    </span>
-                    {t.live && (
-                      <span className="font-mono text-[10px] text-[#2F6B5E] bg-[#2F6B5E]/10 px-2 py-1 rounded-sm font-semibold">
-                        LIVE
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
-        </div>
+        {/* Tier sections */}
+        {activeTiers.length === 0 ? (
+          <div className="text-center py-16 bg-white rounded-xl border border-[#e0d8c8]">
+            <div className="text-4xl mb-3">🔍</div>
+            <h2 className="text-xl font-bold mb-2">No trips found</h2>
+            <p className="text-sm text-[#9A9A8A] mb-4">Try a different filter.</p>
+            <button
+              onClick={() => { setRegion('All'); setVibe('All'); }}
+              className="text-sm text-[#2F6B5E] underline cursor-pointer bg-transparent border-0"
+            >
+              Clear filters
+            </button>
+          </div>
+        ) : (
+          activeTiers.map(tier => (
+            <div key={tier}>
+              <TierBreak tier={tier} count={tierGroups[tier].length} avgCost={avgPrice(tierGroups[tier])} />
+              <Mosaic items={tierGroups[tier]} tier={tier} />
+            </div>
+          ))
+        )}
       </div>
     </section>
   );
