@@ -2,6 +2,8 @@ import type { Metadata } from 'next';
 import WandrNavbar from '@/components/WandrNavbar';
 import WandrFooter from '@/components/WandrFooter';
 import ExploreClient from './ExploreClient';
+import destinationsRaw from '@/data/destinations.json';
+import type { Destination } from '@/lib/ranking';
 
 export const metadata: Metadata = {
   title: 'Explore destinations — Wandr',
@@ -9,7 +11,39 @@ export const metadata: Metadata = {
     'Filter by budget, region, vibe, or visa-free access. Prices are live and per person, all-in — flights, hotel, food, and the fun stuff.',
 };
 
+const DEFAULT_NIGHTS = 5;
+
+export type ExploreTrip = {
+  id: string;
+  city: string;
+  country: string;
+  flag: string;
+  region: string;
+  tags: string[];
+  totalCost: number;
+  nights: number;
+};
+
 export default function ExplorePage() {
+  const trips: ExploreTrip[] = (destinationsRaw as Destination[])
+    .map((d) => {
+      const flightCost = d.avgFlightCostFromJFK;
+      const hotelCost = d.avgHotelNightly * DEFAULT_NIGHTS;
+      const foodCost = Math.round(d.avgDailyCost * 0.45 * DEFAULT_NIGHTS);
+      const activitiesCost = Math.round(d.avgDailyCost * 0.35 * DEFAULT_NIGHTS);
+      return {
+        id: d.id,
+        city: d.city,
+        country: d.country,
+        flag: d.flag,
+        region: d.region,
+        tags: d.tags,
+        totalCost: flightCost + hotelCost + foodCost + activitiesCost,
+        nights: DEFAULT_NIGHTS,
+      };
+    })
+    .sort((a, b) => a.totalCost - b.totalCost);
+
   return (
     <>
       <WandrNavbar />
@@ -24,7 +58,7 @@ export default function ExplorePage() {
           </p>
         </header>
 
-        <ExploreClient />
+        <ExploreClient trips={trips} />
 
         {/* Curated collections */}
         <section className="sec">
