@@ -47,7 +47,7 @@ button { font-family: inherit; }
 .pghead p { font-size: 17px; color: var(--w-ink-muted); max-width: 620px; margin: 0 auto; line-height: 1.6; }
 
 /* ── HERO ── */
-.hero { position: relative; overflow: hidden; padding: 72px 28px 0; text-align: center; background: var(--w-canvas); }
+.hero { position: relative; overflow: hidden; padding: 0 28px; text-align: center; background: var(--w-canvas); min-height: calc(100dvh - 64px); display: flex; flex-direction: column; }
 .hero .dotgrid { position: absolute; inset: 0; background-image: radial-gradient(circle, rgba(0,0,0,0.055) 1px, transparent 1px); background-size: 28px 28px; pointer-events: none; }
 .aurora { position: absolute; pointer-events: none; border-radius: 50%; filter: blur(22px); }
 .aurora-1 { width: 520px; height: 420px; background: radial-gradient(ellipse, rgba(6,182,212,0.22) 0%, transparent 70%); top: -80px; left: -80px; animation: drift1 14s ease-in-out infinite; }
@@ -56,7 +56,7 @@ button { font-family: inherit; }
 @keyframes drift1 { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(40px,30px) scale(1.1);} }
 @keyframes drift2 { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(-30px,40px) scale(0.95);} }
 @keyframes drift3 { 0%,100% { transform: translate(0,0) scale(1);} 50% { transform: translate(20px,-30px) scale(1.08);} }
-.hero-inner { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; padding-bottom: 96px; }
+.hero-inner { position: relative; z-index: 2; max-width: 900px; margin: 0 auto; flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 0 48px; width: 100%; }
 
 /* Rotating headline */
 .rotator { display: inline-block; position: relative; color: var(--w-accent); font-family: var(--w-font-serif); font-style: italic; font-weight: 700; letter-spacing: -0.01em; vertical-align: baseline; }
@@ -71,7 +71,7 @@ h1.display { font-size: clamp(40px, 6.2vw, 76px); font-weight: 700; letter-spaci
 .lede { font-size: 18px; color: var(--w-ink-muted); line-height: 1.6; max-width: 620px; margin: 0 auto 36px; }
 
 /* ── LIVE TICKER ── */
-.tape { position: relative; z-index: 2; margin: 56px -28px 0; border-top: 1px solid var(--w-border-warm); border-bottom: 1px solid var(--w-border-warm); background: rgba(255,252,247,0.75); backdrop-filter: blur(6px); display: flex; align-items: stretch; }
+.tape { position: relative; z-index: 2; margin: 0 -28px 0; border-top: 1px solid var(--w-border-warm); border-bottom: 1px solid var(--w-border-warm); background: rgba(255,252,247,0.75); backdrop-filter: blur(6px); display: flex; align-items: stretch; }
 .tape-label { flex: 0 0 auto; display: flex; align-items: center; gap: 8px; font-family: var(--w-font-mono); font-size: 10.5px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; color: var(--w-ink-muted-2); padding: 14px 20px; border-right: 1px solid var(--w-border-warm); background: var(--w-canvas-sand); white-space: nowrap; }
 .tape-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--w-accent); animation: pulse 1.4s infinite; }
 .tape-viewport { flex: 1 1 auto; overflow: hidden; position: relative; padding: 14px 0; mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
@@ -440,8 +440,8 @@ h2.head .serif { font-family: var(--w-font-serif); font-weight: 700; font-style:
   .fgrid, .bgrid { grid-template-columns: 1fr 1fr; }
   .earn-grid { grid-template-columns: repeat(2, 1fr); }
   .sec { padding: 56px 0; }
-  .hero { padding: 48px 20px 0; }
-  .tape { margin: 40px -20px 0; }
+  .hero { padding: 0 20px; }
+  .tape { margin: 0 -20px 0; }
   .tape-label { padding: 12px 14px; font-size: 9.5px; }
   .plan-grid { grid-template-columns: 1fr; }
   .plan-steps { grid-template-columns: 1fr; gap: 24px; margin-top: 40px; }
